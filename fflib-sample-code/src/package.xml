@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>Accounts</members>
+        <members>Chargeable</members>
+        <members>DeveloperWorkItems</members>
+        <members>InvoicingService</members>
+        <members>Opportunities</members>
+        <members>OpportunitiesSelector</members>
+        <members>OpportunitiesService</members>
+        <members>OpportunitiesTest</members>
+        <members>OpportunityApplyDiscountController</members>
+        <members>OpportunityCreateInvoiceController</members>
+        <members>OpportunityLineItems</members>
+        <members>OpportunityLineItemsSelector</members>
+        <members>PricebookEntriesSelector</members>
+        <members>PricebooksSelector</members>
+        <members>ProductsSelector</members>
+        <members>ProductsSelectorTest</members>
+        <members>QuickOpportunityWizardController</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>opportunityapplydiscount</members>
+        <members>opportunitycreateinvoice</members>
+        <members>quickopportunitywizard</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>DeveloperWorkItemsTrigger</members>
+        <members>OpportunitiesTrigger</members>
+        <members>OpportunityLineItemsTrigger</members>
+        <name>ApexTrigger</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>Opportunity.DiscountType__c</members>
+        <members>Product2.DiscountingApproved__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>DesignWorkItem__c</members>
+        <members>DeveloperWorkItem__c</members>
+        <members>Invoice__c</members>
+        <members>OpportunitySettings__c</members>
+        <members>TrainingWorkItem__c</members>
+        <members>WorkOrder__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>Product2.OpportunityDiscount</members>
+        <name>FieldSet</name>
+    </types>
+    <types>
+        <members>DesignWorkItem__c-Design Work Item Layout</members>
+        <members>DeveloperWorkItem__c-Developer Work Item Layout</members>
+        <members>Invoice__c-Invoice Layout</members>
+        <members>TrainingWorkItem__c-Training Work Item Layout</members>
+        <members>WorkOrder__c-Work Order Layout</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <members>Account.QuickOpportunity</members>
+        <members>Opportunity.ApplyDiscount</members>
+        <members>Opportunity.CreateInvoice</members>
+        <name>WebLink</name>
+    </types>
+    <version>24.0</version>
+</Package>

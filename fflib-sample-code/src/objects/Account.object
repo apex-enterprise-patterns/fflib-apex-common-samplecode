@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <webLinks>
+        <fullName>QuickOpportunity</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Quick Opportunity</masterLabel>
+        <openType>sidebar</openType>
+        <page>quickopportunitywizard</page>
+        <protected>false</protected>
+    </webLinks>
+</CustomObject>
