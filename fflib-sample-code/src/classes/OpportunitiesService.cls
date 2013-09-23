@@ -57,14 +57,22 @@ global with sharing class OpportunitiesService
 		List<Invoice__c> invoices = new List<Invoice__c>();
 		for(Opportunity opportunityRecord : (List<Opportunity>) opportunities.Records)		
 		{
-			// Create a new Invoice__c 
+			// Create a new Invoice__c and related InvoiceLine__c records
 			Invoice__c invoice = new Invoice__c();
 			invoice.Account__c = opportunityRecord.AccountId;
-			invoice.Amount__c = opportunityRecord.Amount;
 			invoice.Description__c = opportunityRecord.Description;
 			invoice.InvoiceDate__c = System.today();
 			invoice.Opportunity__c = opportunityRecord.Id;
 			uow.registerNew(invoice);
+			for(OpportunityLineItem oppLineRecord : opportunityRecord.OpportunityLineItems)
+			{
+				InvoiceLine__c invoiceLine = new InvoiceLine__c();
+				invoiceLine.Product__c = oppLineRecord.PricebookEntry.Product2Id;
+				invoiceLine.Description__c = oppLineRecord.Description;
+				invoiceLine.Quantity__c = oppLineRecord.Quantity;
+				invoiceLine.UnitPrice__c = oppLineRecord.UnitPrice;
+				uow.registerNew(invoiceLine, InvoiceLine__c.Invoice__c, invoice);
+			}
 			invoices.add(invoice);
 		}
 		
@@ -79,6 +87,7 @@ global with sharing class OpportunitiesService
 	private static List<Schema.SObjectType> SERVICE_SOBJECTS = 
 		new Schema.SObjectType[] { 
 			Invoice__c.SObjectType, 
+			InvoiceLine__c.SObjectType,
 			Opportunity.SObjectType, 
 			OpportunityLineItem.SObjectType };	
 }

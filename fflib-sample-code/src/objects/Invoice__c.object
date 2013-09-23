@@ -54,12 +54,10 @@
         <fullName>Amount__c</fullName>
         <externalId>false</externalId>
         <label>Amount</label>
-        <precision>18</precision>
-        <required>false</required>
-        <scale>2</scale>
-        <trackFeedHistory>true</trackFeedHistory>
-        <type>Number</type>
-        <unique>false</unique>
+        <summarizedField>InvoiceLine__c.LineTotal__c</summarizedField>
+        <summaryForeignKey>InvoiceLine__c.Invoice__c</summaryForeignKey>
+        <summaryOperation>sum</summaryOperation>
+        <type>Summary</type>
     </fields>
     <fields>
         <fullName>ChatterAPIHeader__c</fullName>
@@ -130,7 +128,10 @@
     <label>Invoice</label>
     <listViews>
         <fullName>All</fullName>
+        <columns>NAME</columns>
         <columns>Account__c</columns>
+        <columns>InvoiceDate__c</columns>
+        <columns>Description__c</columns>
         <columns>Amount__c</columns>
         <filterScope>Everything</filterScope>
         <label>All</label>
@@ -151,7 +152,6 @@
         <customTabListAdditionalFields>InvoiceDate__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>Account__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>Description__c</customTabListAdditionalFields>
-        <customTabListAdditionalFields>Amount__c</customTabListAdditionalFields>
     </searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
 </CustomObject>

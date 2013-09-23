@@ -45,12 +45,7 @@
         <name>CustomField</name>
     </types>
     <types>
-        <members>DesignWorkItem__c</members>
-        <members>DeveloperWorkItem__c</members>
-        <members>Invoice__c</members>
-        <members>OpportunitySettings__c</members>
-        <members>TrainingWorkItem__c</members>
-        <members>WorkOrder__c</members>
+        <members>*</members>
         <name>CustomObject</name>
     </types>
     <types>
@@ -64,6 +59,7 @@
     <types>
         <members>DesignWorkItem__c-Design Work Item Layout</members>
         <members>DeveloperWorkItem__c-Developer Work Item Layout</members>
+        <members>InvoiceLine__c-Invoice Line Layout</members>
         <members>Invoice__c-Invoice Layout</members>
         <members>TrainingWorkItem__c-Training Work Item Layout</members>
         <members>WorkOrder__c-Work Order Layout</members>
