@@ -39,6 +39,7 @@
     <types>
         <members>Opportunity.DiscountType__c</members>
         <members>Product2.DiscountingApproved__c</members>
+        <members>Product2.SubscriberField__c</members>
         <name>CustomField</name>
     </types>
     <types>

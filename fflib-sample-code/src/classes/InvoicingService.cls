@@ -26,6 +26,9 @@
 
 public with sharing class InvoicingService 
 {
+	/**
+	 * Invoices a given set of Opportunities
+	 **/
 	public void invoiceOpportunities(Set<Id> opportunityIds)
 	{
 		// Create unit of work to capture work and commit it under one transaction

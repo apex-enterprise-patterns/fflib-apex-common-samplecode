@@ -16,4 +16,14 @@
         <label>Discounting Approved</label>
         <type>Checkbox</type>
     </fields>
+    <fields>
+        <fullName>SubscriberField__c</fullName>
+        <description>This field emulates a field added by the subscriber to the object and referenced via a Fieldset.</description>
+        <externalId>false</externalId>
+        <label>Subscriber Field</label>
+        <length>32</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
 </CustomObject>
