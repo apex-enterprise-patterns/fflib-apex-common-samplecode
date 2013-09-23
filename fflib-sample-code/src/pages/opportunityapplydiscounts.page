@@ -1,0 +1,22 @@
+<apex:page standardController="Opportunity" extensions="OpportunityApplyDiscountController" recordSetVar="opps">
+<br/>
+<apex:pageMessages />
+<apex:pageBlock title="Discount Opportunities">
+	<apex:pageBlockSection title="Opportunity Information">
+		<apex:pageBlockTable value="{!selected}" var="item">
+			<apex:column value="{!item.Name}"/>			
+		</apex:pageBlockTable>
+	</apex:pageBlockSection>
+	<apex:pageBlockSection title="Discount">
+		<apex:pageBlockSectionItem >
+			This process will discount the selected opportunities and any lines.
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:form >
+				<apex:inputText value="{!discountPercentage}"/>
+				<apex:commandButton action="{!applyDiscounts}" value="Apply Discounts"/>
+			</apex:form>
+		</apex:pageBlockSectionItem>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:page>

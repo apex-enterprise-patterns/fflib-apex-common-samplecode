@@ -30,6 +30,18 @@
         <protected>false</protected>
     </webLinks>
     <webLinks>
+        <fullName>ApplyDiscounts</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Apply Discounts</masterLabel>
+        <openType>sidebar</openType>
+        <page>opportunityapplydiscounts</page>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
+    </webLinks>
+    <webLinks>
         <fullName>CreateInvoice</fullName>
         <availability>online</availability>
         <displayType>button</displayType>
@@ -39,5 +51,17 @@
         <openType>sidebar</openType>
         <page>opportunitycreateinvoice</page>
         <protected>false</protected>
+    </webLinks>
+    <webLinks>
+        <fullName>CreateInvoices</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Create Invoices</masterLabel>
+        <openType>sidebar</openType>
+        <page>opportunitycreateinvoices</page>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
     </webLinks>
 </CustomObject>

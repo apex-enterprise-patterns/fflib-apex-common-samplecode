@@ -1,0 +1,22 @@
+<apex:page standardController="Opportunity" extensions="OpportunityCreateInvoiceController" recordSetVar="opps">
+<br/>
+<apex:pageMessages />
+<apex:pageBlock title="Create Invoices">
+	<apex:pageBlockSection title="Opportunity Information">
+		<apex:pageBlockTable value="{!selected}" var="item">
+			<apex:column value="{!item.Name}"/>			
+		</apex:pageBlockTable>
+	</apex:pageBlockSection>
+	<apex:pageBlockSection title="Discount">
+		<apex:pageBlockSectionItem >
+			This process will optionally discount the selected opportunities and then create Invoices from them.
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:form >
+				<apex:inputText value="{!discountPercentage}"/>
+				<apex:commandButton action="{!createInvoices}" value="Create Invoices"/>
+			</apex:form>
+		</apex:pageBlockSectionItem>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:page>
