@@ -39,7 +39,8 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 			Opportunity.Pricebook2Id,
 			Opportunity.Probability,
 			Opportunity.StageName,
-			Opportunity.Type
+			Opportunity.Type,
+			Opportunity.InvoicedStatus__c
 		};
 	}
 
@@ -117,5 +118,12 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 		public String AccountNumber { get { return opportunity.Account.AccountNumber; } }		
 		public String AccountOwner { get { return opportunity.Account.Owner.Name; } }
 		private OpportunityInfo(Opportunity opportunity) { this.opportunity = opportunity; }		 
+	}
+	
+	public Database.QueryLocator queryLocatorReadyToInvoice()
+	{
+		return Database.getQueryLocator(
+			String.format('SELECT {0} FROM {1} WHERE InvoicedStatus__c = \'\'Ready\'\' ORDER BY {2}', 
+				new List<String>{getFieldListString(),getSObjectName(),getOrderBy()}));
 	}
 }

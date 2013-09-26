@@ -74,6 +74,9 @@ global with sharing class OpportunitiesService
 				uow.registerNew(invoiceLine, InvoiceLine__c.Invoice__c, invoice);
 			}
 			invoices.add(invoice);
+			// Update Opportunity has been invoiced
+			opportunityRecord.InvoicedStatus__c = 'Invoiced';
+			uow.registerDirty(opportunityRecord);
 		}
 		
 		// Commit any Opportunity updates and new invoices

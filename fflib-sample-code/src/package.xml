@@ -3,6 +3,7 @@
     <types>
         <members>Accounts</members>
         <members>Chargeable</members>
+        <members>CreateInvoicesJob</members>
         <members>DeveloperWorkItems</members>
         <members>InvoicingService</members>
         <members>Opportunities</members>
@@ -18,6 +19,7 @@
         <members>ProductsSelector</members>
         <members>ProductsSelectorTest</members>
         <members>QuickOpportunityWizardController</members>
+        <members>UsersSelector</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -40,6 +42,7 @@
     </types>
     <types>
         <members>Opportunity.DiscountType__c</members>
+        <members>Opportunity.InvoicedStatus__c</members>
         <members>Product2.DiscountingApproved__c</members>
         <members>Product2.SubscriberField__c</members>
         <name>CustomField</name>

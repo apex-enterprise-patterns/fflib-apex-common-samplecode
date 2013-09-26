@@ -18,6 +18,28 @@
         <trackFeedHistory>false</trackFeedHistory>
         <type>Picklist</type>
     </fields>
+    <fields>
+        <fullName>InvoicedStatus__c</fullName>
+        <externalId>false</externalId>
+        <label>Invoiced Status</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Not Ready</fullName>
+                <default>true</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Ready</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Invoiced</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Picklist</type>
+    </fields>
     <webLinks>
         <fullName>ApplyDiscount</fullName>
         <availability>online</availability>
