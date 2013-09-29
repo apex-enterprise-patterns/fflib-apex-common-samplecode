@@ -7,6 +7,7 @@
         <members>DeveloperWorkItems</members>
         <members>InvoicingService</members>
         <members>Opportunities</members>
+        <members>OpportunitiesResource</members>
         <members>OpportunitiesSelector</members>
         <members>OpportunitiesService</members>
         <members>OpportunitiesTest</members>

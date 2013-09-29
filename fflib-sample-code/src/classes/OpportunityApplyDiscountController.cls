@@ -73,7 +73,8 @@ public with sharing class OpportunityApplyDiscountController
 				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
 			
 			// Apply discount entered to the selected Opportunities
-			OpportunitiesService.applyDiscounts(selectedOpportuntyIds, DiscountPercentage);
+			OpportunitiesService.applyDiscounts(
+				selectedOpportuntyIds, DiscountPercentage);
 			
 			// Confirm submission
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Info, 'Opportunities updated.'));

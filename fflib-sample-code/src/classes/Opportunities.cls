@@ -33,16 +33,6 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 		super(sObjectList);
 	}
 	
-	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
-	{
-		// Process Opportunities
-		for(Opportunity opportunity : (List<Opportunity>) Records)
-		{
-			// Utilise InvoiceFactory to create invoices
-			invoiceFactory.createInvoice(opportunity.AccountId, opportunity.Description, System.today().addDays(14));
-		}		
-	}
-	
 	public override void onApplyDefaults()
 	{
 		// Apply defaults to Opportunities
@@ -120,6 +110,16 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 		// Apply discount to lines
 		OpportunityLineItems lineItems = new OpportunityLineItems(linesToApplyDiscount);
 		lineItems.applyDiscount(this, discountPercentage, uow);
+	}
+	
+	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
+	{
+		// Process Opportunities
+		for(Opportunity opportunity : (List<Opportunity>) Records)
+		{
+			// Utilise InvoiceFactory to create invoices
+			invoiceFactory.createInvoice(opportunity.AccountId, opportunity.Description, System.today().addDays(14));
+		}		
 	}
 	
 	public static Decimal calculateDiscountFactor(Decimal discountPercentage)
