@@ -68,17 +68,17 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 	}
 	
 	public override void onAfterInsert()
-	{
-		// Related Accounts
-		List<Id> accountIds = new List<Id>();
-		for(Opportunity opp : (List<Opportunity>) Records)
-			if(opp.AccountId!=null)
-				accountIds.add(opp.AccountId);
-		
-		// Update last Opportunity activity on the related Accounts (via the Accounts domain class)
-		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType }); 
-		Accounts accounts = new Accounts([select Id, Name from Account where id in :accountIds]);
+	{		
+		// Unit of Work scope for this event
+		fflib_SObjectUnitOfWork uow = 
+			new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType });
+		 
+		// Update last Opportunity activity on the related Accounts (via the Accounts Domain class)
+		Accounts accounts = new Accounts(
+			new AccountsSelector().selectByOpportunity(Records));
 		accounts.updateOpportunityActivity(uow);
+		
+		// Commit the work
 		uow.commitWork();				
 	}
 	

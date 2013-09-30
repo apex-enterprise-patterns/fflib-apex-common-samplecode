@@ -2,6 +2,7 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>Accounts</members>
+        <members>AccountsSelector</members>
         <members>Chargeable</members>
         <members>CreateInvoicesJob</members>
         <members>DeveloperWorkItems</members>
