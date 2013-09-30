@@ -12,6 +12,7 @@
         <members>OpportunitiesService</members>
         <members>OpportunitiesTest</members>
         <members>OpportunityApplyDiscountController</members>
+        <members>OpportunityConsoleController</members>
         <members>OpportunityCreateInvoiceController</members>
         <members>OpportunityLineItems</members>
         <members>OpportunityLineItemsSelector</members>
