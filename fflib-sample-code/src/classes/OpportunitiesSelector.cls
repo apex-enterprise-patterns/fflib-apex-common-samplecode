@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, FinancialForce.com, inc
+ * Copyright (c), FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -40,7 +40,8 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 			Opportunity.Probability,
 			Opportunity.StageName,
 			Opportunity.Type,
-			Opportunity.InvoicedStatus__c
+			Opportunity.InvoicedStatus__c,
+			Opportunity.DiscountType__c
 		};
 	}
 

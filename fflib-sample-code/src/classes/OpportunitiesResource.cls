@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, FinancialForce.com, inc
+ * Copyright (c), FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -28,7 +28,7 @@
 global with sharing class OpportunitiesResource 
 {
 	@HttpGet
-	// e.g. /opportunities/006b0000002DFNJ/applydiscount?discount=10
+	// e.g. https://ue2.salesforce.com/services/apexrest/opportunities/006b0000003u4Ln/applydiscount?discount=10
 	global static void applyDiscount()
 	{
     	// Take apart the URI to discover the Opportunity Id

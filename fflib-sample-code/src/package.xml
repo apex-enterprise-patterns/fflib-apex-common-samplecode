@@ -15,6 +15,7 @@
         <members>OpportunityApplyDiscountController</members>
         <members>OpportunityConsoleController</members>
         <members>OpportunityCreateInvoiceController</members>
+        <members>OpportunityInvoicingController</members>
         <members>OpportunityLineItems</members>
         <members>OpportunityLineItemsSelector</members>
         <members>PricebookEntriesSelector</members>
@@ -30,6 +31,7 @@
         <members>opportunityapplydiscounts</members>
         <members>opportunitycreateinvoice</members>
         <members>opportunitycreateinvoices</members>
+        <members>opportunityinvoicing</members>
         <members>quickopportunitywizard</members>
         <name>ApexPage</name>
     </types>
@@ -75,6 +77,7 @@
         <members>Account.QuickOpportunity</members>
         <members>Opportunity.ApplyDiscount</members>
         <members>Opportunity.ApplyDiscounts</members>
+        <members>Opportunity.BatchInvoicing</members>
         <members>Opportunity.CreateInvoice</members>
         <members>Opportunity.CreateInvoices</members>
         <name>WebLink</name>

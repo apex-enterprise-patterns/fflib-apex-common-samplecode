@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, FinancialForce.com, inc
+ * Copyright (c), FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -25,18 +25,36 @@
 **/
 
 /**
- * TODO: Implement this Selector
+ * This is a basic selector for Account for this app, note how it implements selectByOpportunity
  **/
-public with sharing class AccountsSelector 
+public with sharing class AccountsSelector extends fflib_SObjectSelector
 {
+	public List<Schema.SObjectField> getSObjectFieldList()
+	{
+		return new List<Schema.SObjectField> {
+			Account.Id,
+			Account.Name,
+			Account.Description
+		};
+	}
+
+	public Schema.SObjectType getSObjectType()
+	{
+		return Account.sObjectType;
+	}
+
+	public List<Account> selectById(Set<ID> idSet)
+	{
+		return (List<Account>) selectSObjectsById(idSet);
+	}
+		
 	public List<Account> selectByOpportunity(List<Opportunity> opportunities)
 	{
 		// Related Accounts
-		List<Id> accountIds = new List<Id>();
+		Set<Id> accountIds = new Set<Id>();
 		for(Opportunity opp : (List<Opportunity>) opportunities)
 			if(opp.AccountId!=null)
-				accountIds.add(opp.AccountId);
-		
-		return null;
+				accountIds.add(opp.AccountId);		
+		return selectById(accountIds);
 	}	
 }

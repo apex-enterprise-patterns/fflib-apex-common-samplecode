@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, FinancialForce.com, inc
+ * Copyright (c), FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -31,13 +31,13 @@
  *        focusing on passing paramters in and handling errors and notfications
  *
  **/ 
-public with sharing class CreateInvoicesJob
+global with sharing class CreateInvoicesJob
 	implements System.Schedulable, Database.Batchable<SObject>, Database.Stateful  
 {	
 	// Simple job log for errors
 	private List<JobError> jobErrors = new List<JobError>();
 	
-	public void execute(SchedulableContext sc)
+	global void execute(SchedulableContext sc)
 	{
 		// Start the job once the scheduled time has arrived
 		Database.executeBatch(new CreateInvoicesJob());		

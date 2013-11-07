@@ -24,39 +24,38 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class DeveloperWorkItems extends Chargeable 
+/**
+ * Small example showing a controller using the service layer to submit a Batch Apex job
+ **/
+public with sharing class OpportunityInvoicingController 
 {
-	public DeveloperWorkItems(List<DeveloperWorkItem__c> workItems)
+	public Id JobId {get;set;}
+	
+	public OpportunityInvoicingController(ApexPages.StandardSetController standardSetControlelr)
 	{
-		super(workItems);
+		ApexPages.addMessage(
+			new ApexPages.Message(
+				ApexPages.Severity.Info, 'Click Start to scan Opportunities that are ready for invoicing and process them.'));
 	}
 	
-	public override Schema.SObjectField getCostOfHoursWorkedField()
+	public PageReference startJob()
 	{
-		// Field base class will populate once it has calculated the cost
-		return DeveloperWorkItem__c.DeveloperCost__c;
+		try
+		{	
+			// Ask the service to submit the job
+			JobId = OpportunitiesService.submitInvoicingJob();
+			
+			// Confirm
+			ApexPages.addMessage(
+				new ApexPages.Message(
+					ApexPages.Severity.Info, 'The job has been submitted, you will receive an email notificaiton of any issues.'));
+		}
+		catch (Exception e)
+		{
+			// Client displays any issues submitting the job 		
+			ApexPages.addMessages(e);
+		}
+		
+		return null;
 	}
-	 
-	public override List<Integer> calculateHoursWorked()
-	{
-		// Calculate the hours worked for each record
-		List<Integer> hoursWorked = new List<Integer>(); 
-		for(DeveloperWorkItem__c workItem : (List<DeveloperWorkItem__c>) Records)
-		{
-			// This calculation is intentionally simplistic for illustration purposes
-			hoursWorked.add((Integer)  
-				(workItem.CodingHours__c + 
-				 workItem.CodeReviewingHours__c + 
-				 workItem.TechnicalDesignHours__c));
-		}
-		return hoursWorked;
-	}	
-	
-	public class Constructor implements fflib_SObjectDomain.IConstructable
-	{
-		public fflib_SObjectDomain construct(List<SObject> sObjectList)
-		{
-			return new DeveloperWorkItems(sObjectList);
-		}
-	}	
 }

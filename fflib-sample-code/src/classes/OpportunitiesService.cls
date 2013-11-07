@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, FinancialForce.com, inc
+ * Copyright (c), FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -84,6 +84,14 @@ global with sharing class OpportunitiesService
 		
 		// Invoice Ids
 		return new Map<Id, Invoice__c> ( invoices ).keySet();
+	}
+	
+	global static Id submitInvoicingJob()
+	{
+		// Submit the job via Batch Apex, 
+		//   service layer can perform validations and updates such as logging etc on behalf of client
+		//   also configure scope size, knowledge of the class to use etc is encapsulated in the service		
+		return Database.executeBatch(new CreateInvoicesJob());
 	}
 	
 	// SObject's used by the logic in this service, listed in dependency order

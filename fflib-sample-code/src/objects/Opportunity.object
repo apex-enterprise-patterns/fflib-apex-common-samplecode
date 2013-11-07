@@ -64,6 +64,18 @@
         <requireRowSelection>true</requireRowSelection>
     </webLinks>
     <webLinks>
+        <fullName>BatchInvoicing</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Batch Invoicing</masterLabel>
+        <openType>sidebar</openType>
+        <page>opportunityinvoicing</page>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
+    </webLinks>
+    <webLinks>
         <fullName>CreateInvoice</fullName>
         <availability>online</availability>
         <displayType>button</displayType>
