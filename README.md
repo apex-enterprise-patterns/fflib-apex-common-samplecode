@@ -9,6 +9,8 @@ Sample Application
 
 This repository contains a sample application illustrating the Apex Enterprise Patterns library. The aim is to illustrate fullly working sample application to better illustrate the patterns in presentations and articles. You can see a [demo of this application in the Dreamforce 2013 session](http://www.youtube.com/watch?v=qlq46AEAlLI#t=572) I presented. 
 
+![Alt text](/images/sampleappoverview.png "Optional title")
+
 Application Enterprise Patterns on Force.com
 ============================================
 
