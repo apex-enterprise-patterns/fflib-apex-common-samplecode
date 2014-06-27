@@ -52,6 +52,60 @@ private with sharing class OpportunitiesTest
 	}
 
 	@IsTest
+	private static void testInsertValidationFailedWithDML()
+	{
+		try 
+		{
+			// Test validation with DML
+			Opportunity opp = 
+				new Opportunity ( 
+					Name = 'Test', 
+					Type = 'Existing Account', 
+					StageName = 'Won', 
+					CloseDate = System.today() );
+			insert opp;
+			// Expected to throw exception
+			System.assert(false);
+		} 
+		catch (Exception e)
+		{
+			// Expected exception
+			System.assertEquals('Insert failed. First exception on row 0; first error: FIELD_CUSTOM_VALIDATION_EXCEPTION, You must provide an Account for Opportunities for existing Customers.: [AccountId]', e.getMessage());
+		}
+	}
+	
+	@IsTest
+	private static void testDeleteWithDML()
+	{
+		try 
+		{
+			// Insert account
+			Account account = 
+				new Account(
+					Name = 'Test Account');
+			insert account;
+			// Insert test opportunity
+			Opportunity opp = 
+				new Opportunity ( 
+					Name = 'Test',
+					AccountId = account.Id, 
+					Type = 'New Account', 
+					StageName = 'Won', 
+					CloseDate = System.today() );
+			insert opp;
+			// Attempt to delete it
+			delete opp;
+			// Expected to throw exception
+			System.assert(false);
+		} 
+		catch (Exception e)
+		{
+			// Expected exception
+			System.assert(e.getMessage().endsWith('FIELD_CUSTOM_VALIDATION_EXCEPTION, You cannot delete Won Opportunities.: [StageName]'));
+		}		
+	}
+
+	@IsTest
 	private static void testUpdateValidationFailedWithoutDML()
 	{
 		Opportunity oldOpp = new Opportunity ( Name = 'Test', Type = 'Existing Account' );

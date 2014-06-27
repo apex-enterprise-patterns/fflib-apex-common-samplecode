@@ -57,56 +57,43 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 
 	public List<Opportunity> selectByIdWithProducts(Set<ID> idSet)
 	{
-		assertIsAccessible();
+		fflib_QueryFactory opportunitiesQueryFactory = newQueryFactory();
 
-		OpportunityLineItemsSelector opportunityLineItemSelector = new OpportunityLineItemsSelector(); 
-		PricebookEntriesSelector pricebookEntrySelector = new PricebookEntriesSelector(); 
-		ProductsSelector productSelector = new ProductsSelector(); 
-		PricebooksSelector pricebookSelector = new PricebooksSelector(); 
+		fflib_QueryFactory lineItemsQueryFactory = 
+			new OpportunityLineItemsSelector().
+				addQueryFactorySubselect(opportunitiesQueryFactory);
+			
+		new PricebookEntriesSelector().
+			configureQueryFactoryFields(lineItemsQueryFactory, 'PricebookEntry');
+		new ProductsSelector().
+			configureQueryFactoryFields(lineItemsQueryFactory, 'PricebookEntry.Product2');
+		new PricebooksSelector().
+			configureQueryFactoryFields(lineItemsQueryFactory, 'PricebookEntry.Pricebook2');
 
-		opportunityLineItemSelector.assertIsAccessible();
-		pricebookEntrySelector.assertIsAccessible();
-		productSelector.assertIsAccessible();
-		pricebookSelector.assertIsAccessible();
-
-		String query = String.format(
-				'select {0}, ' +
-				  '(select {3},{5},{6},{7} ' +
-				     'from OpportunityLineItems ' + 
-				     'order by {4}) ' + 
-				  'from {1} ' +
-				  'where id in :idSet ' + 
-				  'order by {2}', 
-			new List<String>{
-				getFieldListString(),
-				getSObjectName(),
-				getOrderBy(),
-				opportunityLineItemSelector.getFieldListString(),
-				opportunityLineItemSelector.getOrderBy(),
-				pricebookEntrySelector.getRelatedFieldListString('PricebookEntry'),
-				productSelector.getRelatedFieldListString('PricebookEntry.Product2'),
-				pricebookSelector.getRelatedFieldListString('PricebookEntry.Pricebook2')
-			});
-
-		return (List<Opportunity>) Database.query(query);
+		return (List<Opportunity>) Database.query(
+			opportunitiesQueryFactory.setCondition('id in :idSet').toSOQL());
 	}
 	
 	public List<OpportunityInfo> selectOpportunityInfo(Set<Id> idSet)
 	{
 		List<OpportunityInfo> opportunityInfos = new List<OpportunityInfo>();
-		List<String> selectFields = 
-			new List<String> {  
-				'Id, ', 
-				'Amount', 
-				'StageName', 
-				'Account.Name', 
-				'Account.AccountNumber', 
-				'Account.Owner.Name' };
 		for(Opportunity opportunity : Database.query(
-				String.format('select {0} from {1} where id in :idSet order by {2}', 
-					new List<String> { String.join(selectFields, ','), getSObjectName() })))
+				newQueryFactory(false).
+					selectField(Opportunity.Id).
+					selectField(Opportunity.StageName).
+					selectField('Account.Name').
+					selectField('Account.AccountNumber').
+					selectField('Account.Owner.Name').
+					setCondition('id in :idSet').
+					toSOQL()))
 			opportunityInfos.add(new OpportunityInfo(opportunity));
 		return opportunityInfos;	
+	}
+	
+	public Database.QueryLocator queryLocatorReadyToInvoice()
+	{
+		return Database.getQueryLocator(
+			newQueryFactory().setCondition('InvoicedStatus__c = \'\'Ready\'\'').toSOQL());
 	}
 	
 	public class OpportunityInfo
@@ -119,12 +106,5 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 		public String AccountNumber { get { return opportunity.Account.AccountNumber; } }		
 		public String AccountOwner { get { return opportunity.Account.Owner.Name; } }
 		private OpportunityInfo(Opportunity opportunity) { this.opportunity = opportunity; }		 
-	}
-	
-	public Database.QueryLocator queryLocatorReadyToInvoice()
-	{
-		return Database.getQueryLocator(
-			String.format('SELECT {0} FROM {1} WHERE InvoicedStatus__c = \'\'Ready\'\' ORDER BY {2}', 
-				new List<String>{getFieldListString(),getSObjectName(),getOrderBy()}));
-	}
+	}	
 }

@@ -26,7 +26,7 @@
 
 public with sharing class Opportunities extends fflib_SObjectDomain
 	implements InvoicingService.ISupportInvoicing
-{
+{	
 	public Opportunities(List<Opportunity> sObjectList)
 	{
 		// Domain classes are initialised with lists to enforce bulkification throughout
@@ -82,6 +82,17 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 		uow.commitWork();				
 	}
 	
+	public override void onAfterDelete()
+	{
+		for(Opportunity opp : (List<Opportunity>) Records)
+		{
+			if(opp.StageName!=null && opp.StageName.startsWith('Won'))
+			{
+				opp.StageName.addError( error('You cannot delete Won Opportunities.', opp, Opportunity.StageName) );					
+			}			
+		}				
+	}
+	
 	public void applyDiscount(Decimal discountPercentage, fflib_SObjectUnitOfWork uow)
 	{
 		// Calculate discount factor
@@ -131,7 +142,7 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 	}
 	
 	public class Constructor implements fflib_SObjectDomain.IConstructable
-	{
+	{						
 		public fflib_SObjectDomain construct(List<SObject> sObjectList)
 		{
 			return new Opportunities(sObjectList);

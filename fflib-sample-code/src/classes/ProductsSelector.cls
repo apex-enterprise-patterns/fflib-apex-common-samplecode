@@ -43,7 +43,8 @@ public with sharing class ProductsSelector extends fflib_SObjectSelector
 			Product2.Id,
 			Product2.IsActive,
 			Product2.Name,
-			Product2.ProductCode
+			Product2.ProductCode,
+			Product2.DiscountingApproved__c
 		};
 	}
 
