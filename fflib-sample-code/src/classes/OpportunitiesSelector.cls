@@ -1,5 +1,5 @@
 /**
- * Copyright (c), FinancialForce.com, inc
+ * Copyright (c) 2012, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -25,7 +25,13 @@
 **/
 
 public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
+	implements IOpportunitiesSelector
 {
+	public static IOpportunitiesSelector newInstance()
+	{
+		return (IOpportunitiesSelector) Application.Selector.newInstance(Opportunity.SObjectType);
+	}
+	
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {
@@ -40,11 +46,10 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 			Opportunity.Probability,
 			Opportunity.StageName,
 			Opportunity.Type,
-			Opportunity.InvoicedStatus__c,
 			Opportunity.DiscountType__c
 		};
 	}
-
+	
 	public Schema.SObjectType getSObjectType()
 	{
 		return Opportunity.sObjectType;
@@ -106,5 +111,5 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 		public String AccountNumber { get { return opportunity.Account.AccountNumber; } }		
 		public String AccountOwner { get { return opportunity.Account.Owner.Name; } }
 		private OpportunityInfo(Opportunity opportunity) { this.opportunity = opportunity; }		 
-	}	
+	}
 }

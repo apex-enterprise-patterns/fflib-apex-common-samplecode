@@ -1,5 +1,5 @@
 /**
- * Copyright (c), FinancialForce.com, inc
+ * Copyright (c) 2012, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -24,81 +24,64 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-global with sharing class OpportunitiesService 
-{		
-	global static void applyDiscounts(Set<ID> opportunityIds, Decimal discountPercentage)
+public class OpportunitiesServiceImpl 
+	implements IOpportunitiesService
+{
+	public void applyDiscounts(Set<ID> opportunityIds, Decimal discountPercentage)
 	{
 		// Create unit of work to capture work and commit it under one transaction
-		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(SERVICE_SOBJECTS);
-		
-		// Query Opportunities and apply discount
-		Opportunities opportunities = new Opportunities(
-			new OpportunitiesSelector().selectByIdWithProducts(opportunityIds));				
-		opportunities.applyDiscount(discountPercentage, uow);
+	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+	    	    	    	  	    										
+		// Query Opportunities
+		List<Opportunity> oppRecords = 
+			OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds);
+
+		// Apply discount via Opportunties domain class behaviour
+		IOpportunities opps = Opportunities.newInstance(oppRecords);				
+		opps.applyDiscount(discountPercentage, uow);
 		
 		// Commit updates to opportunities		
 		uow.commitWork();						
 	}
-	
-	global static Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage)
+
+	public Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage)
 	{
 		// Create unit of work to capture work and commit it under one transaction
-		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(SERVICE_SOBJECTS);						
-
+	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+	    										
 		// Query Opportunities
-		Opportunities opportunities = new Opportunities(
-			new OpportunitiesSelector().selectByIdWithProducts(opportunityIds));		
+		IOpportunities opps = 
+			Opportunities.newInstance(
+				OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds));		
 		
 		// Optionally apply discounts as part of invoice creation
 		if(discountPercentage!=null && discountPercentage>0)
-			opportunities.applyDiscount(discountPercentage, uow);		
+			opps.applyDiscount(discountPercentage, uow);		
 		
 		// Create Invoices from the given opportunities
-		List<Invoice__c> invoices = new List<Invoice__c>();
-		for(Opportunity opportunityRecord : (List<Opportunity>) opportunities.Records)		
+		List<SObject> invoices = new List<SObject>();
+		for(Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())		
 		{
-			// Create a new Invoice__c and related InvoiceLine__c records
 			Invoice__c invoice = new Invoice__c();
-			invoice.Account__c = opportunityRecord.AccountId;
-			invoice.Description__c = opportunityRecord.Description;
-			invoice.InvoiceDate__c = System.today();
-			invoice.Opportunity__c = opportunityRecord.Id;
-			uow.registerNew(invoice);
-			for(OpportunityLineItem oppLineRecord : opportunityRecord.OpportunityLineItems)
-			{
-				InvoiceLine__c invoiceLine = new InvoiceLine__c();
-				invoiceLine.Product__c = oppLineRecord.PricebookEntry.Product2Id;
-				invoiceLine.Description__c = oppLineRecord.Description;
-				invoiceLine.Quantity__c = oppLineRecord.Quantity;
-				invoiceLine.UnitPrice__c = oppLineRecord.UnitPrice;
-				uow.registerNew(invoiceLine, InvoiceLine__c.Invoice__c, invoice);
-			}
-			invoices.add(invoice);
-			// Update Opportunity has been invoiced
-			opportunityRecord.InvoicedStatus__c = 'Invoiced';
-			uow.registerDirty(opportunityRecord);
+			// TODO: Populate invoice fields ...
+			uow.registerNew(invoice);	
 		}
 		
 		// Commit any Opportunity updates and new invoices
 		uow.commitWork();									
 		
 		// Invoice Ids
-		return new Map<Id, Invoice__c> ( invoices ).keySet();
+		Set<Id> invoiceIds = new Set<Id>();
+		for(SObject invoice : invoices)
+			invoiceIds.add((ID)invoice.get('Id'));
+		return invoiceIds;
 	}
 	
-	global static Id submitInvoicingJob()
+	public Id submitInvoicingJob()
 	{
 		// Submit the job via Batch Apex, 
 		//   service layer can perform validations and updates such as logging etc on behalf of client
 		//   also configure scope size, knowledge of the class to use etc is encapsulated in the service		
-		return Database.executeBatch(new CreateInvoicesJob());
+		return Database.executeBatch(new CreateInvoicesJob());		
 	}
-	
-	// SObject's used by the logic in this service, listed in dependency order
-	private static List<Schema.SObjectType> SERVICE_SOBJECTS = 
-		new Schema.SObjectType[] { 
-			Invoice__c.SObjectType, 
-			InvoiceLine__c.SObjectType,
-			Opportunity.SObjectType, 
-			OpportunityLineItem.SObjectType };	
 }

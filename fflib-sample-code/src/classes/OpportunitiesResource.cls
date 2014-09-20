@@ -27,7 +27,7 @@
 @RestResource(urlMapping='/opportunities/*/applydiscount')
 global with sharing class OpportunitiesResource 
 {
-	@HttpGet
+	@HttpPost
 	// e.g. https://ue2.salesforce.com/services/apexrest/opportunities/006b0000003u4Ln/applydiscount?discount=10
 	global static void applyDiscount()
 	{

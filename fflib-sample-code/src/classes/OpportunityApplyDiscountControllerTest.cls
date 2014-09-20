@@ -1,5 +1,5 @@
 /**
- * Copyright (c), FinancialForce.com, inc
+ * Copyright (c) 2012, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -24,39 +24,28 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing abstract class Chargeable extends fflib_SObjectDomain
-	implements IChargeable 
+@IsTest
+private class OpportunityApplyDiscountControllerTest 
 {
-	public Chargeable(List<SObject> records)
+	@IsTest
+	private static void callingApplyDiscountOnControllerShouldCallService()
 	{
-		super(records);
-	}
-	
-	public abstract Schema.SObjectField getCostOfHoursWorkedField();
-	 
-	public abstract List<Integer> calculateHoursWorked();
-	
-	public override void onBeforeInsert()
-	{
-		updateCostOfHoursWorked();		
-	}
-	
-	public override void onBeforeUpdate(Map<Id,SObject> existingRecords)
-	{
-		updateCostOfHoursWorked();
-	}			
-	
-	public void updateCostOfHoursWorked()
-	{
-		List<Integer> hoursWorked = calculateHoursWorked();
-		
-		Schema.SobjectField costOfHoursWorkedField = getCostOfHoursWorkedField();
-		
-		Integer hoursWorkedRecordIdx = 0; 
-		
-		for(SObject record : Records)
-		{
-			record.put(costOfHoursWorkedField, hoursWorked[hoursWorkedRecordIdx++] * 100);	
-		}
+		fflib_ApexMocks mocks = new fflib_ApexMocks();
+
+		// Given
+		Id opportunityId = fflib_IDGenerator.generate(Opportunity.SObjectType);
+		Opportunity opp = new Opportunity(Id = opportunityId, Amount = 100, Name = 'Test');
+		ApexPages.StandardController standardController = new ApexPages.StandardController(opp);
+		Mocks.OpportunitiesService mockService = new Mocks.OpportunitiesService(mocks);
+		Application.Service.setMock(IOpportunitiesService.class, mockService);
+
+		// When
+		OpportunityApplyDiscountController controller = new OpportunityApplyDiscountController(standardController);
+		controller.DiscountPercentage = 10;
+		controller.applyDiscount();
+
+		// Then
+		((IOpportunitiesService) 
+			mocks.verify(mockService, 1)).applyDiscounts(new Set<Id> { opportunityId }, 10);
 	}
 }

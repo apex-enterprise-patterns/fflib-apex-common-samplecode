@@ -1,5 +1,5 @@
 /**
- * Copyright (c), FinancialForce.com, inc
+ * Copyright (c) 2012, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -24,39 +24,35 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing abstract class Chargeable extends fflib_SObjectDomain
-	implements IChargeable 
+public with sharing class InvoicingServiceImpl
+	implements IInvoicingService 
 {
-	public Chargeable(List<SObject> records)
+	/**
+	 * Generate invoices for the given source records (so long as their domain classes implement ISupportInvoicing)
+	 **/
+	public void generate(Set<Id> sourceRecordIds)
 	{
-		super(records);
-	}
-	
-	public abstract Schema.SObjectField getCostOfHoursWorkedField();
-	 
-	public abstract List<Integer> calculateHoursWorked();
-	
-	public override void onBeforeInsert()
-	{
-		updateCostOfHoursWorked();		
-	}
-	
-	public override void onBeforeUpdate(Map<Id,SObject> existingRecords)
-	{
-		updateCostOfHoursWorked();
-	}			
-	
-	public void updateCostOfHoursWorked()
-	{
-		List<Integer> hoursWorked = calculateHoursWorked();
+		// Create unit of work to capture work and commit it under one transaction
+		fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
 		
-		Schema.SobjectField costOfHoursWorkedField = getCostOfHoursWorkedField();
+		// Invoicing Factory helps domain classes produce invoices
+		InvoicingService.InvoiceFactory invoiceFactory = new InvoicingService.InvoiceFactory(uow);
 		
-		Integer hoursWorkedRecordIdx = 0; 
-		
-		for(SObject record : Records)
-		{
-			record.put(costOfHoursWorkedField, hoursWorked[hoursWorkedRecordIdx++] * 100);	
+		// Construct domain class capabile of performing invoicing
+		fflib_ISObjectDomain domain =  
+			Application.Domain.newInstance(
+				Application.Selector.selectById(sourceRecordIds));
+		if(domain instanceof InvoicingService.ISupportInvoicing)
+		{ 
+			// Ask the domain object to generate its invoices
+			InvoicingService.ISupportInvoicing invoicing = (InvoicingService.ISupportInvoicing) domain;
+			invoicing.generate(invoiceFactory);	
+			// Commit generated invoices to the database		
+			uow.commitWork();
+			return;	
 		}
+		
+		// Related Domain object does not support the ability to generate invoices
+		throw new fflib_Application.ApplicationException('Invalid source object for generating invoices.');		
 	}
 }

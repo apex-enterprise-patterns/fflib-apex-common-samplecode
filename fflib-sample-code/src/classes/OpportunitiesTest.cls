@@ -1,5 +1,5 @@
 /**
- * Copyright (c), FinancialForce.com, inc
+ * Copyright (c) 2012, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -28,8 +28,37 @@
  * This test class demonstrates two approaches to unit testing, with and without DML, each has its own pros and cons
  **/
 @IsTest
-private with sharing class OpportunitiesTest 
+private class OpportunitiesTest 
 {
+	@IsTest
+	private static void callingApplyDiscountShouldCalcDiscountAndRegisterDirty()
+	{
+		// Create mocks
+		fflib_ApexMocks mocks = new fflib_ApexMocks();
+		fflib_ISObjectUnitOfWork uowMock = new fflib_SObjectMocks.SObjectUnitOfWork(mocks);
+
+		// Given
+		Opportunity opp = new Opportunity(
+			Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+			Name = 'Test Opportunity',
+			StageName = 'Open',
+			Amount = 1000,
+			CloseDate = System.today());
+		List<Opportunity> testOppsList = new List<Opportunity> { opp };
+		Decimal discountPercent = 10;
+		Application.UnitOfWork.setMock(uowMock);
+
+		// When
+		IOpportunities opps = 
+			Opportunities.newInstance(testOppsList);
+		opps.applyDiscount(discountPercent, uowMock);
+
+		// Then
+		((fflib_ISObjectUnitOfWork) 
+			mocks.verify(uowMock, 1)).registerDirty(opp);
+		System.assertEquals(900, opp.Amount);
+	}	
+
 	@IsTest
 	private static void testValidationWithoutDML()
 	{
@@ -49,60 +78,6 @@ private with sharing class OpportunitiesTest
 		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
 		System.assertEquals('You must provide an Account for Opportunities for existing Customers.', fflib_SObjectDomain.Errors.getAll()[0].message);
 		System.assertEquals(Opportunity.AccountId, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		
-	}
-
-	@IsTest
-	private static void testInsertValidationFailedWithDML()
-	{
-		try 
-		{
-			// Test validation with DML
-			Opportunity opp = 
-				new Opportunity ( 
-					Name = 'Test', 
-					Type = 'Existing Account', 
-					StageName = 'Won', 
-					CloseDate = System.today() );
-			insert opp;
-			// Expected to throw exception
-			System.assert(false);
-		} 
-		catch (Exception e)
-		{
-			// Expected exception
-			System.assertEquals('Insert failed. First exception on row 0; first error: FIELD_CUSTOM_VALIDATION_EXCEPTION, You must provide an Account for Opportunities for existing Customers.: [AccountId]', e.getMessage());
-		}
-	}
-	
-	@IsTest
-	private static void testDeleteWithDML()
-	{
-		try 
-		{
-			// Insert account
-			Account account = 
-				new Account(
-					Name = 'Test Account');
-			insert account;
-			// Insert test opportunity
-			Opportunity opp = 
-				new Opportunity ( 
-					Name = 'Test',
-					AccountId = account.Id, 
-					Type = 'New Account', 
-					StageName = 'Won', 
-					CloseDate = System.today() );
-			insert opp;
-			// Attempt to delete it
-			delete opp;
-			// Expected to throw exception
-			System.assert(false);
-		} 
-		catch (Exception e)
-		{
-			// Expected exception
-			System.assert(e.getMessage().endsWith('FIELD_CUSTOM_VALIDATION_EXCEPTION, You cannot delete Won Opportunities.: [StageName]'));
-		}		
 	}
 
 	@IsTest

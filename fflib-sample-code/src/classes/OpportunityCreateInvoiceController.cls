@@ -57,7 +57,7 @@ public with sharing class OpportunityCreateInvoiceController
 				new Set<ID> { standardController.getId() }, DiscountPercentage);
 			
 			// Redirect to Invoice 
-			return new PageReference('/'+new List<Id>(invoiceIds)[0]);									
+			return new PageReference('/'+new List<Id>(invoiceIds)[0]);
 		}
 		catch (Exception e)		
 		{
