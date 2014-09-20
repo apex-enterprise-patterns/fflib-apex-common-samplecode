@@ -1,5 +1,5 @@
 /**
- * Copyright (c), FinancialForce.com, inc
+ * Copyright (c) 2012, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -24,13 +24,28 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class Opportunities extends fflib_SObjectDomain
-	implements InvoicingService.ISupportInvoicing
-{	
+public class Opportunities extends fflib_SObjectDomain
+	implements IOpportunities, InvoicingService.ISupportInvoicing
+{
+	public static IOpportunities newInstance(List<Opportunity> sObjectList)
+	{
+		return (IOpportunities) Application.Domain.newInstance(sObjectList);
+	}
+
 	public Opportunities(List<Opportunity> sObjectList)
 	{
 		// Domain classes are initialised with lists to enforce bulkification throughout
 		super(sObjectList);
+	}
+	
+	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
+	{
+		// Process Opportunities
+		for(Opportunity opportunity : (List<Opportunity>) Records)
+		{
+			// Utilise InvoiceFactory to create invoices
+			invoiceFactory.createInvoice(opportunity.AccountId, opportunity.Description, System.today().addDays(14));
+		}		
 	}
 	
 	public override void onApplyDefaults()
@@ -68,32 +83,21 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 	}
 	
 	public override void onAfterInsert()
-	{		
-		// Unit of Work scope for this event
-		fflib_SObjectUnitOfWork uow = 
-			new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType });
-		 
-		// Update last Opportunity activity on the related Accounts (via the Accounts Domain class)
-		Accounts accounts = new Accounts(
-			new AccountsSelector().selectByOpportunity(Records));
+	{
+		// Related Accounts
+		List<Id> accountIds = new List<Id>();
+		for(Opportunity opp : (List<Opportunity>) Records)
+			if(opp.AccountId!=null)
+				accountIds.add(opp.AccountId);
+				
+		// Update last Opportunity activity on the related Accounts (via the Accounts domain class)
+		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType }); 
+		Accounts accounts = new Accounts([select Id, Name from Account where id in :accountIds]);
 		accounts.updateOpportunityActivity(uow);
-		
-		// Commit the work
 		uow.commitWork();				
 	}
 	
-	public override void onAfterDelete()
-	{
-		for(Opportunity opp : (List<Opportunity>) Records)
-		{
-			if(opp.StageName!=null && opp.StageName.startsWith('Won'))
-			{
-				opp.StageName.addError( error('You cannot delete Won Opportunities.', opp, Opportunity.StageName) );					
-			}			
-		}				
-	}
-	
-	public void applyDiscount(Decimal discountPercentage, fflib_SObjectUnitOfWork uow)
+	public void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
 	{
 		// Calculate discount factor
 		Decimal factor = calculateDiscountFactor(discountPercentage);
@@ -105,7 +109,8 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 		for(Opportunity opportunity : (List<Opportunity>) Records)
 		{
 			// Appply to the Opporunity Amount?
-			if(opportunity.OpportunityLineItems.size()==0)
+			if(opportunity.OpportunityLineItems == null || 
+			   opportunity.OpportunityLineItems.size()==0)
 			{
 				// Adjust the Amount on the Opportunity if no lines
 				opportunity.Amount = opportunity.Amount * factor;
@@ -119,18 +124,9 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 		}		
 		
 		// Apply discount to lines
-		OpportunityLineItems lineItems = new OpportunityLineItems(linesToApplyDiscount);
+		IOpportunityLineItems lineItems = 
+			(IOpportunityLineItems) Application.Domain.newInstance(linesToApplyDiscount);
 		lineItems.applyDiscount(this, discountPercentage, uow);
-	}
-	
-	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
-	{
-		// Process Opportunities
-		for(Opportunity opportunity : (List<Opportunity>) Records)
-		{
-			// Utilise InvoiceFactory to create invoices
-			invoiceFactory.createInvoice(opportunity.AccountId, opportunity.Description, System.today().addDays(14));
-		}		
 	}
 	
 	public static Decimal calculateDiscountFactor(Decimal discountPercentage)
@@ -140,9 +136,9 @@ public with sharing class Opportunities extends fflib_SObjectDomain
 		Decimal factor = 1 - discountProportion;
 		return factor;		
 	}
-	
+		
 	public class Constructor implements fflib_SObjectDomain.IConstructable
-	{						
+	{
 		public fflib_SObjectDomain construct(List<SObject> sObjectList)
 		{
 			return new Opportunities(sObjectList);

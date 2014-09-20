@@ -26,25 +26,15 @@
 
 public with sharing class InvoicingService 
 {
-	/**
-	 * Invoices a given set of Opportunities
-	 **/
-	public void invoiceOpportunities(Set<Id> opportunityIds)
+	public static void generate(Set<Id> sourceRecordIds)
 	{
-		// Create unit of work to capture work and commit it under one transaction
-		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(SERVICE_SOBJECTS);
-		
-		// Invoicing Factory helps domain classes produce invoices
-		InvoiceFactory invoiceFactory = new InvoiceFactory(uow);
-		
-		// Construct domain class capabile of performing invoicing
-		ISupportInvoicing invoicing = 
-			new Opportunities(new OpportunitiesSelector().selectByIdWithProducts(opportunityIds));				
-		invoicing.generate(invoiceFactory);
-		
-		// Commit updates to opportunities		
-		uow.commitWork();									
+		service().generate(sourceRecordIds);
 	}
+
+	private static IInvoicingService service()
+	{
+		return (IInvoicingService) Application.Service.newInstance(IInvoicingService.class);
+	}	
 	
 	/**
 	 * Interface implemented by domain classes that support the ability to produce invoices
@@ -59,9 +49,9 @@ public with sharing class InvoicingService
 	 */
 	public class InvoiceFactory
 	{
-		private fflib_SObjectUnitOfWork unitOfWork;
+		private fflib_ISObjectUnitOfWork unitOfWork;
 		
-		public InvoiceFactory(fflib_SObjectUnitOfWork unitOfWork)
+		public InvoiceFactory(fflib_ISObjectUnitOfWork unitOfWork)
 		{
 			this.unitOfWork = unitOfWork;
 		}
@@ -74,12 +64,5 @@ public with sharing class InvoicingService
 			unitOfWork.registerNew(invoice);
 			return invoice;
 		}
-	}
-	
-	// SObject's used by the logic in this service, listed in dependency order
-	private static List<Schema.SObjectType> SERVICE_SOBJECTS = 
-		new Schema.SObjectType[] { 
-			Invoice__c.SObjectType, 
-			Opportunity.SObjectType, 
-			OpportunityLineItem.SObjectType };		
+	}	
 }

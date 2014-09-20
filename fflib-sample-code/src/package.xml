@@ -3,16 +3,30 @@
     <types>
         <members>Accounts</members>
         <members>AccountsSelector</members>
+        <members>Application</members>
         <members>Chargeable</members>
         <members>CreateInvoicesJob</members>
         <members>DeveloperWorkItems</members>
+        <members>IAccounts</members>
+        <members>IAccountsSelector</members>
+        <members>IChargeable</members>
+        <members>IInvoicingService</members>
+        <members>IOpportunities</members>
+        <members>IOpportunitiesSelector</members>
+        <members>IOpportunitiesService</members>
+        <members>IOpportunityLineItems</members>
         <members>InvoicingService</members>
+        <members>InvoicingServiceImpl</members>
+        <members>Mocks</members>
         <members>Opportunities</members>
         <members>OpportunitiesResource</members>
         <members>OpportunitiesSelector</members>
         <members>OpportunitiesService</members>
+        <members>OpportunitiesServiceImpl</members>
+        <members>OpportunitiesServiceTest</members>
         <members>OpportunitiesTest</members>
         <members>OpportunityApplyDiscountController</members>
+        <members>OpportunityApplyDiscountControllerTest</members>
         <members>OpportunityConsoleController</members>
         <members>OpportunityCreateInvoiceController</members>
         <members>OpportunityInvoicingController</members>

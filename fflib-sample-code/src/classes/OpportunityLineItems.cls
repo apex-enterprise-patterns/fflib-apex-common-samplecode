@@ -25,17 +25,18 @@
 **/
 
 public with sharing class OpportunityLineItems extends fflib_SObjectDomain
+	implements IOpportunityLineItems
 {
 	public OpportunityLineItems(List<OpportunityLineItem> sObjectList)
 	{
 		super(sObjectList);
 	}
 	
-	public void applyDiscount(Opportunities opps, Decimal discountPercentage, fflib_SObjectUnitOfWork uow)
+	public void applyDiscount(IOpportunities opps, Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
 	{
 		// Opportunties by Id
 		Map<Id, Opportunity> opportunitiesById = 
-			new Map<Id, Opportunity>((List<Opportunity>) opps.Records);
+			new Map<Id, Opportunity>((List<Opportunity>) opps.getRecords());
 		
 		// Calculate discount factor
 		Decimal factor = Opportunities.calculateDiscountFactor(discountPercentage);

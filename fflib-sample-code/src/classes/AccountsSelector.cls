@@ -28,7 +28,13 @@
  * This is a basic selector for Account for this app, note how it implements selectByOpportunity
  **/
 public with sharing class AccountsSelector extends fflib_SObjectSelector
+	implements IAccountsSelector
 {
+	public static IAccountsSelector newInstance()
+	{
+		return (IAccountsSelector) Application.Selector.newInstance(Opportunity.SObjectType);
+	}
+	
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {

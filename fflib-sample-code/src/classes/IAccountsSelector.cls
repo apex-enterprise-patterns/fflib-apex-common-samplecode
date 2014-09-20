@@ -1,5 +1,5 @@
 /**
- * Copyright (c), FinancialForce.com, inc
+ * Copyright (c) 2012, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -24,39 +24,8 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing abstract class Chargeable extends fflib_SObjectDomain
-	implements IChargeable 
+public interface IAccountsSelector extends fflib_ISObjectSelector 
 {
-	public Chargeable(List<SObject> records)
-	{
-		super(records);
-	}
-	
-	public abstract Schema.SObjectField getCostOfHoursWorkedField();
-	 
-	public abstract List<Integer> calculateHoursWorked();
-	
-	public override void onBeforeInsert()
-	{
-		updateCostOfHoursWorked();		
-	}
-	
-	public override void onBeforeUpdate(Map<Id,SObject> existingRecords)
-	{
-		updateCostOfHoursWorked();
-	}			
-	
-	public void updateCostOfHoursWorked()
-	{
-		List<Integer> hoursWorked = calculateHoursWorked();
-		
-		Schema.SobjectField costOfHoursWorkedField = getCostOfHoursWorkedField();
-		
-		Integer hoursWorkedRecordIdx = 0; 
-		
-		for(SObject record : Records)
-		{
-			record.put(costOfHoursWorkedField, hoursWorked[hoursWorkedRecordIdx++] * 100);	
-		}
-	}
+	List<Account> selectById(Set<ID> idSet);
+	List<Account> selectByOpportunity(List<Opportunity> opportunities);
 }
