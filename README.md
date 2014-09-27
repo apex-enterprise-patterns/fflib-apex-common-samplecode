@@ -1,5 +1,5 @@
-fflib-apex-common-samplecode
-============================
+FinancialForce Apex Common Sample App
+=====================================
 
 <a href="https://githubsfdeploy.herokuapp.com?owner=financialforcedev&repo=fflib-apex-common-samplecode">
   <img alt="Deploy to Salesforce"
