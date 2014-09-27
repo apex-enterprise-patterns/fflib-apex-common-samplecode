@@ -1,8 +1,11 @@
 fflib-apex-common-samplecode
 ============================
 
-**[Deploy to Salesforce](https://githubsfdeploy.herokuapp.com/app/githubdeploy/financialforcedev/fflib-apex-common-samplecode)**
-(be sure to [deploy](https://githubsfdeploy.herokuapp.com/app/githubdeploy/financialforcedev/fflib-apex-common) fflib-apex-common first)
+<a href="https://githubsfdeploy.herokuapp.com?owner=financialforcedev&repo=fflib-apex-common-samplecode">
+  <img alt="Deploy to Salesforce"
+       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
+</a>
+(be sure to [deploy](https://githubsfdeploy.herokuapp.com?owner=financialforcedev&repo=fflib-apex-common) fflib-apex-common first)
 
 Sample Application
 ==================
