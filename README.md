@@ -6,7 +6,7 @@ FinancialForce Apex Common Sample
        src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
 </a>
 
-**IMPORTANT:** Be sure to [deploy](https://githubsfdeploy.herokuapp.com?owner=financialforcedev&repo=fflib-apex-common) fflib-apex-common first
+**IMPORTANT:** Be sure to [deploy](https://github.com/financialforcedev/fflib-apex-common) fflib-apex-common first
 
 Sample Application
 ==================
