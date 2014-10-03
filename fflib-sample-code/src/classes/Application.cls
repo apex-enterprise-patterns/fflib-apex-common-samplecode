@@ -31,7 +31,10 @@ public class Application
 		new fflib_Application.UnitOfWorkFactory(
 				new List<SObjectType> { 
 					Invoice__c.SObjectType,
+					InvoiceLine__c.SObjectType,
 					Opportunity.SObjectType,
+					Product2.SObjectType,
+					PricebookEntry.SObjectType,
 					OpportunityLineItem.SObjectType });	
 
 	// Configure and create the ServiceFactory for this Application

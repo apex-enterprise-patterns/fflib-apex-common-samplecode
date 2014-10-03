@@ -63,8 +63,21 @@ public class OpportunitiesServiceImpl
 		for(Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())		
 		{
 			Invoice__c invoice = new Invoice__c();
-			// TODO: Populate invoice fields ...
-			uow.registerNew(invoice);	
+			invoice.Account__c = opportunityRecord.AccountId;
+			invoice.Description__c = opportunityRecord.Description;
+			invoice.InvoiceDate__c = opportunityRecord.CloseDate;
+			invoice.Opportunity__c = opportunityRecord.Id;
+			uow.registerNew(invoice);
+			for(OpportunityLineItem lineItem : opportunityRecord.OpportunityLineItems)
+			{
+				InvoiceLine__c invoiceLineItem = new InvoiceLine__c();
+				invoiceLineItem.Description__c = lineItem.Description;
+				invoiceLineItem.Product__c = lineItem.PricebookEntry.Product2Id;
+				invoiceLineItem.UnitPrice__c = lineItem.UnitPrice;
+				invoiceLineItem.Quantity__c = lineItem.Quantity;
+				uow.registerNew(invoiceLineItem, InvoiceLine__c.Invoice__c, invoice);
+			}
+			invoices.add(invoice);
 		}
 		
 		// Commit any Opportunity updates and new invoices

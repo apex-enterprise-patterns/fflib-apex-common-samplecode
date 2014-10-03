@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, FinancialForce.com, inc
+ * Copyright (c), FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -24,7 +24,42 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public interface IInvoicingService 
+@IsTest
+private class InvoicingServiceTest 
 {
-	List<Id> generate(List<Id> sourceRecordIds);
+	@IsTest
+	private static void testService()
+	{
+		// Create Test Data
+		fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+		Opportunity opp = new Opportunity();
+		opp.Name = 'Opportunity';
+		opp.StageName = 'Open';
+		opp.CloseDate = System.today();
+		uow.registerNew(opp);		
+		for(Integer i=0; i<5; i++)
+		{						
+			Product2 product = new Product2();
+			product.Name = opp.Name + ' : Product : ' + i;
+			uow.registerNew(product);		
+			PricebookEntry pbe = new PricebookEntry();
+			pbe.UnitPrice = 10;
+			pbe.IsActive = true;
+			pbe.UseStandardPrice = false;
+			pbe.Pricebook2Id = Test.getStandardPricebookId();
+			uow.registerNew(pbe, PricebookEntry.Product2Id, product);		
+			OpportunityLineItem oppLineItem = new OpportunityLineItem();
+			oppLineItem.Quantity = 1;
+			oppLineItem.TotalPrice = 10;
+			uow.registerRelationship(oppLineItem, OpportunityLineItem.PricebookEntryId, pbe);
+			uow.registerNew(oppLineItem, OpportunityLineItem.OpportunityId, opp);
+		}
+		uow.commitWork();
+
+		// Call Service
+		List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.Id });
+
+		// Assert Invoices
+		System.assertEquals(1, invoiceIds.size());
+	}
 }

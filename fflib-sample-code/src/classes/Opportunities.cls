@@ -40,12 +40,25 @@ public class Opportunities extends fflib_SObjectDomain
 	
 	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
 	{
-		// Process Opportunities
+		// Utilise InvoiceFactory to create invoices from Opportunity details
 		for(Opportunity opportunity : (List<Opportunity>) Records)
 		{
-			// Utilise InvoiceFactory to create invoices
-			invoiceFactory.createInvoice(opportunity.AccountId, opportunity.Description, System.today().addDays(14));
-		}		
+			InvoicingService.Invoice invoice = new InvoicingService.Invoice();
+			invoice.Account = opportunity.AccountId;
+			invoice.Description = opportunity.Description;
+			invoice.InvoiceDate = opportunity.CloseDate.addDays(14);
+			invoice.Lines = new List<InvoicingService.InvoiceLine>();
+			for(OpportunityLineItem lineItem : opportunity.OpportunityLineItems)
+			{
+				InvoicingService.InvoiceLine invoiceLineItem = new InvoicingService.InvoiceLine();
+				invoiceLineItem.Description = lineItem.Description;
+				invoiceLineItem.Product = lineItem.PricebookEntry.Product2Id;
+				invoiceLineItem.UnitPrice = lineItem.UnitPrice;
+				invoiceLineItem.Quantity = lineItem.Quantity;
+				invoice.Lines.add(invoiceLineItem);
+			}			
+			invoiceFactory.add(invoice);
+		}
 	}
 	
 	public override void onApplyDefaults()

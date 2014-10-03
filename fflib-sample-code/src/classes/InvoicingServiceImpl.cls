@@ -24,13 +24,13 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class InvoicingServiceImpl
+public class InvoicingServiceImpl
 	implements IInvoicingService 
 {
 	/**
 	 * Generate invoices for the given source records (so long as their domain classes implement ISupportInvoicing)
 	 **/
-	public void generate(Set<Id> sourceRecordIds)
+	public List<Id> generate(List<Id> sourceRecordIds)
 	{
 		// Create unit of work to capture work and commit it under one transaction
 		fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
@@ -41,7 +41,7 @@ public with sharing class InvoicingServiceImpl
 		// Construct domain class capabile of performing invoicing
 		fflib_ISObjectDomain domain =  
 			Application.Domain.newInstance(
-				Application.Selector.selectById(sourceRecordIds));
+				Application.Selector.selectById(new Set<Id>(sourceRecordIds)));
 		if(domain instanceof InvoicingService.ISupportInvoicing)
 		{ 
 			// Ask the domain object to generate its invoices
@@ -49,7 +49,11 @@ public with sharing class InvoicingServiceImpl
 			invoicing.generate(invoiceFactory);	
 			// Commit generated invoices to the database		
 			uow.commitWork();
-			return;	
+			// List of Invoices generated
+			List<Id> invoiceIds = new List<Id>();
+			for(Invoice__c invoice : invoiceFactory.Invoices)
+				invoiceIds.add(invoice.Id);
+			return invoiceIds;
 		}
 		
 		// Related Domain object does not support the ability to generate invoices
