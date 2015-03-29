@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Apex Commons Sample Application" default="generate.mocks" basedir=".">
+
+	<target name="generate.mocks">
+		<java classname="com.financialforce.apexmocks.ApexMockGenerator">
+			<classpath>
+				<pathelement location="${basedir}/bin/apex-mocks-generator-3.1.2.jar"/>
+			</classpath>
+			<arg value="${basedir}/fflib-sample-code/src/classes"/>
+			<arg value="${basedir}/interfacemocks.properties"/>
+			<arg value="Mocks"/>
+			<arg value="${basedir}/fflib-sample-code/src/classes"/>
+		</java>
+	</target>
+
+</project>
