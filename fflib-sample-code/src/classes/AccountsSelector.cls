@@ -32,7 +32,7 @@ public with sharing class AccountsSelector extends fflib_SObjectSelector
 {
 	public static IAccountsSelector newInstance()
 	{
-		return (IAccountsSelector) Application.Selector.newInstance(Opportunity.SObjectType);
+		return (IAccountsSelector) Application.Selector.newInstance(Account.SObjectType);
 	}
 	
 	public List<Schema.SObjectField> getSObjectFieldList()
