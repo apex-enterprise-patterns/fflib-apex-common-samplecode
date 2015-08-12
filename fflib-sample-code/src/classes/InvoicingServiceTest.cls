@@ -27,39 +27,133 @@
 @IsTest
 private class InvoicingServiceTest 
 {
-	@IsTest
-	private static void testService()
-	{
-		// Create Test Data
-		fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
-		Opportunity opp = new Opportunity();
-		opp.Name = 'Opportunity';
-		opp.StageName = 'Open';
-		opp.CloseDate = System.today();
-		uow.registerNew(opp);		
-		for(Integer i=0; i<5; i++)
-		{						
-			Product2 product = new Product2();
-			product.Name = opp.Name + ' : Product : ' + i;
-			uow.registerNew(product);		
-			PricebookEntry pbe = new PricebookEntry();
-			pbe.UnitPrice = 10;
-			pbe.IsActive = true;
-			pbe.UseStandardPrice = false;
-			pbe.Pricebook2Id = Test.getStandardPricebookId();
-			uow.registerNew(pbe, PricebookEntry.Product2Id, product);		
-			OpportunityLineItem oppLineItem = new OpportunityLineItem();
-			oppLineItem.Quantity = 1;
-			oppLineItem.TotalPrice = 10;
-			uow.registerRelationship(oppLineItem, OpportunityLineItem.PricebookEntryId, pbe);
-			uow.registerNew(oppLineItem, OpportunityLineItem.OpportunityId, opp);
-		}
-		uow.commitWork();
+    @IsTest
+    private static void testService()
+    {
+        // Create Test Data
+        fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+        Opportunity opp = new Opportunity();
+        opp.Name = 'Opportunity';
+        opp.StageName = 'Open';
+        opp.CloseDate = System.today();
+        uow.registerNew(opp);       
+        for(Integer i=0; i<5; i++)
+        {                       
+            Product2 product = new Product2();
+            product.Name = opp.Name + ' : Product : ' + i;
+            uow.registerNew(product);       
+            PricebookEntry pbe = new PricebookEntry();
+            pbe.UnitPrice = 10;
+            pbe.IsActive = true;
+            pbe.UseStandardPrice = false;
+            pbe.Pricebook2Id = Test.getStandardPricebookId();
+            uow.registerNew(pbe, PricebookEntry.Product2Id, product);       
+            OpportunityLineItem oppLineItem = new OpportunityLineItem();
+            oppLineItem.Quantity = 1;
+            oppLineItem.TotalPrice = 10;
+            uow.registerRelationship(oppLineItem, OpportunityLineItem.PricebookEntryId, pbe);
+            uow.registerNew(oppLineItem, OpportunityLineItem.OpportunityId, opp);
+        }
+        uow.commitWork();
 
-		// Call Service
-		List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.Id });
+        // Call Service
+        List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.Id });
 
-		// Assert Invoices
-		System.assertEquals(1, invoiceIds.size());
-	}
+        // Assert Invoices
+        System.assertEquals(1, invoiceIds.size());
+    }
+
+
+    @isTest
+    private static void testService_UsingTestDataBuilders() {
+        
+        // Setup
+        Opportunity_t opp = new Opportunity_t()
+                                    .stage('Open')
+                                    .closes(System.today());
+        
+        for(Integer i=0; i<5; i++) {
+                                 opp.add(new OpportunityLineItem_t(new PriceBookEntry_t(new Product_t('Product ' + i))
+                                                                           .price(10)
+                                                                           .useStdPrice(false))
+                                                     .quantity(1)
+                                                     .totalPrice(10));
+        }
+            
+        opp.build(); 
+    
+
+        // Exercise
+        List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.record.Id });
+
+        
+        // Verify
+        System.assertEquals(1, invoiceIds.size());
+    }
+    
+    
+    @isTest
+    private static void testService_VerifyAllBuiltObjects() {
+        
+        // Setup
+        Product_t prd = new Product_t();
+        
+        PriceBookEntry_t pbe = new PriceBookEntry_t(prd)
+                                            .price(10)
+                                            .useStdPrice(false);
+        
+        OpportunityLineItem_t oli = new OpportunityLineItem_t(pbe)
+                                            .quantity(1)
+                                            .totalPrice(10);
+        
+        Opportunity_t opp = new Opportunity_t()
+                                    .stage('Open')
+                                    .add(oli);
+        // Exercise
+        opp.build(); 
+
+        
+        // Verify
+        System.assertNotEquals(null, prd.record.Id);
+        System.assertNotEquals(null, pbe.record.Id);
+        System.assertNotEquals(null, oli.record.Id);
+        System.assertNotEquals(null, opp.record.Id);
+        
+    }
+    
+    
+    @isTest
+    private static void testService_GetSObjectFromBuilder() {
+        
+        // Setup
+        Opportunity_t opp = new Opportunity_t()
+                                    .stage('Closed')
+                                    .add(new OpportunityLineItem_t()
+                                                     .quantity(1)
+                                                     .totalPrice(10)); 
+        // Exercise
+        opp.build(); 
+
+        
+        // Verify
+        System.assertNotEquals(null, opp.record.Id);    // ! Access a Builders SObject record
+    }
+    
+    
+    @isTest
+    private static void testService_GetSObjectFromBuildMethod() {
+        
+        // Setup
+        Opportunity_t opp = new Opportunity_t()
+                                    .stage('Open')
+                                    .add(new OpportunityLineItem_t()
+                                                     .quantity(1)
+                                                     .totalPrice(10)); 
+        // Exercise
+        Opportunity oppRecord = (Opportunity) opp.build(); 
+
+        
+        // Verify
+        System.assertNotEquals(null, oppRecord.Id);     
+    }
 }
