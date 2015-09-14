@@ -27,7 +27,7 @@
 /**
  * This is a basic selector for Account for this app, note how it implements selectByOpportunity
  **/
-public with sharing class AccountsSelector extends fflib_SObjectSelector
+public class AccountsSelector extends fflib_SObjectSelector
 	implements IAccountsSelector
 {
 	public static IAccountsSelector newInstance()

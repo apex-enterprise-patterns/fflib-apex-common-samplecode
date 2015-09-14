@@ -25,7 +25,7 @@
 **/
 
 @IsTest
-private with sharing class ProductsSelectorTest 
+private class ProductsSelectorTest 
 {
 	@IsTest
 	private static void testSelectById()

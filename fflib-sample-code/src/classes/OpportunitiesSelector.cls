@@ -24,7 +24,7 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
+public class OpportunitiesSelector extends fflib_SObjectSelector
 	implements IOpportunitiesSelector
 {
 	public static IOpportunitiesSelector newInstance()
