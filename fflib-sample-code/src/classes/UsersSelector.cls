@@ -27,7 +27,7 @@
 /**
  * Selector encapsulates queries arund the User object, currently limited to needs around email, hence reduced scope
  **/
-public with sharing class UsersSelector extends fflib_SObjectSelector
+public class UsersSelector extends fflib_SObjectSelector
 	implements fflib_ISObjectSelector
 {
 	public List<Schema.SObjectField> getSObjectFieldList()
