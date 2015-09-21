@@ -25,7 +25,9 @@ Design patterns are an invaluable tool for developers and architects looking to 
 Dreamforce Session and Slides
 -----------------------------
 
-View slides for the  **Dreamforce 2013** session [here](https://docs.google.com/file/d/0B6brfGow3cD8RVVYc1dCX2s0S1E/edit) and a video recording of the session [here](http://www.youtube.com/watch?v=qlq46AEAlLI).
+- View slides for the **Dreamforce 2013** session [here](https://docs.google.com/file/d/0B6brfGow3cD8RVVYc1dCX2s0S1E/edit) 
+- Video recording of the **Dreamforce 2013** session [here](http://www.youtube.com/watch?v=qlq46AEAlLI).
+- Video recording of the **Advanced Apex Enterprise Dreamforce 2014** session [here](http://dreamforce.vidyard.com/watch/7QtP2628KmtXfmiwI-7B1w%20).
 
 Latest Article Series on Developer Force.com
 --------------------------------------------
