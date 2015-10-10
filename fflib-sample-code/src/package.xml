@@ -25,9 +25,11 @@
 		<members>OpportunitiesService</members>
 		<members>OpportunitiesServiceImpl</members>
 		<members>OpportunitiesServiceTest</members>
+		<members>OpportunitiesServiceTestIntegration</members>
 		<members>OpportunitiesTest</members>
 		<members>OpportunityApplyDiscountController</members>
 		<members>OpportunityApplyDiscountControllerTest</members>
+		<members>OpportunityApplyDiscountControllerTestI</members>
 		<members>OpportunityConsoleController</members>
 		<members>OpportunityCreateInvoiceController</members>
 		<members>OpportunityInvoicingController</members>
