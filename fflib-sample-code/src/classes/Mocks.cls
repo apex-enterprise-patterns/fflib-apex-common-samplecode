@@ -19,7 +19,7 @@ public class Mocks
 		}
 	}
 
-	public class Opportunities extends fflib_SObjectMocks.SObjectDomain implements IOpportunities
+	public class Opportunities extends fflib_SObjectMocks.SObjectDomain implements IOpportunities, InvoicingService.ISupportInvoicing
 	{
 		private fflib_ApexMocks mocks;
 
@@ -33,6 +33,11 @@ public class Mocks
 		{
 			mocks.mockVoidMethod(this, 'applyDiscount', new List<Object> {discountPercentage, uow});
 		}
+
+		public void generate(InvoicingService.InvoiceFactory invoiceFactory)
+		{
+			mocks.mockVoidMethod(this, 'generate', new List<Object> {invoiceFactory});
+		}		
 	}
 
 	public class OpportunitiesService implements IOpportunitiesService

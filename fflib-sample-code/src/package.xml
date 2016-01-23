@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
 	<types>
+		<members>Account_t</members>
 		<members>Accounts</members>
 		<members>AccountsSelector</members>
 		<members>Application</members>
 		<members>Chargeable</members>
 		<members>CreateInvoicesJob</members>
 		<members>DeveloperWorkItems</members>
+		<members>Domain_t</members>
 		<members>IAccounts</members>
 		<members>IAccountsSelector</members>
 		<members>IChargeable</members>
@@ -33,10 +35,15 @@
 		<members>OpportunityConsoleController</members>
 		<members>OpportunityCreateInvoiceController</members>
 		<members>OpportunityInvoicingController</members>
+		<members>OpportunityLineItem_t</members>
 		<members>OpportunityLineItems</members>
 		<members>OpportunityLineItemsSelector</members>
+		<members>Opportunity_t</members>
+		<members>PriceBookEntry_t</members>
+		<members>PriceBook_t</members>
 		<members>PricebookEntriesSelector</members>
 		<members>PricebooksSelector</members>
+		<members>Product_t</members>
 		<members>ProductsSelector</members>
 		<members>ProductsSelectorTest</members>
 		<members>QuickOpportunityWizardController</members>

@@ -83,6 +83,28 @@ public with sharing class InvoicingService
 			}
 			Invoices.add(invoiceRecord);
 		}
+
+		/**
+		 * @description Per limitation of Apex Mocks, implementing a VERY BASIC custom equality check
+		 *              to provide support for method verification
+		 *              See https://github.com/financialforcedev/fflib-apex-mocks/issues/8
+		 **/
+		public Boolean equals(Object obj) {
+			if (obj == null) {
+				return false;
+			}
+
+			return (obj instanceof InvoiceFactory) && Invoices.equals(((InvoiceFactory)obj).Invoices);
+		}
+
+		/**
+		 * @description Per limitation of Apex Mocks, implementing a VERY BASIC custom equality check
+		 *              to provide support for method verification
+		 *              See https://github.com/financialforcedev/fflib-apex-mocks/issues/8
+		 **/
+		public Integer hashCode() {
+			return Invoices.hashCode();
+		}
 	}	
 
 	/**

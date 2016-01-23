@@ -68,6 +68,17 @@ private class OpportunitiesTest
 		System.assertEquals('You must provide an Account for Opportunities for existing Customers.', fflib_SObjectDomain.Errors.getAll()[0].message);
 		System.assertEquals(Opportunity.AccountId, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		
 	}
+
+	@IsTest
+	private static void testValidationWithoutDML_UsingBuilders()
+	{
+		// BuilderNote: Calling buildNew will generate an in-memory New Opportunity (Id will be null)
+		Opportunities opps = new Opportunities(new Opportunity[] { Opportunity_t.anOpportunity().withName('Test').withType('Existing Account').buildNew() } );
+		opps.onValidate();
+		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
+		System.assertEquals('You must provide an Account for Opportunities for existing Customers.', fflib_SObjectDomain.Errors.getAll()[0].message);
+		System.assertEquals(Opportunity.AccountId, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field);	
+	}	
 	
 	@IsTest
 	private static void testInsertValidationFailedWithoutDML()
@@ -91,6 +102,21 @@ private class OpportunitiesTest
 		System.assertEquals('You cannot change the Opportunity type once it has been created.', fflib_SObjectDomain.Errors.getAll()[0].message);
 		System.assertEquals(Opportunity.Type, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		
 	}
+
+	@IsTest
+	private static void testUpdateValidationFailedWithoutDML_UsingBuilders()
+	{
+		// BuildersNote: Calling build with generate an in-memory Existing Opportunity (Id will have a value)
+		Opportunity oldOpp = Opportunity_t.anOpportunityWithExistingAccount().build();
+		// BuildersNote: Calling but() with return a cloned instance - Result will be that newOpp is identical to oldOpp
+		//               except for the Type becoming New Account
+		Opportunity newOpp = Opportunity_t.anOpportunityWithExistingAccount().but().withType('New Account').build();
+		fflib_SObjectDomain.Test.Database.onUpdate(new Opportunity[] { newOpp }, new Map<Id, SObject> { newOpp.Id => oldOpp } );		
+		fflib_SObjectDomain.triggerHandler(Opportunities.class);		
+		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
+		System.assertEquals('You cannot change the Opportunity type once it has been created.', fflib_SObjectDomain.Errors.getAll()[0].message);
+		System.assertEquals(Opportunity.Type, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		
+	}	
 	
 	@IsTest
 	private static void testInsertValidationSuccessWithoutDML()
@@ -118,6 +144,28 @@ private class OpportunitiesTest
 		Opportunity assertOpp = [select Amount from Opportunity where Id = :opp.Id];
 		System.assertEquals(90, assertOpp.Amount);				
 	}
+
+	@IsTest
+	private static void testApplyDiscountWithoutOpportunityLines_UsingBuilders()
+	{
+		Opportunity_t oppBuilder = Opportunity_t.anOpportunity()
+											.withName('Test')
+											.withType('New Account')
+											.withStageName('Open')
+											.withCloseDate(System.today().addMonths(1))
+											.withAmount(100);
+
+		// BuildersNote: Calling instance level persist() will process the builder and any of its
+		//               related data through the Unit Of Work using the default UOW
+		Opportunity opp = oppBuilder.persist();
+
+		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork( new Schema.SObjectType[] { Opportunity.SObjectType });				
+		Opportunities opps = new Opportunities(new List<Opportunity> { opp });
+		opps.applyDiscount(10, uow);
+		uow.commitWork();		
+		Opportunity assertOpp = [select Amount from Opportunity where Id = :opp.Id];
+		System.assertEquals(90, assertOpp.Amount);				
+	}	
 		
 	@IsTest
 	private static void testUpdateAccountOnInsertOfOpportunity()
@@ -135,5 +183,27 @@ private class OpportunitiesTest
 		insert opp;		
 		Account assertAccount = [select Description from Account where Id = :account.Id];
 		System.assertEquals('Last Opportunity Raised ' + System.today(), assertAccount.Description);		
-	}			
+	}
+
+	@IsTest
+	private static void testUpdateAccountOnInsertOfOpportunity_UsingBuilders()
+	{
+		Opportunity_t oppBuilder = Opportunity_t.anOpportunity()
+											.withName('Test')
+											.withType('Existing Account')
+											.withStageName('Open')
+											.withCloseDate(System.today().addMonths(1))
+											.withAccount(
+												Account_t.anAccount()
+															.withName('Test')
+															.withDescription(null));
+		// BuildersNote: Calling instance level persist(uow) will process the builder and any of its
+		//               related data through the Unit Of Work using the specified UOW
+		Opportunity opp = oppBuilder.persist(Application.UnitOfWork.newInstance(new List<SObjectType> { 
+					Account.SObjectType,
+					Opportunity.SObjectType }));
+
+		Account assertAccount = [select Description from Account where Id = :opp.AccountId];
+		System.assertEquals('Last Opportunity Raised ' + System.today(), assertAccount.Description);		
+	}
 }
