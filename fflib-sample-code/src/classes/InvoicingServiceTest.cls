@@ -73,7 +73,8 @@ private class InvoicingServiceTest
 		Opportunity_t opp = Opportunity_t.anOpenOpportunity()
 											.withName('Opportunity');
 
-		for (Integer i = 0; i < 5; i++) {
+		Integer numLines = 5;
+		for (Integer i = 0; i < numLines; i++) {
 			// BuilderNote: We call register on each Opportunity Line Item so that it is added to the list of 
 			//				builders that will be persisted to DB.  Note that we have to call register
 			//				on each individual Opportunity Line Item because there are no other builders that 
@@ -94,6 +95,8 @@ private class InvoicingServiceTest
 																.withOpportunity(opp)
 																.register();
 		}
+
+		// persist the builders
 		fflib_DomainObjectBuilder.persistRegistered(Application.UnitOfWork.newInstance());
 
 		// Call Service
@@ -101,7 +104,57 @@ private class InvoicingServiceTest
 
 		// Assert Invoices
 		System.assertEquals(1, invoiceIds.size());
+		System.assertEquals(1, [SELECT COUNT() FROM Opportunity]);
+		System.assertEquals(numLines, [SELECT COUNT() FROM OpportunityLineItem]);
+		System.assertEquals(numLines, [SELECT COUNT() FROM PriceBookEntry]);
+		System.assertEquals(numLines, [SELECT COUNT() FROM Product2]);
 	}
+
+	@IsTest
+	private static void testService_UsingBuildersAddingChildToParentWithDML()
+	{
+		// Create Test Data
+		// BuilderNote: We do not have to call register here because the Opportunity will be automatically
+		//              persisted because the Opportunity Line contains a reference to it.  Alternately, we
+		//              could call register on the Opportunity itself but its not necessary in this case.  
+		Opportunity_t opp = Opportunity_t.anOpenOpportunity()
+											.withName('Opportunity');
+
+		Integer numLines = 5;
+		for (Integer i = 0; i < numLines; i++) {
+			// BuilderNote: We call register on each Opportunity Line Item so that it is added to the list of 
+			//				builders that will be persisted to DB.  Note that we have to call register
+			//				on each individual Opportunity Line Item because there are no other builders that 
+			//              reference it.  However, we do not need to call register on the PriceBookEntry,
+			//              Product or Opportunity because the Opportunity Line Item is registered and anything
+			//              it references will be automatically added to the unit of work.
+			opp.add(OpportunityLineItem_t.anOpportunityLineItem()
+											.withQuantity(1)
+											.withTotalPrice(1)
+											.withPriceBookEntry(
+												PriceBookEntry_t.aPriceBookEntryWithStandardPriceBook()
+																	.withUseStandardPrice(false)
+																	.withIsActive(true)
+																	.withUnitPrice(10)
+																	.withProduct(
+																		Product_t.aProduct()
+																					.withName('Product ' + i)))
+											.register());
+		}
+
+		// persist the builders
+		fflib_DomainObjectBuilder.persistRegistered(Application.UnitOfWork.newInstance());
+
+		// Call Service
+		List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.Record.Id });
+
+		// Assert Invoices
+		System.assertEquals(1, invoiceIds.size());
+		System.assertEquals(1, [SELECT COUNT() FROM Opportunity]);
+		System.assertEquals(numLines, [SELECT COUNT() FROM OpportunityLineItem]);
+		System.assertEquals(numLines, [SELECT COUNT() FROM PriceBookEntry]);
+		System.assertEquals(numLines, [SELECT COUNT() FROM Product2]);		
+	}	
 
 	@IsTest
 	private static void testService_UsingBuildersWithoutDML()
@@ -109,7 +162,7 @@ private class InvoicingServiceTest
 		// Create Mocks
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
 		fflib_ISObjectUnitOfWork uowMock = new fflib_SObjectMocks.SObjectUnitOfWork(mocks);
-		IOpportunitiesSelector selectorMock = new Mocks.OpportunitiesSelector(mocks);		
+		IOpportunitiesSelector selectorMock = new Mocks.OpportunitiesSelector(mocks);
 		IOpportunities domainMock = new Mocks.Opportunities(mocks);
 
 		// Given
@@ -123,7 +176,7 @@ private class InvoicingServiceTest
 		mocks.startStubbing();
 		mocks.when(selectorMock.sObjectType()).thenReturn(Opportunity.SObjectType);
 		mocks.when(selectorMock.selectSObjectsById(oppIds)).thenReturn(new List<Opportunity> { opp });
-		mocks.when(domainMock.sObjectType()).thenReturn(Opportunity.SObjectType);		
+		mocks.when(domainMock.sObjectType()).thenReturn(Opportunity.SObjectType);
 		mocks.stopStubbing();
 		Application.UnitOfWork.setMock(uowMock);
 		Application.Selector.setMock(selectorMock);
@@ -143,7 +196,7 @@ private class InvoicingServiceTest
 		// enhancement to Apex Mocks (see https://github.com/financialforcedev/fflib-apex-mocks/issues/8) 
 		// that will simplify method verification and will avoid the need for creating the Factory here.  
 		// See equals(Object) && hashCode() in InvoiceFactory class.
-		InvoicingService.InvoiceFactory invoiceFactory = new InvoicingService.InvoiceFactory(uowMock);		
+		InvoicingService.InvoiceFactory invoiceFactory = new InvoicingService.InvoiceFactory(uowMock);
 		((InvoicingService.ISupportInvoicing)
 			mocks.verify(domainMock, 1)).generate(invoiceFactory);
 	}
