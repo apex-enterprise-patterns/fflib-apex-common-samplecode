@@ -27,7 +27,7 @@
 public with sharing class Accounts extends fflib_SObjectDomain
 	implements IAccounts
 {
-	public static IAccounts newInstance(List<Opportunity> sObjectList)
+	public static IAccounts newInstance(List<Account> sObjectList)
 	{
 		return (IAccounts) Application.Domain.newInstance(sObjectList);
 	}
