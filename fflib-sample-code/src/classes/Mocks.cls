@@ -15,7 +15,7 @@ public class Mocks
 
 		public List<Opportunity> selectByIdWithProducts(Set<ID> idSet)
 		{
-			return (List<Opportunity>) mocks.mockNonVoidMethod(this, 'selectByIdWithProducts', new List<Type>(), new List<Object> {idSet});
+			return (List<Opportunity>) mocks.mockNonVoidMethod(this, 'selectByIdWithProducts', new List<Type> {Opportunity.class}, new List<Object> {idSet});
 		}
 	}
 
@@ -51,12 +51,12 @@ public class Mocks
 
 		public Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage)
 		{
-			return (Set<Id>) mocks.mockNonVoidMethod(this, 'createInvoices', new List<Type>(), new List<Object> {opportunityIds, discountPercentage});
+			return (Set<Id>) mocks.mockNonVoidMethod(this, 'createInvoices', new List<Type> {ID.class}, new List<Object> {opportunityIds, discountPercentage});
 		}
 
 		public Id submitInvoicingJob()
 		{
-			return (Id) mocks.mockNonVoidMethod(this, 'submitInvoicingJob', new List<Type>(), new List<Object>());
+			return (Id) mocks.mockNonVoidMethod(this, 'submitInvoicingJob', new List<Type> {ID.class}, new List<Object>());
 		}
 	}
 }
