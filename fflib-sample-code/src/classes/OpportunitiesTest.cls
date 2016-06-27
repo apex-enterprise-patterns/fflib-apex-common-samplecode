@@ -55,8 +55,11 @@ private class OpportunitiesTest
 
 		// Then
 		((fflib_ISObjectUnitOfWork) 
-			mocks.verify(uowMock, 1)).registerDirty(opp);
-		System.assertEquals(900, opp.Amount);
+			mocks.verify(uowMock, 1)).registerDirty(
+				fflib_Match.sObjectWith(
+					new Map<SObjectField, Object>{ 
+						Opportunity.Id => opp.Id, 
+						Opportunity.Amount => 900} ));
 	}	
 
 	@IsTest

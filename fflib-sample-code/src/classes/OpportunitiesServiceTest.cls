@@ -50,19 +50,18 @@ private class OpportunitiesServiceTest
 		mocks.when(selectorMock.sObjectType()).thenReturn(Opportunity.SObjectType);
 		mocks.when(selectorMock.selectByIdWithProducts(testOppsSet)).thenReturn(testOppsList);
 		mocks.stopStubbing();
-		Decimal discountPercent = 10;
 		Application.UnitOfWork.setMock(uowMock);
 		Application.Domain.setMock(domainMock);
 		Application.Selector.setMock(selectorMock);
 
 		// When
-		OpportunitiesService.applyDiscounts(testOppsSet, discountPercent);
+		OpportunitiesService.applyDiscounts(testOppsSet, 10);
 
 		// Then
 		((IOpportunitiesSelector) 
 			mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);
 		((IOpportunities) 
-			mocks.verify(domainMock)).applyDiscount(discountPercent, uowMock);
+			mocks.verify(domainMock)).applyDiscount(10, uowMock);
 		((fflib_ISObjectUnitOfWork) 
 			mocks.verify(uowMock, 1)).commitWork();
 	}
