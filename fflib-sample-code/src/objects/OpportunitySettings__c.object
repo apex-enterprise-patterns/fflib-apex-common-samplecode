@@ -10,6 +10,7 @@
         <label>Discount Type</label>
         <length>32</length>
         <required>false</required>
+        <trackTrending>false</trackTrending>
         <type>Text</type>
         <unique>false</unique>
     </fields>

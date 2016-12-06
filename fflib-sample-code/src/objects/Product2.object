@@ -5,6 +5,7 @@
         <description>Used to show subscriber fields on the pages used by the Opportunity Discount functionality.</description>
         <displayedFields>
             <field>SubscriberField__c</field>
+            <isFieldManaged>false</isFieldManaged>
             <isRequired>false</isRequired>
         </displayedFields>
         <label>Opportunity Discount</label>
@@ -14,6 +15,7 @@
         <defaultValue>false</defaultValue>
         <externalId>false</externalId>
         <label>Discounting Approved</label>
+        <trackHistory>false</trackHistory>
         <type>Checkbox</type>
     </fields>
     <fields>
@@ -23,6 +25,7 @@
         <label>Subscriber Field</label>
         <length>32</length>
         <required>false</required>
+        <trackHistory>false</trackHistory>
         <type>Text</type>
         <unique>false</unique>
     </fields>
