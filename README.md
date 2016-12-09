@@ -1,6 +1,8 @@
 FinancialForce Apex Common Sample
 =================================
 
+[![Build Status](https://travis-ci.org/financialforcedev/fflib-apex-common-samplecode.svg)](https://travis-ci.org/financialforcedev/fflib-apex-common-samplecode) 
+
 **Dependencies:** Must deploy [Apex Common ](https://github.com/financialforcedev/fflib-apex-common) before deploying this library
 
 <a href="https://githubsfdeploy.herokuapp.com?owner=financialforcedev&repo=fflib-apex-common-samplecode">
