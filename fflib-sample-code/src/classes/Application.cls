@@ -35,7 +35,11 @@ public class Application
 					Opportunity.SObjectType,
 					Product2.SObjectType,
 					PricebookEntry.SObjectType,
-					OpportunityLineItem.SObjectType });	
+					OpportunityLineItem.SObjectType,
+					WorkOrder__c.SObjectType,
+					DeveloperWorkItem__c.SObjectType,
+					TrainingWorkItem__c.SObjectType,
+					DesignWorkItem__c.SObjectType });	
 
 	// Configure and create the ServiceFactory for this Application
 	public static final fflib_Application.ServiceFactory Service = 
