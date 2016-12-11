@@ -7,6 +7,7 @@
 		<members>Chargeable</members>
 		<members>CreateInvoicesJob</members>
 		<members>DeveloperWorkItems</members>
+        <members>DeveloperWorkItemsTest</members>
 		<members>IAccounts</members>
 		<members>IAccountsSelector</members>
 		<members>IChargeable</members>
@@ -99,5 +100,5 @@
 		<members>Opportunity.CreateInvoices</members>
 		<name>WebLink</name>
 	</types>
-	<version>31.0</version>
+	<version>37.0</version>
 </Package>
