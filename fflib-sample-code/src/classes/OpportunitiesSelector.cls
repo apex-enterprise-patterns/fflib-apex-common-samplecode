@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, FinancialForce.com, inc
+ * Copyright (c) 2012-2015, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 

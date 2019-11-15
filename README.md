@@ -1,5 +1,5 @@
-FinancialForce Apex Common Sample
-=================================
+FFLib Apex Common Sample
+========================
 
 [![Build Status](https://travis-ci.org/financialforcedev/fflib-apex-common-samplecode.svg)](https://travis-ci.org/financialforcedev/fflib-apex-common-samplecode)
 
