@@ -1,11 +1,11 @@
 FFLib Apex Common Sample
 ========================
 
-[![Build Status](https://travis-ci.org/financialforcedev/fflib-apex-common-samplecode.svg)](https://travis-ci.org/financialforcedev/fflib-apex-common-samplecode)
+[![Build Status](https://travis-ci.org/apex-enterprise-patterns/fflib-apex-common-samplecode.svg)](https://travis-ci.org/apex-enterprise-patterns/fflib-apex-common-samplecode)
 
-**Dependencies:** Must deploy [Apex Common ](https://github.com/financialforcedev/fflib-apex-common) before deploying this library
+**Dependencies:** Must deploy [Apex Common ](https://github.com/apex-enterprise-patterns/fflib-apex-common) before deploying this library
 
-<a href="https://githubsfdeploy.herokuapp.com?owner=financialforcedev&repo=fflib-apex-common-samplecode">
+<a href="https://githubsfdeploy.herokuapp.com?owner=apex-enterprise-patterns&repo=fflib-apex-common-samplecode">
   <img alt="Deploy to Salesforce"
        src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
 </a>
@@ -15,7 +15,7 @@ Sample Application
 
 This repository contains a sample application illustrating the Apex Enterprise Patterns library. The aim is to illustrate fullly working sample application to better illustrate the patterns in presentations and articles. You can see a [demo of this application in the Dreamforce 2013 session](http://www.youtube.com/watch?v=qlq46AEAlLI#t=572) I presented. 
 
-**NOTE:** The supporting **Apex Common** library can be found [here](https://github.com/financialforcedev/fflib-apex-common).
+**NOTE:** The supporting **Apex Common** library can be found [here](https://github.com/apex-enterprise-patterns/fflib-apex-common).
 
 ![Alt text](/images/sampleappoverview.png "Optional title")
 
@@ -40,5 +40,5 @@ I'm proud to have been given the opportunity to run a more detailed look at thes
 - [Apex Enterprise Patterns - Separation of Concerns](http://wiki.developerforce.com/page/Apex_Enterprise_Patterns_-_Separation_of_Concerns)
 - [Apex Enterprise Patterns - Service Layer](http://wiki.developerforce.com/page/Apex_Enterprise_Patterns_-_Service_Layer)
 - [Apex Enterprise Patterns - Domain Layer](http://wiki.developerforce.com/page/Apex_Enterprise_Patterns_-_Domain_Layer)
-- [Apex Enterprise Patterns - Selector Layer](https://github.com/financialforcedev/df12-apex-enterprise-patterns#data-mapper-selector)
+- [Apex Enterprise Patterns - Selector Layer](https://github.com/apex-enterprise-patterns/df12-apex-enterprise-patterns#data-mapper-selector)
 
