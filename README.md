@@ -13,7 +13,7 @@ FFLib Apex Common Sample
 Sample Application
 ==================
 
-This repository contains a sample application illustrating the Apex Enterprise Patterns library. The aim is to illustrate fullly working sample application to better illustrate the patterns in presentations and articles. You can see a [demo of this application in the Dreamforce 2013 session](http://www.youtube.com/watch?v=qlq46AEAlLI#t=572) I presented. 
+This repository contains a sample application illustrating the Apex Enterprise Patterns library. The aim is to illustrate fullly working sample application to better illustrate the patterns in presentations and articles. 
 
 **NOTE:** The supporting **Apex Common** library can be found [here](https://github.com/apex-enterprise-patterns/fflib-apex-common).
 
@@ -29,7 +29,6 @@ Dreamforce Session and Slides
 
 - View slides for the **Dreamforce 2013** session [here](https://docs.google.com/file/d/0B6brfGow3cD8RVVYc1dCX2s0S1E/edit) 
 - Video recording of the **Dreamforce 2013** session [here](http://www.youtube.com/watch?v=qlq46AEAlLI).
-- Video recording of the **Advanced Apex Enterprise Dreamforce 2014** session [here](http://dreamforce.vidyard.com/watch/7QtP2628KmtXfmiwI-7B1w%20).
 - View slides for the **Dreamforce 2015** session [here](http://www.slideshare.net/andyinthecloud/building-strong-foundations-apex-enterprise-patterns)
 
 Latest Article Series on Developer Force.com
