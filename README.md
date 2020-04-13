@@ -1,10 +1,21 @@
 FFLib Apex Common Sample
 ========================
 
-[![Build Status](https://travis-ci.org/apex-enterprise-patterns/fflib-apex-common-samplecode.svg)](https://travis-ci.org/apex-enterprise-patterns/fflib-apex-common-samplecode)
+**Dependencies:** Must deploy [Apex Mocks](https://github.com/apex-enterprise-patterns/fflib-apex-mocks) and [Apex Common](https://github.com/apex-enterprise-patterns/fflib-apex-common) before deploying this library
 
-**Dependencies:** Must deploy [Apex Common ](https://github.com/apex-enterprise-patterns/fflib-apex-common) before deploying this library
+Deploy Apex Mocks
+<a href="https://githubsfdeploy.herokuapp.com?owner=apex-enterprise-patterns&repo=fflib-apex-mocks">
+  <img alt="Deploy to Salesforce"
+       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
+</a>
 
+Deploy Apex Common
+<a href="https://githubsfdeploy.herokuapp.com?owner=apex-enterprise-patterns&repo=fflib-apex-common">
+  <img alt="Deploy to Salesforce"
+       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
+</a>
+
+Deploy Apex Common Sample Code
 <a href="https://githubsfdeploy.herokuapp.com?owner=apex-enterprise-patterns&repo=fflib-apex-common-samplecode">
   <img alt="Deploy to Salesforce"
        src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
@@ -13,14 +24,14 @@ FFLib Apex Common Sample
 Sample Application
 ==================
 
-This repository contains a sample application illustrating the Apex Enterprise Patterns library. The aim is to illustrate fullly working sample application to better illustrate the patterns in presentations and articles. You can see a [demo of this application in the Dreamforce 2013 session](http://www.youtube.com/watch?v=qlq46AEAlLI#t=572) I presented. 
+This repository contains a sample application illustrating the Apex Enterprise Patterns library. The aim is to illustrate fullly working sample application to better illustrate the patterns in presentations and articles. You can see a [demo of this application in the Dreamforce 2013 session](http://www.youtube.com/watch?v=qlq46AEAlLI#t=572) presented by @afawcett
 
 **NOTE:** The supporting **Apex Common** library can be found [here](https://github.com/apex-enterprise-patterns/fflib-apex-common).
 
 ![Alt text](/images/sampleappoverview.png "Optional title")
 
-Application Enterprise Patterns on Force.com
-============================================
+Application Enterprise Patterns on Salesforce Lightning Platform
+================================================================
 
 Design patterns are an invaluable tool for developers and architects looking to build enterprise solutions. Here are presented some tried and tested enterprise application engineering patterns that have been used in other platforms and languages. We will discuss and illustrate how patterns such as Data Mapper, Service Layer, Unit of Work and of course Model View Controller can be applied to Force.com. Applying these patterns can help manage governed resources (such as DML) better, encourage better separation-of-concerns in your logic and enforce Force.com coding best practices.
 
@@ -32,13 +43,12 @@ Dreamforce Session and Slides
 - Video recording of the **Advanced Apex Enterprise Dreamforce 2014** session [here](http://dreamforce.vidyard.com/watch/7QtP2628KmtXfmiwI-7B1w%20).
 - View slides for the **Dreamforce 2015** session [here](http://www.slideshare.net/andyinthecloud/building-strong-foundations-apex-enterprise-patterns)
 
-Latest Article Series on Developer Force.com
+More Information on Trailhead
 --------------------------------------------
 
-I'm proud to have been given the opportunity to run a more detailed look at these patterns on developer.force.com. 
+There are two Trailhead Modules for Apex Enterprise Patterns:
 
-- [Apex Enterprise Patterns - Separation of Concerns](http://wiki.developerforce.com/page/Apex_Enterprise_Patterns_-_Separation_of_Concerns)
-- [Apex Enterprise Patterns - Service Layer](http://wiki.developerforce.com/page/Apex_Enterprise_Patterns_-_Service_Layer)
-- [Apex Enterprise Patterns - Domain Layer](http://wiki.developerforce.com/page/Apex_Enterprise_Patterns_-_Domain_Layer)
-- [Apex Enterprise Patterns - Selector Layer](https://github.com/apex-enterprise-patterns/df12-apex-enterprise-patterns#data-mapper-selector)
+- [Apex Enterprise Patterns - Service Layer](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl)
+    - [Separation of Concerns](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl/apex_patterns_sl_soc)
+- [Apex Enterprise Patterns - Domain and Selector Layer](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_dsl)
 
