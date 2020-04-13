@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FieldSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>OpportunityDiscount</fullName>
+    <description>Used to show subscriber fields on the pages used by the Opportunity Discount functionality.</description>
+    <displayedFields>
+        <field>SubscriberField__c</field>
+        <isFieldManaged>false</isFieldManaged>
+        <isRequired>false</isRequired>
+    </displayedFields>
+    <label>Opportunity Discount</label>
+</FieldSet>

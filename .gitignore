@@ -1,4 +1,39 @@
+# General Project related
+.DS_Store
+target/
+temp/
+/deploy/*
+/debug/
+**/dep-dir.txt
+*.prefs
+build.properties
+sfdx-source/apex-common-samplecode/main/default/
+sfdx-source/untracked/
+.execanon
 
-fflib-sample-code/.settings/com.salesforce.ide.core.prefs
+# MavensMate IDE related
+*mm.log
+*.sublime-build
+*.sublime-project
+*.sublime-settings
+*.sublime-workspace
+.sublime-project
+.tm_properties
 
-fflib-sample-code/salesforce.schema
+# Eclipse IDE Related
+.project
+.settings/
+salesforce.schema
+Referenced Packages/
+
+# VS Code IDE Related
+.vscode/
+.history/
+
+# SFDX Related
+.sfdx/
+
+# NPM Related
+package.json
+/node_modules
+package-lock.json
