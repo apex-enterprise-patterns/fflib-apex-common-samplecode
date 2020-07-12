@@ -39,7 +39,7 @@ Dreamforce Session and Slides
 -----------------------------
 
 - View slides for the **Dreamforce 2013** session [here](https://docs.google.com/file/d/0B6brfGow3cD8RVVYc1dCX2s0S1E/edit) 
-- Video recording of the **Dreamforce 2013** session [here](http://www.youtube.com/watch?v=qlq46AEAlLI).
+- Video recording of the **Dreamforce 2014** advanced session [here](https://www.youtube.com/watch?v=BLXp0ZP0cF0).
 - View slides for the **Dreamforce 2015** session [here](http://www.slideshare.net/andyinthecloud/building-strong-foundations-apex-enterprise-patterns)
 
 More Information on Trailhead
