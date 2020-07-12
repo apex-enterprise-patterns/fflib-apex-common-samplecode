@@ -35,8 +35,7 @@ private class OpportunitiesTest
 	{
 		// Create mocks
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		fflib_ISObjectUnitOfWork uowMock = new fflib_SObjectMocks.SObjectUnitOfWork(mocks);
-
+		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(fflib_ISObjectUnitOfWork.class);
 		// Given
 		Opportunity opp = new Opportunity(
 			Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
