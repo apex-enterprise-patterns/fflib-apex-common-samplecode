@@ -46,7 +46,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
 	{
 		// Utilise InvoiceFactory to create invoices from Opportunity details
-		for(Opportunity opportunity : (List<Opportunity>) Records)
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
 			InvoicingService.Invoice invoice = new InvoicingService.Invoice();
 			invoice.Account = opportunity.AccountId;
@@ -69,7 +69,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public override void onApplyDefaults()
 	{
 		// Apply defaults to Opportunities
-		for(Opportunity opportunity : (List<Opportunity>) Records)
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
 			opportunity.DiscountType__c = OpportunitySettings__c.getInstance().DiscountType__c;						
 		}
@@ -78,7 +78,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public override void onValidate()	
 	{
 		// Validate Opportunities
-		for(Opportunity opp : (List<Opportunity>) Records)
+		for(Opportunity opp : (List<Opportunity>) this.records)
 		{
 			if(opp.Type!=null && opp.Type.startsWith('Existing') && opp.AccountId == null)
 			{
@@ -90,7 +90,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public override void onValidate(Map<Id,SObject> existingRecords)
 	{
 		// Validate changes to Opportunities
-		for(Opportunity opp : (List<Opportunity>) Records)
+		for(Opportunity opp : (List<Opportunity>) this.records)
 		{
 			Opportunity existingOpp = (Opportunity) existingRecords.get(opp.Id);
 			if(opp.Type != existingOpp.Type)
@@ -124,7 +124,7 @@ public class Opportunities extends fflib_SObjectDomain
 		List<OpportunityLineItem> linesToApplyDiscount = new List<OpportunityLineItem>();
 		
 		// Apply discount 
-		for(Opportunity opportunity : (List<Opportunity>) Records)
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
 			// Appply to the Opporunity Amount?
 			if(opportunity.OpportunityLineItems == null || 
