@@ -50,7 +50,7 @@ public with sharing abstract class AbstractChargeable extends fflib_SObjectDomai
 	{
 		List<Integer> hoursWorked = calculateHoursWorked();
 		
-		Schema.SobjectField costOfHoursWorkedField = getCostOfHoursWorkedField();
+		Schema.SObjectField costOfHoursWorkedField = getCostOfHoursWorkedField();
 		
 		Integer hoursWorkedRecordIdx = 0; 
 		

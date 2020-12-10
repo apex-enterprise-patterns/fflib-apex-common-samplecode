@@ -35,7 +35,7 @@ public with sharing class OpportunityInvoicingController
 	{
 		ApexPages.addMessage(
 			new ApexPages.Message(
-				ApexPages.Severity.Info, 'Click Start to scan Opportunities that are ready for invoicing and process them.'));
+				ApexPages.Severity.INFO, 'Click Start to scan Opportunities that are ready for invoicing and process them.'));
 	}
 	
 	public PageReference startJob()
@@ -48,7 +48,7 @@ public with sharing class OpportunityInvoicingController
 			// Confirm
 			ApexPages.addMessage(
 				new ApexPages.Message(
-					ApexPages.Severity.Info, 'The job has been submitted, you will receive an email notificaiton of any issues.'));
+					ApexPages.Severity.INFO, 'The job has been submitted, you will receive an email notificaiton of any issues.'));
 		}
 		catch (Exception e)
 		{

@@ -30,6 +30,6 @@ public with sharing class OpportunityConsoleController
 	public static void applyDiscount(Id opportunityId, Decimal discountPercent)
 	{
 		// Call service
-		OpportunitiesService.applyDiscounts(new Set<ID> { opportunityId }, discountPercent);
+		OpportunitiesService.applyDiscounts(new Set<Id> { opportunityId }, discountPercent);
 	}
 }

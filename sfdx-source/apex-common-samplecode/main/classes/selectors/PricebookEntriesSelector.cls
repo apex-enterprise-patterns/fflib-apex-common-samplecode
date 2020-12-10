@@ -48,10 +48,10 @@ public class PricebookEntriesSelector extends fflib_SObjectSelector
 
 	public Schema.SObjectType getSObjectType()
 	{
-		return PricebookEntry.sObjectType;
+		return PricebookEntry.SObjectType;
 	}
 
-	public List<PricebookEntry> selectById(Set<ID> idSet)
+	public List<PricebookEntry> selectById(Set<Id> idSet)
 	{
 		assertIsAccessible();
 		String query = String.format('select {0},{3},{4} FROM {1} WHERE id in :idSet order by {2}', 

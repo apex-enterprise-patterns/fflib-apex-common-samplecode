@@ -26,12 +26,12 @@
 
 global with sharing class OpportunitiesService 
 {		
-	global static void applyDiscounts(Set<ID> opportunityIds, Decimal discountPercentage)
+	global static void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
 	{
 		service().applyDiscounts(opportunityIds, discountPercentage);
 	}
 	
-	global static Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage)
+	global static Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)
 	{		
 		return service().createInvoices(opportunityIds, discountPercentage);
 	}

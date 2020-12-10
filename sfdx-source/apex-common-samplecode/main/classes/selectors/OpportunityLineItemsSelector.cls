@@ -49,7 +49,7 @@ public class OpportunityLineItemsSelector extends fflib_SObjectSelector
 
 	public Schema.SObjectType getSObjectType()
 	{
-		return OpportunityLineItem.sObjectType;
+		return OpportunityLineItem.SObjectType;
 	}
 
 	public override String getOrderBy()
@@ -57,7 +57,7 @@ public class OpportunityLineItemsSelector extends fflib_SObjectSelector
 		return 'SortOrder,PricebookEntry.Name';
 	}
 
-	public List<OpportunityLineItem> selectById(Set<ID> idSet)
+	public List<OpportunityLineItem> selectById(Set<Id> idSet)
 	{
 		return (List<OpportunityLineItem>) selectSObjectsById(idSet);
 	}
