@@ -24,7 +24,13 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public interface IOpportunities extends fflib_ISObjectDomain
+public interface IOpportunities extends fflib_Domain
 {
+	void addAccountError(String errorMessage);
+	void addTypeError(String errorMessage);
 	void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow);
+	Set<Id> getAccountIds();
+	IOpportunities selectWithoutAccountsByExistingCustomers();
+	IOpportunities setDiscountType(String value);
+
 }

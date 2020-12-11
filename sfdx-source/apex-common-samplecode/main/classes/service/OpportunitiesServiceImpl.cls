@@ -56,11 +56,11 @@ public class OpportunitiesServiceImpl
 		
 		// Optionally apply discounts as part of invoice creation
 		if(discountPercentage!=null && discountPercentage>0)
-			opps.applyDiscount(discountPercentage, uow);		
+			opps.applyDiscount(discountPercentage, uow);
 		
 		// Create Invoices from the given opportunities
 		List<SObject> invoices = new List<SObject>();
-		for(Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())		
+		for (Opportunity opportunityRecord : (List<Opportunity>) opps.getObjects())
 		{
 			Invoice__c invoice = new Invoice__c();
 			invoice.Account__c = opportunityRecord.AccountId;

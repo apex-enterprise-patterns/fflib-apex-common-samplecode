@@ -64,7 +64,9 @@ private class OpportunitiesTest
 	@IsTest
 	private static void testValidationWithoutDML()
 	{
-		Opportunities opps = new Opportunities(new Opportunity[] { new Opportunity ( Name = 'Test', Type = 'Existing Account' ) } );
+		OpportunitiesTriggerHandler opps = new OpportunitiesTriggerHandler(
+				new Opportunity[] { new Opportunity ( Name = 'Test', Type = 'Existing Account' ) }
+		);
 		opps.onValidate();
 		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
 		System.assertEquals('You must provide an Account for Opportunities for existing Customers.', fflib_SObjectDomain.Errors.getAll()[0].message);
@@ -76,7 +78,7 @@ private class OpportunitiesTest
 	{
 		Opportunity opp = new Opportunity ( Name = 'Test', Type = 'Existing Account' );
 		fflib_SObjectDomain.Test.Database.onInsert(new Opportunity[] { opp } );		
-		fflib_SObjectDomain.triggerHandler(Opportunities.class);		
+		fflib_SObjectDomain.triggerHandler(OpportunitiesTriggerHandler.class);
 		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
 		System.assertEquals('You must provide an Account for Opportunities for existing Customers.', fflib_SObjectDomain.Errors.getAll()[0].message);
 		System.assertEquals(Opportunity.AccountId, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		
@@ -88,7 +90,7 @@ private class OpportunitiesTest
 		Opportunity oldOpp = new Opportunity ( Name = 'Test', Type = 'Existing Account' );
 		Opportunity newOpp = new Opportunity ( Name = 'Test', Type = 'New Account' );
 		fflib_SObjectDomain.Test.Database.onUpdate(new Opportunity[] { newOpp }, new Map<Id, SObject> { newOpp.Id => oldOpp } );		
-		fflib_SObjectDomain.triggerHandler(Opportunities.class);		
+		fflib_SObjectDomain.triggerHandler(OpportunitiesTriggerHandler.class);
 		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
 		System.assertEquals('You cannot change the Opportunity type once it has been created.', fflib_SObjectDomain.Errors.getAll()[0].message);
 		System.assertEquals(Opportunity.Type, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		

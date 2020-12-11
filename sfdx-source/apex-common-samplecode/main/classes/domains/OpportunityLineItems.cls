@@ -46,7 +46,7 @@ public with sharing class OpportunityLineItems extends fflib_SObjectDomain
 	{
 		// Opportunties by Id
 		Map<Id, Opportunity> opportunitiesById = 
-			new Map<Id, Opportunity>((List<Opportunity>) opps.getRecords());
+			new Map<Id, Opportunity>((List<Opportunity>) opps.getObjects());
 		
 		// Calculate discount factor
 		Decimal factor = Opportunities.calculateDiscountFactor(discountPercentage);
