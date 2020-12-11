@@ -31,37 +31,6 @@
 private class OpportunitiesTest 
 {
 	@IsTest
-	private static void callingApplyDiscountShouldCalcDiscountAndRegisterDirty()
-	{
-		// Create mocks
-		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(fflib_ISObjectUnitOfWork.class);
-		// Given
-		Opportunity opp = new Opportunity(
-			Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
-			Name = 'Test Opportunity',
-			StageName = 'Open',
-			Amount = 1000,
-			CloseDate = System.today());
-		List<Opportunity> testOppsList = new List<Opportunity> { opp };
-		Decimal discountPercent = 10;
-		Application.UnitOfWork.setMock(uowMock);
-
-		// When
-		IOpportunities opps = 
-			Opportunities.newInstance(testOppsList);
-		opps.applyDiscount(discountPercent, uowMock);
-
-		// Then
-		((fflib_ISObjectUnitOfWork) 
-			mocks.verify(uowMock, 1)).registerDirty(
-				fflib_Match.sObjectWith(
-					new Map<SObjectField, Object>{ 
-						Opportunity.Id => opp.Id, 
-						Opportunity.Amount => 900} ));
-	}	
-
-	@IsTest
 	private static void testValidationWithoutDML()
 	{
 		OpportunitiesTriggerHandler opps = new OpportunitiesTriggerHandler(
@@ -105,24 +74,6 @@ private class OpportunitiesTest
 		System.assertEquals(fflib_SObjectDomain.Errors.getAll().size(), 0);		
 	}
 			
-	@IsTest
-	private static void testApplyDiscountWithoutOpportunityLines()
-	{
-		Opportunity opp = new Opportunity ( 
-			Name = 'Test', 
-			Type = 'New Account',
-			StageName = 'Open',
-			CloseDate = System.today().addMonths(1), 
-			Amount = 100 );
-		insert opp;			
-		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork( new Schema.SObjectType[] { Opportunity.SObjectType });				
-		Opportunities opps = new Opportunities(new List<Opportunity> { opp });
-		opps.applyDiscount(10, uow);
-		uow.commitWork();		
-		Opportunity assertOpp = [select Amount from Opportunity where Id = :opp.Id];
-		System.assertEquals(90, assertOpp.Amount);				
-	}
-		
 	@IsTest
 	private static void testUpdateAccountOnInsertOfOpportunity()
 	{

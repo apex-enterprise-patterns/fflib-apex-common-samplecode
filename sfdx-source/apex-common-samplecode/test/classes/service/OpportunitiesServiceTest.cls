@@ -32,7 +32,7 @@ private class OpportunitiesServiceTest
 	{
 		// Create mocks
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		
+
 		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(fflib_ISObjectUnitOfWork.class);
 		IOpportunities domainMock = (IOpportunities) mocks.mock(IOpportunities.class);
 		IOpportunitiesSelector selectorMock = (IOpportunitiesSelector) mocks.mock(IOpportunitiesSelector.class);
@@ -40,31 +40,59 @@ private class OpportunitiesServiceTest
 
 		// Given
 		mocks.startStubbing();
-		List<Opportunity> testOppsList = new List<Opportunity> { 
-			new Opportunity(
-				Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+		Id opportunityId = fflib_IDGenerator.generate(Opportunity.SObjectType);
+		List<Opportunity> testOppsList = new List<Opportunity>
+		{
+				new Opportunity(
+				Id = opportunityId,
 				Name = 'Test Opportunity',
 				StageName = 'Open',
 				Amount = 1000,
 				CloseDate = System.today()) };
 		Set<Id> testOppsSet = new Map<Id, Opportunity>(testOppsList).keySet();
-		mocks.when(domainMock.sObjectType()).thenReturn(Opportunity.SObjectType);
 		mocks.when(selectorMock.sObjectType()).thenReturn(Opportunity.SObjectType);
 		mocks.when(selectorMock.selectByIdWithProducts(testOppsSet)).thenReturn(testOppsList);
 		mocks.stopStubbing();
 		Application.UnitOfWork.setMock(uowMock);
-		Application.Domain.setMock(domainMock);
 		Application.Selector.setMock(selectorMock);
 
 		// When
 		OpportunitiesService.applyDiscounts(testOppsSet, 10);
 
 		// Then
-		((IOpportunitiesSelector) 
+		((IOpportunitiesSelector)
 			mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);
-		((IOpportunities) 
-			mocks.verify(domainMock)).applyDiscount(10, uowMock);
-		((fflib_ISObjectUnitOfWork) 
+		((fflib_ISObjectUnitOfWork)
+				mocks.verify(uowMock, 1))
+				.registerDirty(
+				fflib_Match.sObjectsWith(
+						new List<Map<SObjectField, Object>>
+						{
+								new Map<SObjectField, Object>
+								{
+										Opportunity.Id => opportunityId,
+										Opportunity.Amount => 900
+								}
+						}));
+		((fflib_ISObjectUnitOfWork)
 			mocks.verify(uowMock, 1)).commitWork();
+	}
+
+	@IsTest
+	private static void testApplyDiscountWithoutOpportunityLines()
+	{
+		Opportunity opp = new Opportunity (
+			Name = 'Test',
+			Type = 'New Account',
+			StageName = 'Open',
+			CloseDate = System.today().addMonths(1),
+			Amount = 100 );
+		insert opp;
+		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork( new Schema.SObjectType[] { Opportunity.SObjectType });
+		Opportunities opps = new Opportunities(new List<Opportunity> { opp });
+		new OpportunitiesServiceImpl().applyDiscounts(uow, opps, 10);
+		uow.commitWork();
+		Opportunity assertOpp = [select Amount from Opportunity where Id = :opp.Id];
+		System.assertEquals(90, assertOpp.Amount);
 	}
 }

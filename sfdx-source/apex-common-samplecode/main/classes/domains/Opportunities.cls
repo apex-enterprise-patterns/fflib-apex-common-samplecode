@@ -63,6 +63,7 @@ public class Opportunities extends fflib_SObjectDomain
 		addFieldError(Schema.Opportunity.Type, errorMessage);
 	}
 
+	// todo - refactor
 	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
 	{
 		// Utilise InvoiceFactory to create invoices from Opportunity details
@@ -104,55 +105,51 @@ public class Opportunities extends fflib_SObjectDomain
 		return result;
 	}
 
-
-	private void addFieldError(Schema.SObjectField sObjectField, String errorMessage)
+	public List<OpportunityLineItem> getLineItems()
 	{
-		for (Opportunity record : (List<Opportunity>) Records)
+		List<OpportunityLineItem> result = new List<OpportunityLineItem>();
+		for (Opportunity record : (List<Opportunity>) getRecords())
 		{
-			record.addError(error(errorMessage, record, sObjectField));
+			result.addAll(record.OpportunityLineItems);
 		}
+		return result;
 	}
 
-	// Todo - refactor
-	public void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
+	public IOpportunities multiplyAmount(Decimal factor)
 	{
-		// Calculate discount factor
-		Decimal factor = calculateDiscountFactor(discountPercentage);
-
-		// Opportunity lines to apply discount to
-		List<OpportunityLineItem> linesToApplyDiscount = new List<OpportunityLineItem>();
-		
-		// Apply discount 
-		for(Opportunity opportunity : (List<Opportunity>) Records)
+		for (Opportunity record : (List<Opportunity>) getRecords())
 		{
-			// Appply to the Opporunity Amount?
-			if(opportunity.OpportunityLineItems == null || 
-			   opportunity.OpportunityLineItems.size()==0)
-			{
-				// Adjust the Amount on the Opportunity if no lines
-				opportunity.Amount = opportunity.Amount * factor;
-				uow.registerDirty(opportunity);
-			}
-			else
-			{
-				// Collect lines to apply discount to
-				linesToApplyDiscount.addAll(opportunity.OpportunityLineItems);
-			}
-		}		
-		
-		// Apply discount to lines
-		IOpportunityLineItems lineItems = 
-			(IOpportunityLineItems) Application.Domain.newInstance(linesToApplyDiscount);
-		lineItems.applyDiscount(this, discountPercentage, uow);
+			record.Amount = record.Amount * factor;
+		}
+		return this;
 	}
 
-	// todo - refactor
-	public static Decimal calculateDiscountFactor(Decimal discountPercentage)
+	public IOpportunities selectWithLineItems()
 	{
-		// Calculate discount factor
-		Decimal discountProportion = discountPercentage == null ? 0 : discountPercentage / 100;
-		Decimal factor = 1 - discountProportion;
-		return factor;
+		List<Opportunity> result = new List<Opportunity>();
+		for (Opportunity record : (List<Opportunity>) getRecords())
+		{
+			if (record.OpportunityLineItems != null &&
+					record.OpportunityLineItems.size() > 0)
+			{
+				result.add(record);
+			}
+		}
+		return newInstance(result);
+	}
+
+	public IOpportunities selectWithoutLineItems()
+	{
+		List<Opportunity> result = new List<Opportunity>();
+		for (Opportunity record : (List<Opportunity>) getRecords())
+		{
+			if (record.OpportunityLineItems == null ||
+					record.OpportunityLineItems.size() == 0)
+			{
+				result.add(record);
+			}
+		}
+		return newInstance(result);
 	}
 
 	public IOpportunities selectWithoutAccountsByExistingCustomers()
@@ -175,6 +172,15 @@ public class Opportunities extends fflib_SObjectDomain
 			opportunity.DiscountType__c = value;
 		}
 		return this;
+	}
+
+
+	private void addFieldError(Schema.SObjectField sObjectField, String errorMessage)
+	{
+		for (Opportunity record : (List<Opportunity>) Records)
+		{
+			record.addError(error(errorMessage, record, sObjectField));
+		}
 	}
 
 	public class Constructor implements fflib_SObjectDomain.IConstructable

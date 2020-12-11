@@ -28,9 +28,12 @@ public interface IOpportunities extends fflib_Domain
 {
 	void addAccountError(String errorMessage);
 	void addTypeError(String errorMessage);
-	void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow);
 	Set<Id> getAccountIds();
+	List<OpportunityLineItem> getLineItems();
+	List<SObject> getRecords();
+	IOpportunities multiplyAmount(Decimal factor);
+	IOpportunities selectWithLineItems();
 	IOpportunities selectWithoutAccountsByExistingCustomers();
+	IOpportunities selectWithoutLineItems();
 	IOpportunities setDiscountType(String value);
-
 }

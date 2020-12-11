@@ -27,6 +27,9 @@
 public interface IOpportunitiesService 
 {
 	void applyDiscounts(Set<ID> opportunityIds, Decimal discountPercentage);
+	void applyDiscounts(List<Opportunity> opportunitiesWithProducts, Decimal discountPercentage);
+	void applyDiscounts(fflib_ISObjectUnitOfWork uow, IOpportunities opportunities, Decimal discountPercentage);
+	Decimal calculateDiscountFactor(Decimal discountPercentage);
 	Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage);
 	Id submitInvoicingJob();
 }

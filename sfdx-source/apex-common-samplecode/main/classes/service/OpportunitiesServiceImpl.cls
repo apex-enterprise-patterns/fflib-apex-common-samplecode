@@ -27,36 +27,75 @@
 public class OpportunitiesServiceImpl 
 	implements IOpportunitiesService
 {
+	private static IOpportunityLineItems newDomainLineItems(List<OpportunityLineItem> recordList)
+	{
+		return (IOpportunityLineItems) Application.Domain.newInstance(recordList);
+	}
+
 	public void applyDiscounts(Set<ID> opportunityIds, Decimal discountPercentage)
 	{
-		// Create unit of work to capture work and commit it under one transaction
-	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
-	    	    	    	  	    										
-		// Query Opportunities
-		List<Opportunity> oppRecords = 
-			OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds);
+		// Use method overloading to allow different endpoints to invoke the logic
+		applyDiscounts(
+				// Query Opportunities
+				OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds),
+				discountPercentage
+		);
+	}
 
+	public void applyDiscounts(List<Opportunity> opportunitiesWithProducts, Decimal discountPercentage)
+	{
+		// Separating the UnitOfWork commit actions, to allow for chaining the business logic
+		fflib_ISObjectUnitOfWork unitOfWork = Application.UnitOfWork.newInstance();
+		applyDiscounts(
+				// Create unit of work to capture work and commit it under one transaction
+				unitOfWork,
+				Opportunities.newInstance(opportunitiesWithProducts),
+				discountPercentage
+		);
+		unitOfWork.commitWork();
+	}
+
+	public void applyDiscounts(fflib_ISObjectUnitOfWork uow, IOpportunities opportunities, Decimal discountPercentage)
+	{
 		// Apply discount via Opportunties domain class behaviour
-		IOpportunities opps = Opportunities.newInstance(oppRecords);				
-		opps.applyDiscount(discountPercentage, uow);
-		
-		// Commit updates to opportunities		
-		uow.commitWork();						
+		Decimal factor = calculateDiscountFactor(discountPercentage);
+		uow.registerDirty(
+				opportunities
+						.selectWithoutLineItems()
+						.multiplyAmount(factor)
+						.getRecords()
+		);
+
+		IOpportunities opportunitiesWithLineItems = opportunities.selectWithLineItems();
+
+		if (opportunitiesWithLineItems.getObjects().isEmpty()) return;
+
+		List<OpportunityLineItem> opportunityLineItems = opportunitiesWithLineItems.getLineItems();
+		newDomainLineItems(opportunityLineItems)
+				.applyDiscount(opportunitiesWithLineItems, discountPercentage, uow);
+	}
+
+	public Decimal calculateDiscountFactor(Decimal discountPercentage)
+	{
+		// Calculate discount factor
+		Decimal discountProportion = discountPercentage == null ? 0 : discountPercentage / 100;
+		Decimal factor = 1 - discountProportion;
+		return factor;
 	}
 
 	public Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage)
 	{
 		// Create unit of work to capture work and commit it under one transaction
-	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
-	    										
+		fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+
 		// Query Opportunities
-		IOpportunities opps = 
-			Opportunities.newInstance(
-				OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds));		
+		IOpportunities opps =
+				Opportunities.newInstance(
+						OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds));
 		
 		// Optionally apply discounts as part of invoice creation
-		if(discountPercentage!=null && discountPercentage>0)
-			opps.applyDiscount(discountPercentage, uow);
+		if (discountPercentage != null && discountPercentage > 0)
+			applyDiscounts(uow, opps, discountPercentage);
 		
 		// Create Invoices from the given opportunities
 		List<SObject> invoices = new List<SObject>();
