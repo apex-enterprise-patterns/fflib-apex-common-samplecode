@@ -39,7 +39,7 @@ public class Opportunities extends fflib_SObjectDomain
 	
 	public Opportunities(List<Opportunity> sObjectList)
 	{
-		// Domain classes are initialised with lists to enforce nullification throughout
+		// Domain classes are initialised with lists to enforce bulkification throughout
 		super(sObjectList);
 	}
 	
