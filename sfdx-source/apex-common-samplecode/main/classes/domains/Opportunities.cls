@@ -104,7 +104,7 @@ public class Opportunities extends fflib_SObjectDomain
 	{
 		// Related Accounts
 		List<Id> accountIds = new List<Id>();
-		for (Opportunity opp : (List<Opportunity>) Records)
+		for (Opportunity opp : (List<Opportunity>) getRecords())
 		{
 			if (opp.AccountId != null)
 			{
