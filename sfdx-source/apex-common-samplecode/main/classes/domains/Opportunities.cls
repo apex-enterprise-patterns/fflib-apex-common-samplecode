@@ -46,7 +46,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
 	{
 		// Utilise InvoiceFactory to create invoices from Opportunity details
-		for(Opportunity opportunity : (List<Opportunity>) Records)
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
 			InvoicingService.Invoice invoice = new InvoicingService.Invoice();
 			invoice.Account = opportunity.AccountId;
@@ -69,7 +69,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public override void onApplyDefaults()
 	{
 		// Apply defaults to Opportunities
-		for(Opportunity opportunity : (List<Opportunity>) Records)
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
 			opportunity.DiscountType__c = OpportunitySettings__c.getInstance().DiscountType__c;						
 		}
@@ -78,7 +78,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public override void onValidate()	
 	{
 		// Validate Opportunities
-		for(Opportunity opp : (List<Opportunity>) Records)
+		for(Opportunity opp : (List<Opportunity>) this.records)
 		{
 			if(opp.Type!=null && opp.Type.startsWith('Existing') && opp.AccountId == null)
 			{
@@ -90,7 +90,7 @@ public class Opportunities extends fflib_SObjectDomain
 	public override void onValidate(Map<Id,SObject> existingRecords)
 	{
 		// Validate changes to Opportunities
-		for(Opportunity opp : (List<Opportunity>) Records)
+		for(Opportunity opp : (List<Opportunity>) this.records)
 		{
 			Opportunity existingOpp = (Opportunity) existingRecords.get(opp.Id);
 			if(opp.Type != existingOpp.Type)
@@ -103,16 +103,27 @@ public class Opportunities extends fflib_SObjectDomain
 	public override void onAfterInsert()
 	{
 		// Related Accounts
-		List<Id> accountIds = new List<Id>();
-		for(Opportunity opp : (List<Opportunity>) Records)
-			if(opp.AccountId!=null)
+		Set<Id> accountIds = new Set<Id>();
+		for(Opportunity opp : (List<Opportunity>) this.records)
+		{
+			if( opp.AccountId != null)
+			{
 				accountIds.add(opp.AccountId);
-				
-		// Update last Opportunity activity on the related Accounts (via the Accounts domain class)
-		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType }); 
-		Accounts accounts = new Accounts([select Id, Name from Account where id in :accountIds]);
-		accounts.updateOpportunityActivity(uow);
-		uow.commitWork();				
+			}
+		}
+		
+		if ( ! accountIds.isEmpty() ) 
+		{
+			// Update last Opportunity activity on the related Accounts (via the Accounts domain class)
+			fflib_ISObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType }); 
+		
+			
+			IAccounts accounts = (IAccounts)Application.Domain.newInstance( accountIds );
+		
+			accounts.updateOpportunityActivity(uow);
+			
+			uow.commitWork();				
+		}
 	}
 	
 	public void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
@@ -124,7 +135,7 @@ public class Opportunities extends fflib_SObjectDomain
 		List<OpportunityLineItem> linesToApplyDiscount = new List<OpportunityLineItem>();
 		
 		// Apply discount 
-		for(Opportunity opportunity : (List<Opportunity>) Records)
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
 			// Appply to the Opporunity Amount?
 			if(opportunity.OpportunityLineItems == null || 

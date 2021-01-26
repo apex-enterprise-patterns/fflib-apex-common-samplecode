@@ -52,6 +52,7 @@ public class Application
 	public static final fflib_Application.SelectorFactory Selector = 
 		new fflib_Application.SelectorFactory(
 			new Map<SObjectType, Type> {
+					Account.SObjectType => AccountsSelector.class,
 					Opportunity.SObjectType => OpportunitiesSelector.class,
 					OpportunityLineItem.SObjectType => OpportunityLineItemsSelector.class,
 					PricebookEntry.SObjectType => PricebookEntriesSelector.class,
