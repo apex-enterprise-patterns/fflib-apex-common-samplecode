@@ -25,7 +25,7 @@
 **/
 
 /**
- * Selector encapsulates queries arund the User object, currently limited to needs around email, hence reduced scope
+ * Selector encapsulates queries around the User object, currently limited to needs around email, hence reduced scope
  **/
 public class UsersSelector extends fflib_SObjectSelector
 	implements IUsersSelector
@@ -37,13 +37,13 @@ public class UsersSelector extends fflib_SObjectSelector
 		
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
-		// Current app requirements driven soley by getUsersEmail at this stage
+		// Current app requirements driven solely by getUsersEmail at this stage
 		return new List<Schema.SObjectField> { User.Email };
 	}
 
 	public Schema.SObjectType getSObjectType()
 	{
-		return User.sObjectType;
+		return User.SObjectType;
 	}
 	
 	/**
@@ -53,8 +53,10 @@ public class UsersSelector extends fflib_SObjectSelector
 	{
 		List<User> users = selectSObjectsById(userIds);	
 		Map<Id, String> emailsById = new Map<Id, String>();
-		for(User user : users)
+		for (User user : users)
+		{
 			emailsById.put(user.Id, user.Email);
+		}
 		return emailsById;	
 	}
 }

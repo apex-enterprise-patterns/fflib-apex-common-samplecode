@@ -26,7 +26,7 @@
 
 public interface IOpportunitiesService 
 {
-	void applyDiscounts(Set<ID> opportunityIds, Decimal discountPercentage);
-	Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage);
+	void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage);
+	Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage);
 	Id submitInvoicingJob();
 }

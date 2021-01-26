@@ -48,10 +48,10 @@ public class PricebookEntriesSelector extends fflib_SObjectSelector
 
 	public Schema.SObjectType getSObjectType()
 	{
-		return PricebookEntry.sObjectType;
+		return PricebookEntry.SObjectType;
 	}
 
-	public List<PricebookEntry> selectById(Set<ID> idSet)
+	public List<PricebookEntry> selectById(Set<Id> idSet)
 	{
 		return (List<PricebookEntry>) selectSObjectsById(idSet);
 	}

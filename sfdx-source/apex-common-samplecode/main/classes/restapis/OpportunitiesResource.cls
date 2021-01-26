@@ -24,7 +24,7 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-@RestResource(urlMapping='/opportunities/*/applydiscount')
+@RestResource(UrlMapping='/opportunities/*/applydiscount')
 global with sharing class OpportunitiesResource 
 {
 	@HttpPost
@@ -33,15 +33,14 @@ global with sharing class OpportunitiesResource
 	{
     	// Take apart the URI to discover the Opportunity Id
         RestRequest req = RestContext.request;
-        RestResponse res = RestContext.response;
-        String[] uriParts = req.requestURI.split('/');
+		String[] uriParts = req.requestURI.split('/');
 		
 		// Determine service parameter values from REST context
-		ID opportunityId = uriParts[2]; // get from URL path
+		Id opportunityId = uriParts[2]; // get from URL path
 		String discountParam = req.params.get('discount');
 		Decimal discountPercent = discountParam!=null ? Decimal.valueOf(discountParam) : 0;
 		
 		// Call Service Method
-		OpportunitiesService.applyDiscounts(new Set<ID> { opportunityId }, discountPercent );
+		OpportunitiesService.applyDiscounts(new Set<Id> { opportunityId }, discountPercent );
 	}
 }

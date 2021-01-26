@@ -42,7 +42,7 @@ public class InvoicingServiceImpl
 		fflib_ISObjectDomain domain =  
 			Application.Domain.newInstance(
 				Application.Selector.selectById(new Set<Id>(sourceRecordIds)));
-		if(domain instanceof InvoicingService.ISupportInvoicing)
+		if (domain instanceof InvoicingService.ISupportInvoicing)
 		{ 
 			// Ask the domain object to generate its invoices
 			InvoicingService.ISupportInvoicing invoicing = (InvoicingService.ISupportInvoicing) domain;
@@ -51,8 +51,10 @@ public class InvoicingServiceImpl
 			uow.commitWork();
 			// List of Invoices generated
 			List<Id> invoiceIds = new List<Id>();
-			for(Invoice__c invoice : invoiceFactory.Invoices)
+			for (Invoice__c invoice : invoiceFactory.Invoices)
+			{
 				invoiceIds.add(invoice.Id);
+			}
 			return invoiceIds;
 		}
 		

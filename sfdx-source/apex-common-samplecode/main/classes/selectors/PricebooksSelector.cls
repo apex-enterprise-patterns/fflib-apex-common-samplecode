@@ -45,10 +45,10 @@ public class PricebooksSelector extends fflib_SObjectSelector
 
 	public Schema.SObjectType getSObjectType()
 	{
-		return Pricebook2.sObjectType;
+		return Pricebook2.SObjectType;
 	}
 
-	public List<Pricebook2> selectById(Set<ID> idSet)
+	public List<Pricebook2> selectById(Set<Id> idSet)
 	{
 		return (List<Pricebook2>) selectSObjectsById(idSet);
 	}	

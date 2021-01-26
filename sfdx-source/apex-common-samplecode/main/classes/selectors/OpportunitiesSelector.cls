@@ -52,15 +52,15 @@ public class OpportunitiesSelector extends fflib_SObjectSelector
 	
 	public Schema.SObjectType getSObjectType()
 	{
-		return Opportunity.sObjectType;
+		return Opportunity.SObjectType;
 	}
 
-	public List<Opportunity> selectById(Set<ID> idSet)
+	public List<Opportunity> selectById(Set<Id> idSet)
 	{
 		return (List<Opportunity>) selectSObjectsById(idSet);
 	}
 
-	public List<Opportunity> selectByIdWithProducts(Set<ID> idSet)
+	public List<Opportunity> selectByIdWithProducts(Set<Id> idSet)
 	{
 		fflib_QueryFactory opportunitiesQueryFactory = newQueryFactory();
 
@@ -84,8 +84,8 @@ public class OpportunitiesSelector extends fflib_SObjectSelector
 		List<OpportunityInfo> opportunityInfos = new List<OpportunityInfo>();
 		for(Opportunity opportunity : Database.query(
 				newQueryFactory(false).
-					selectField(Opportunity.Id).
-					selectField(Opportunity.StageName).
+					selectField(opportunity.Id).
+					selectField(opportunity.StageName).
 					selectField('Account.Name').
 					selectField('Account.AccountNumber').
 					selectField('Account.Owner.Name').

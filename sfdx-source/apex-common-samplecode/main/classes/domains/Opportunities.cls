@@ -116,7 +116,6 @@ public class Opportunities extends fflib_SObjectDomain
 		{
 			// Update last Opportunity activity on the related Accounts (via the Accounts domain class)
 			fflib_ISObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType }); 
-		
 			
 			IAccounts accounts = (IAccounts)Application.Domain.newInstance( accountIds );
 		
@@ -137,9 +136,9 @@ public class Opportunities extends fflib_SObjectDomain
 		// Apply discount 
 		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
-			// Appply to the Opporunity Amount?
-			if(opportunity.OpportunityLineItems == null || 
-			   opportunity.OpportunityLineItems.size()==0)
+			// Apply to the Opportunity Amount?
+			if(opportunity.OpportunityLineItems == null 
+        || opportunity.OpportunityLineItems.isEmpty())
 			{
 				// Adjust the Amount on the Opportunity if no lines
 				opportunity.Amount = opportunity.Amount * factor;
@@ -153,8 +152,8 @@ public class Opportunities extends fflib_SObjectDomain
 		}		
 		
 		// Apply discount to lines
-		IOpportunityLineItems lineItems = 
-			(IOpportunityLineItems) Application.Domain.newInstance(linesToApplyDiscount);
+		IOpportunityLineItems lineItems = (IOpportunityLineItems) Application.Domain.newInstance(linesToApplyDiscount);
+    
 		lineItems.applyDiscount(this, discountPercentage, uow);
 	}
 	

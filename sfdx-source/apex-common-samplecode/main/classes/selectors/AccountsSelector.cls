@@ -46,10 +46,10 @@ public class AccountsSelector extends fflib_SObjectSelector
 
 	public Schema.SObjectType getSObjectType()
 	{
-		return Account.sObjectType;
+		return Account.SObjectType;
 	}
 
-	public List<Account> selectById(Set<ID> idSet)
+	public List<Account> selectById(Set<Id> idSet)
 	{
 		return (List<Account>) selectSObjectsById(idSet);
 	}
@@ -58,9 +58,13 @@ public class AccountsSelector extends fflib_SObjectSelector
 	{
 		// Related Accounts
 		Set<Id> accountIds = new Set<Id>();
-		for(Opportunity opp : (List<Opportunity>) opportunities)
-			if(opp.AccountId!=null)
-				accountIds.add(opp.AccountId);		
+		for (Opportunity opp : (List<Opportunity>) opportunities)
+		{
+			if (opp.AccountId != null)
+			{
+				accountIds.add(opp.AccountId);
+			}
+		}
 		return selectById(accountIds);
 	}	
 }

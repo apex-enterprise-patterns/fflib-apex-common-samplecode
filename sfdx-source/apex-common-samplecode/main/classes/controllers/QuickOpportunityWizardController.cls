@@ -49,7 +49,7 @@ public with sharing class QuickOpportunityWizardController
 			
 		// Recently used Opportunity lines
 		List<OpportunityLineItem> lines = 
-			[select 
+			[SELECT
 				Id, 
 				Description, 
 				ListPrice, 
@@ -72,10 +72,10 @@ public with sharing class QuickOpportunityWizardController
 				PricebookEntry.Pricebook2.IsActive,
 				PricebookEntry.Pricebook2.IsStandard,
 				PricebookEntry.Pricebook2.Name 
-			 from OpportunityLineItem
-			 where Opportunity.Account.id = :account.Id 
-			 order by SystemModstamp 
-			 desc limit 10];
+			 FROM OpportunityLineItem
+			 WHERE Opportunity.Account.Id = :account.Id
+			 ORDER BY SystemModstamp
+			 DESC LIMIT 10];
 			 
 		//  Clone these to be available for selection for the new opportunity
 		for(OpportunityLineItem item : lines)

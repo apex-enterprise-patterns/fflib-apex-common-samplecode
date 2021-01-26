@@ -28,7 +28,7 @@
  * Controller shared by Create Invoice and Create Invoices Custom Buttons (and related pages) on the Opportunity
  * 
  * NOTE: The same service method is called regardless, logic in this controller is thus very light,
- *        focusing on passing paramters in and handling errors and notfications
+ *        focusing on passing parameters in and handling errors and notifications
  **/
 public with sharing class OpportunityCreateInvoiceController 
 {
@@ -54,7 +54,7 @@ public with sharing class OpportunityCreateInvoiceController
 		{
 			// Create Invoice the Opportunity
 			Set<Id> invoiceIds = OpportunitiesService.createInvoices(
-				new Set<ID> { standardController.getId() }, DiscountPercentage);
+				new Set<Id> { standardController.getId() }, DiscountPercentage);
 			
 			// Redirect to Invoice 
 			return new PageReference('/'+new List<Id>(invoiceIds)[0]);
@@ -72,14 +72,14 @@ public with sharing class OpportunityCreateInvoiceController
 		try
 		{
 			// Selected Opportunity Id's
-			Set<Id> selectedOpportuntyIds = 
+			Set<Id> selectedOpportunityIds =
 				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
 			
 			// Create invoices for selected Invoices, optionally applying discount before hand
-			OpportunitiesService.createInvoices(selectedOpportuntyIds, DiscountPercentage);
+			OpportunitiesService.createInvoices(selectedOpportunityIds, DiscountPercentage);
 			
 			// Confirm
-			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Info, 'Invoices created.'));			
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Invoices created.'));
 		}
 		catch (Exception e)		
 		{

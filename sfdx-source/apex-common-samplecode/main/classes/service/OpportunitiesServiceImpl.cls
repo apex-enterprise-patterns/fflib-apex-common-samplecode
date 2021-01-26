@@ -27,7 +27,7 @@
 public class OpportunitiesServiceImpl 
 	implements IOpportunitiesService
 {
-	public void applyDiscounts(Set<ID> opportunityIds, Decimal discountPercentage)
+	public void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
 	{
 		// Create unit of work to capture work and commit it under one transaction
 	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
@@ -36,7 +36,7 @@ public class OpportunitiesServiceImpl
 		List<Opportunity> oppRecords = 
 			OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds);
 
-		// Apply discount via Opportunties domain class behaviour
+		// Apply discount via Opportunities domain class behaviour
 		IOpportunities opps = Opportunities.newInstance(oppRecords);				
 		opps.applyDiscount(discountPercentage, uow);
 		
@@ -44,7 +44,7 @@ public class OpportunitiesServiceImpl
 		uow.commitWork();						
 	}
 
-	public Set<Id> createInvoices(Set<ID> opportunityIds, Decimal discountPercentage)
+	public Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)
 	{
 		// Create unit of work to capture work and commit it under one transaction
 	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
@@ -55,12 +55,14 @@ public class OpportunitiesServiceImpl
 				OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds));		
 		
 		// Optionally apply discounts as part of invoice creation
-		if(discountPercentage!=null && discountPercentage>0)
-			opps.applyDiscount(discountPercentage, uow);		
+		if (discountPercentage != null && discountPercentage > 0)
+		{
+			opps.applyDiscount(discountPercentage, uow);
+		}
 		
 		// Create Invoices from the given opportunities
 		List<SObject> invoices = new List<SObject>();
-		for(Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())		
+		for (Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())
 		{
 			Invoice__c invoice = new Invoice__c();
 			invoice.Account__c = opportunityRecord.AccountId;
@@ -68,7 +70,7 @@ public class OpportunitiesServiceImpl
 			invoice.InvoiceDate__c = opportunityRecord.CloseDate;
 			invoice.Opportunity__c = opportunityRecord.Id;
 			uow.registerNew(invoice);
-			for(OpportunityLineItem lineItem : opportunityRecord.OpportunityLineItems)
+			for (OpportunityLineItem lineItem : opportunityRecord.OpportunityLineItems)
 			{
 				InvoiceLine__c invoiceLineItem = new InvoiceLine__c();
 				invoiceLineItem.Description__c = lineItem.Description;
@@ -85,8 +87,10 @@ public class OpportunitiesServiceImpl
 		
 		// Invoice Ids
 		Set<Id> invoiceIds = new Set<Id>();
-		for(SObject invoice : invoices)
-			invoiceIds.add((ID)invoice.get('Id'));
+		for (SObject invoice : invoices)
+		{
+			invoiceIds.add((Id) invoice.get('Id'));
+		}
 		return invoiceIds;
 	}
 	

@@ -28,7 +28,7 @@
  * Class implements the required interfaces for Scheduling and executing in Batch
  *
  * NOTE: The server and selector methods are reused, logic in this batch class is thus very light,
- *        focusing on passing paramters in and handling errors and notfications
+ *        focusing on passing parameters in and handling errors and notifications
  *
  **/ 
 global with sharing class CreateInvoicesJob
@@ -45,7 +45,7 @@ global with sharing class CreateInvoicesJob
 	
 	public Database.QueryLocator start(Database.BatchableContext context)
 	{
-		// Obtain appoprite query locator from the selector
+		// Obtain appropriate query locator from the selector
 		return new OpportunitiesSelector().queryLocatorReadyToInvoice();	
 	}
 	
@@ -53,7 +53,7 @@ global with sharing class CreateInvoicesJob
 	{
 		try
 		{
-			// Opportunites ready to be invoiced
+			// Opportunities ready to be invoiced
 			Set<Id> opportunitiesToInvoice = new Map<Id, SObject>(opps).keySet();
 						
 			// Create invoices
@@ -71,7 +71,7 @@ global with sharing class CreateInvoicesJob
 	
 	public void finish(Database.BatchableContext context)
 	{
-		// Simple notifiation of any errors received via email
+		// Simple notification of any errors received via email
 		if(jobErrors.size() > 0)
 		{
 			// Email address from user
@@ -83,16 +83,18 @@ global with sharing class CreateInvoicesJob
 			for(JobError jobError : jobErrors)
 			{
 				List<String> failedOpps = new List<String>();
-				for(Opportunity opp : jobError.records)
+				for (Opportunity opp : jobError.records)
+				{
 					failedOpps.add(opp.Name);
-				emailBody += String.format('<p>Error {0} occured during the processing of Opportunities {1}</p>', 
+				}
+				emailBody += String.format('<p>Error {0} occurred during the processing of Opportunities {1}</p>',
 					new List<String> { jobError.message, String.join(failedOpps, ',') });					
 			}			
 			// Send email
 			Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
 			mail.setToAddresses(new String[] { usersEmail.get(UserInfo.getUserId()) });
 			mail.setReplyTo(usersEmail.get(UserInfo.getUserId()));
-			mail.setSenderDisplayName(userInfo.getUserName());
+			mail.setSenderDisplayName(UserInfo.getUserName());
 			mail.setSubject('Create Invoice Job Failures');
 			mail.setHtmlBody(emailBody);
 			Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });			

@@ -41,7 +41,7 @@ public with sharing class OpportunityLineItems extends fflib_SObjectDomain
 	{
 		super(sObjectList);
 	}
-	
+
 	public void applyDiscount(IOpportunities opps, Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
 	{
 		// Opportunties by Id
@@ -56,9 +56,13 @@ public with sharing class OpportunityLineItems extends fflib_SObjectDomain
 		{
 			// Skip products that have not been approved for discounting
 			Opportunity opportunity = opportunitiesById.get(line.OpportunityId);
-			if(opportunity.DiscountType__c == 'Approved Products')
-				if(line.PricebookEntry.Product2.DiscountingApproved__c == false)
-					continue;			
+			if (opportunity.DiscountType__c == 'Approved Products')
+			{
+				if (line.PricebookEntry.Product2.DiscountingApproved__c == false)
+				{
+					continue;
+				}
+			}
 					
 			// Adjust UnitPrice
 			line.UnitPrice = line.UnitPrice * factor;

@@ -28,7 +28,7 @@
  * Controller shared by Apply Discount and Apply Discounts Custom Buttons (and related pages) on the Opportunity
  * 
  * NOTE: The same service method is called regardless, logic in this controller is thus very light,
- *        focusing on passing paramters in and handling errors and notfications
+ *        focusing on passing parameters in and handling errors and notifications
  **/
 public with sharing class OpportunityApplyDiscountController 
 {
@@ -54,7 +54,7 @@ public with sharing class OpportunityApplyDiscountController
 		{
 			// Apply discount entered to the current Opportunity
 			OpportunitiesService.applyDiscounts(
-				new Set<ID> { standardController.getId() }, DiscountPercentage);
+				new Set<Id> { standardController.getId() }, DiscountPercentage);
 		}
 		catch (Exception e)
 		{
@@ -69,15 +69,15 @@ public with sharing class OpportunityApplyDiscountController
 		try
 		{
 			// Selected Opportunity Id's
-			Set<Id> selectedOpportuntyIds = 
+			Set<Id> selectedOpportunityIds =
 				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
 			
 			// Apply discount entered to the selected Opportunities
 			OpportunitiesService.applyDiscounts(
-				selectedOpportuntyIds, DiscountPercentage);
+					selectedOpportunityIds, DiscountPercentage);
 			
 			// Confirm submission
-			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Info, 'Opportunities updated.'));
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Opportunities updated.'));
 		}
 		catch (Exception e)
 		{

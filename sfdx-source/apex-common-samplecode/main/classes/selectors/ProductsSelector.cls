@@ -56,10 +56,10 @@ public class ProductsSelector extends fflib_SObjectSelector
 
 	public Schema.SObjectType getSObjectType()
 	{
-		return Product2.sObjectType;
+		return Product2.SObjectType;
 	}
 
-	public List<Product2> selectById(Set<ID> idSet)
+	public List<Product2> selectById(Set<Id> idSet)
 	{
 		return (List<Product2>) selectSObjectsById(idSet);
 	}
