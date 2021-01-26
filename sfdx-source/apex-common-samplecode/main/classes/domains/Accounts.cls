@@ -42,12 +42,20 @@ public with sharing class Accounts extends fflib_SObjectDomain
 		super(sObjectList);
 	}
 	
-	public void updateOpportunityActivity(fflib_SObjectUnitOfWork uow)
+	public void updateOpportunityActivity(fflib_ISObjectUnitOfWork uow)
 	{
-		for(Account account : (List<Account>) Records)
+		for(Account account : (List<Account>) this.records)
 		{
 			account.Description = 'Last Opportunity Raised ' + System.today();
 			uow.registerDirty(account);
+		}
+	}
+
+	public class Constructor implements fflib_SObjectDomain.IConstructable
+	{
+		public fflib_SObjectDomain construct(List<SObject> sObjectList)
+		{
+			return new Accounts(sObjectList);
 		}
 	}
 }

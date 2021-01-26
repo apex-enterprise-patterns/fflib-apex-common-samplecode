@@ -52,7 +52,7 @@ public with sharing class DeveloperWorkItems extends AbstractChargeable
 	{
 		// Calculate the hours worked for each record
 		List<Integer> hoursWorked = new List<Integer>(); 
-		for(DeveloperWorkItem__c workItem : (List<DeveloperWorkItem__c>) Records)
+		for(DeveloperWorkItem__c workItem : (List<DeveloperWorkItem__c>) this.records)
 		{
 			// This calculation is intentionally simplistic for illustration purposes
 			hoursWorked.add((Integer)  

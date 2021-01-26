@@ -52,7 +52,7 @@ public with sharing class OpportunityLineItems extends fflib_SObjectDomain
 		Decimal factor = Opportunities.calculateDiscountFactor(discountPercentage);
 		
 		// Adjust UnitPrice of each line according to Discount Type of Opportunity
-		for(OpportunityLineItem line : (List<OpportunityLineItem>) Records)
+		for(OpportunityLineItem line : (List<OpportunityLineItem>) this.records)
 		{
 			// Skip products that have not been approved for discounting
 			Opportunity opportunity = opportunitiesById.get(line.OpportunityId);
