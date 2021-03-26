@@ -24,20 +24,9 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class Opportunities extends fflib_SObjects
-	implements IOpportunities, InvoicingService.ISupportInvoicing
+public class OpportunityTriggerHandler extends fflib_SObjectDomain
 {
-	public static IOpportunities newInstance(List<Opportunity> recordList)
-	{
-		return (IOpportunities) Application.Domain.newInstance(recordList);
-	}
-
-	public static IOpportunities newInstance(Set<Id> recordIdSet)
-	{
-		return (IOpportunities) Application.Domain.newInstance(recordIdSet);
-	}
-	
-	public Opportunities(List<Opportunity> sObjectList)
+	public OpportunityTriggerHandler(List<Opportunity> sObjectList)
 	{
 		// Domain classes are initialised with lists to enforce bulkification throughout
 		super(sObjectList);
@@ -46,7 +35,7 @@ public class Opportunities extends fflib_SObjects
 	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
 	{
 		// Utilise InvoiceFactory to create invoices from Opportunity details
-		for(Opportunity opportunity : (List<Opportunity>) getRecords())
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
 		{
 			InvoicingService.Invoice invoice = new InvoicingService.Invoice();
 			invoice.Account = opportunity.AccountId;
@@ -66,51 +55,70 @@ public class Opportunities extends fflib_SObjects
 		}
 	}
 
-	public void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
+	public override void onApplyDefaults()
 	{
-		// Calculate discount factor
-		Decimal factor = calculateDiscountFactor(discountPercentage);
+		// Apply defaults to OpportunityTriggerHandler
+		for(Opportunity opportunity : (List<Opportunity>) this.records)
+		{
+			opportunity.DiscountType__c = OpportunitySettings__c.getInstance().DiscountType__c;
+		}
+	}
 
-		// Opportunity lines to apply discount to
-		List<OpportunityLineItem> linesToApplyDiscount = new List<OpportunityLineItem>();
-		
-		// Apply discount 
-		for(Opportunity opportunity : (List<Opportunity>) getRecords())
-		{
-			// Apply to the Opportunity Amount?
-			if(opportunity.OpportunityLineItems == null 
-        || opportunity.OpportunityLineItems.isEmpty())
-			{
-				// Adjust the Amount on the Opportunity if no lines
-				opportunity.Amount = opportunity.Amount * factor;
-				uow.registerDirty(opportunity);
-			}
-			else
-			{
-				// Collect lines to apply discount to
-				linesToApplyDiscount.addAll(opportunity.OpportunityLineItems);
-			}
-		}		
-		
-		// Apply discount to lines
-		IOpportunityLineItems lineItems = (IOpportunityLineItems) Application.Domain.newInstance(linesToApplyDiscount);
-    
-		lineItems.applyDiscount(this, discountPercentage, uow);
-	}
-	
-	public static Decimal calculateDiscountFactor(Decimal discountPercentage)
+	public override void onValidate()
 	{
-		// Calculate discount factor
-		Decimal discountProportion = discountPercentage==null ? 0 : discountPercentage / 100;
-		Decimal factor = 1 - discountProportion;
-		return factor;		
+		// Validate OpportunityTriggerHandler
+		for(Opportunity opp : (List<Opportunity>) this.records)
+		{
+			if(opp.Type!=null && opp.Type.startsWith('Existing') && opp.AccountId == null)
+			{
+				opp.AccountId.addError( error('You must provide an Account for OpportunityTriggerHandler for existing Customers.', opp, Opportunity.AccountId) );
+			}
+		}
+	}
+
+	public override void onValidate(Map<Id,SObject> existingRecords)
+	{
+		// Validate changes to OpportunityTriggerHandler
+		for(Opportunity opp : (List<Opportunity>) this.records)
+		{
+			Opportunity existingOpp = (Opportunity) existingRecords.get(opp.Id);
+			if(opp.Type != existingOpp.Type)
+			{
+				opp.Type.addError( error('You cannot change the Opportunity type once it has been created.', opp, Opportunity.Type) );
+			}
+		}
+	}
+
+	public override void onAfterInsert()
+	{
+		// Related Accounts
+		Set<Id> accountIds = new Set<Id>();
+		for(Opportunity opp : (List<Opportunity>) this.records)
+		{
+			if( opp.AccountId != null)
+			{
+				accountIds.add(opp.AccountId);
+			}
+		}
+
+		if ( ! accountIds.isEmpty() )
+		{
+			// Update last Opportunity activity on the related Accounts (via the Accounts domain class)
+			fflib_ISObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType });
+
+			IAccounts accounts = (IAccounts)Application.Domain.newInstance( accountIds );
+
+			accounts.updateOpportunityActivity(uow);
+
+			uow.commitWork();
+		}
 	}
 		
-	public class Constructor implements fflib_IDomainConstructor
+	public class Constructor implements fflib_SObjectDomain.IConstructable
 	{
-		public fflib_SObjects construct(List<Object> objectList)
+		public fflib_SObjectDomain construct(List<SObject> sObjectList)
 		{
-			return new Opportunities((List<SObject>) objectList);
+			return new OpportunityTriggerHandler(sObjectList);
 		}
 	}
 }

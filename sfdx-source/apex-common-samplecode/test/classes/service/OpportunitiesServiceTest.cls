@@ -48,12 +48,12 @@ private class OpportunitiesServiceTest
 				Amount = 1000,
 				CloseDate = System.today()) };
 		Set<Id> testOppsSet = new Map<Id, Opportunity>(testOppsList).keySet();
-		mocks.when(domainMock.sObjectType()).thenReturn(Opportunity.SObjectType);
+		mocks.when(domainMock.getType()).thenReturn(Opportunity.SObjectType);
 		mocks.when(selectorMock.sObjectType()).thenReturn(Opportunity.SObjectType);
 		mocks.when(selectorMock.selectByIdWithProducts(testOppsSet)).thenReturn(testOppsList);
 		mocks.stopStubbing();
 		Application.UnitOfWork.setMock(uowMock);
-		Application.Domain.setMock((fflib_ISObjectDomain) domainMock);
+		Application.Domain.setMock(domainMock);
 		Application.Selector.setMock(selectorMock);
 
 		// When

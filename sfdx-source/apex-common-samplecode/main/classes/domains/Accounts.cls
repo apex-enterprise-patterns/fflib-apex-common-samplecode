@@ -24,7 +24,7 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class Accounts extends fflib_SObjectDomain
+public with sharing class Accounts extends fflib_SObjects
 	implements IAccounts
 {
 	public static IAccounts newInstance(List<Account> recordList)
@@ -39,23 +39,28 @@ public with sharing class Accounts extends fflib_SObjectDomain
 	
 	public Accounts(List<Account> sObjectList)
 	{
-		super(sObjectList);
+		super(sObjectList, Schema.Account.SObjectType);
 	}
-	
+
+	public List<Account> getAccounts()
+	{
+		return (List<Account>) getRecords();
+	}
+
 	public void updateOpportunityActivity(fflib_ISObjectUnitOfWork uow)
 	{
-		for(Account account : (List<Account>) this.records)
+		for(Account account : getAccounts())
 		{
 			account.Description = 'Last Opportunity Raised ' + System.today();
 			uow.registerDirty(account);
 		}
 	}
 
-	public class Constructor implements fflib_SObjectDomain.IConstructable
+	public class Constructor implements fflib_IDomainConstructor
 	{
-		public fflib_SObjectDomain construct(List<SObject> sObjectList)
+		public fflib_SObjects construct(List<Object> objectList)
 		{
-			return new Accounts(sObjectList);
+			return new Accounts((List<SObject>) objectList);
 		}
 	}
 }
