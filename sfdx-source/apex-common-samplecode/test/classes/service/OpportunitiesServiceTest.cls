@@ -53,7 +53,7 @@ private class OpportunitiesServiceTest
 		mocks.when(selectorMock.selectByIdWithProducts(testOppsSet)).thenReturn(testOppsList);
 		mocks.stopStubbing();
 		Application.UnitOfWork.setMock(uowMock);
-		Application.Domain.setMock(domainMock);
+		Application.Domain.setMock((fflib_ISObjectDomain) domainMock);
 		Application.Selector.setMock(selectorMock);
 
 		// When
