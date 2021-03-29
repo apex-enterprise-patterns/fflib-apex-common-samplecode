@@ -94,18 +94,31 @@ public class Opportunities extends fflib_SObjects
 		
 		// Apply discount to lines
 		IOpportunityLineItems lineItems = (IOpportunityLineItems) Application.Domain.newInstance(linesToApplyDiscount);
-    
+
 		lineItems.applyDiscount(this, discountPercentage, uow);
 	}
-	
+
 	public static Decimal calculateDiscountFactor(Decimal discountPercentage)
 	{
 		// Calculate discount factor
 		Decimal discountProportion = discountPercentage==null ? 0 : discountPercentage / 100;
 		Decimal factor = 1 - discountProportion;
-		return factor;		
+		return factor;
 	}
-		
+
+	public Set<Id> getAccountIds()
+	{
+		Set<Id> result = new Set<Id>();
+		for (Opportunity record : (List<Opportunity>) getRecords())
+		{
+			if (record.AccountId != null)
+			{
+				result.add(record.AccountId);
+			}
+		}
+		return result;
+	}
+
 	public class Constructor implements fflib_IDomainConstructor
 	{
 		public fflib_SObjects construct(List<Object> objectList)

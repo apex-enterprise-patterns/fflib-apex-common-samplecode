@@ -91,29 +91,20 @@ public class OpportunityTriggerHandler extends fflib_SObjectDomain
 
 	public override void onAfterInsert()
 	{
-		// Related Accounts
-		Set<Id> accountIds = new Set<Id>();
-		for(Opportunity opp : (List<Opportunity>) this.records)
-		{
-			if( opp.AccountId != null)
-			{
-				accountIds.add(opp.AccountId);
-			}
-		}
-
-		if ( ! accountIds.isEmpty() )
-		{
-			// Update last Opportunity activity on the related Accounts (via the Accounts domain class)
-			fflib_ISObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(new Schema.SObjectType[] { Account.SObjectType });
-
-			IAccounts accounts = (IAccounts)Application.Domain.newInstance( accountIds );
-
-			accounts.updateOpportunityActivity(uow);
-
-			uow.commitWork();
-		}
+		updateOpportunityActivityOnAccount();
 	}
-		
+
+	private void updateOpportunityActivityOnAccount()
+	{
+		Set<Id> accountIds =
+				Opportunities.newInstance(this.Records)
+						.getAccountIds();
+
+		if (accountIds.isEmpty()) return;
+
+		AccountsService.updateOpportunityActivity(accountIds);
+	}
+
 	public class Constructor implements fflib_SObjectDomain.IConstructable
 	{
 		public fflib_SObjectDomain construct(List<SObject> sObjectList)

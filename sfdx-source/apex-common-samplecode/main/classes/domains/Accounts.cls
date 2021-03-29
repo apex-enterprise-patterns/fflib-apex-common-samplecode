@@ -27,6 +27,8 @@
 public with sharing class Accounts extends fflib_SObjects
 	implements IAccounts
 {
+	public static final String OPPORTUNITY_RAISED_DESCRIPTION = 'Last Opportunity Raised';
+
 	public static IAccounts newInstance(List<Account> recordList)
 	{
 		return (IAccounts) Application.Domain.newInstance(recordList);
@@ -47,13 +49,17 @@ public with sharing class Accounts extends fflib_SObjects
 		return (List<Account>) getRecords();
 	}
 
-	public void updateOpportunityActivity(fflib_ISObjectUnitOfWork uow)
+	public void setDescription(String description)
 	{
-		for(Account account : getAccounts())
+		for (Account account : getAccounts())
 		{
-			account.Description = 'Last Opportunity Raised ' + System.today();
-			uow.registerDirty(account);
+			account.Description = description;
 		}
+	}
+
+	public void updateOpportunityActivity()
+	{
+		setDescription(OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today());
 	}
 
 	public class Constructor implements fflib_IDomainConstructor

@@ -27,5 +27,6 @@
 public interface IAccounts extends fflib_ISObjects
 {
 	List<Account> getAccounts();
-	void updateOpportunityActivity(fflib_ISObjectUnitOfWork uow);
+	void setDescription(String description);
+	void updateOpportunityActivity();
 }
