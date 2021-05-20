@@ -24,9 +24,11 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class Accounts extends fflib_SObjectDomain
+public with sharing class Accounts extends fflib_SObjects
 	implements IAccounts
 {
+	public static final String OPPORTUNITY_RAISED_DESCRIPTION = 'Last Opportunity Raised';
+
 	public static IAccounts newInstance(List<Account> recordList)
 	{
 		return (IAccounts) Application.Domain.newInstance(recordList);
@@ -39,23 +41,32 @@ public with sharing class Accounts extends fflib_SObjectDomain
 	
 	public Accounts(List<Account> sObjectList)
 	{
-		super(sObjectList);
+		super(sObjectList, Schema.Account.SObjectType);
 	}
-	
-	public void updateOpportunityActivity(fflib_ISObjectUnitOfWork uow)
+
+	public List<Account> getAccounts()
 	{
-		for(Account account : (List<Account>) this.records)
+		return (List<Account>) getRecords();
+	}
+
+	public void setDescription(String description)
+	{
+		for (Account account : getAccounts())
 		{
-			account.Description = 'Last Opportunity Raised ' + System.today();
-			uow.registerDirty(account);
+			account.Description = description;
 		}
 	}
 
-	public class Constructor implements fflib_SObjectDomain.IConstructable
+	public void updateOpportunityActivity()
 	{
-		public fflib_SObjectDomain construct(List<SObject> sObjectList)
+		setDescription(OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today());
+	}
+
+	public class Constructor implements fflib_IDomainConstructor
+	{
+		public fflib_SObjects construct(List<Object> objectList)
 		{
-			return new Accounts(sObjectList);
+			return new Accounts((List<SObject>) objectList);
 		}
 	}
 }

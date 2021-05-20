@@ -29,19 +29,33 @@ public class OpportunitiesServiceImpl
 {
 	public void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
 	{
+		applyDiscounts(
+				OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds),
+				discountPercentage);
+	}
+
+	public void applyDiscounts(List<Opportunity> opportunitiesWithProducts, Decimal discountPercentage)
+	{
+		applyDiscounts(
+				Opportunities.newInstance(opportunitiesWithProducts),
+				discountPercentage
+		);
+	}
+
+	public void applyDiscounts(IOpportunities opportunitiesWithProducts, Decimal discountPercentage)
+	{
 		// Create unit of work to capture work and commit it under one transaction
 	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
-	    	    	    	  	    										
-		// Query Opportunities
-		List<Opportunity> oppRecords = 
-			OpportunitiesSelector.newInstance().selectByIdWithProducts(opportunityIds);
 
-		// Apply discount via Opportunities domain class behaviour
-		IOpportunities opps = Opportunities.newInstance(oppRecords);				
-		opps.applyDiscount(discountPercentage, uow);
-		
-		// Commit updates to opportunities		
-		uow.commitWork();						
+		applyDiscounts(uow, opportunitiesWithProducts, discountPercentage);
+
+		// Commit updates to opportunities
+		uow.commitWork();
+	}
+
+	public void applyDiscounts(fflib_ISObjectUnitOfWork uow, IOpportunities opportunitiesWithProducts, Decimal discountPercentage)
+	{
+		opportunitiesWithProducts.applyDiscount(discountPercentage, uow);
 	}
 
 	public Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)

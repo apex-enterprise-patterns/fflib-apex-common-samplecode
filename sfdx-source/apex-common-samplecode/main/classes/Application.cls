@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014-2016, FinancialForce.com, inc
+ * Copyright (c) 2014-2016, FinancialForce.com, Inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -29,7 +29,8 @@ public class Application
 	// Configure and create the UnitOfWorkFactory for this Application
 	public static final fflib_Application.UnitOfWorkFactory UnitOfWork = 
 		new fflib_Application.UnitOfWorkFactory(
-				new List<SObjectType> { 
+				new List<SObjectType> {
+					Account.SObjectType,
 					Invoice__c.SObjectType,
 					InvoiceLine__c.SObjectType,
 					Opportunity.SObjectType,
@@ -45,6 +46,7 @@ public class Application
 	public static final fflib_Application.ServiceFactory Service = 
 		new fflib_Application.ServiceFactory( 
 			new Map<Type, Type> {
+					IAccountsService.class => AccountsServiceImpl.class,
 					IOpportunitiesService.class => OpportunitiesServiceImpl.class,
 					IInvoicingService.class => InvoicingServiceImpl.class });
 

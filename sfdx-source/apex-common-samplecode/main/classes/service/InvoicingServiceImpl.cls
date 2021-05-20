@@ -39,7 +39,7 @@ public class InvoicingServiceImpl
 		InvoicingService.InvoiceFactory invoiceFactory = new InvoicingService.InvoiceFactory(uow);
 		
 		// Construct domain class capabile of performing invoicing
-		fflib_ISObjectDomain domain =  
+		fflib_IDomain domain =
 			Application.Domain.newInstance(
 				Application.Selector.selectById(new Set<Id>(sourceRecordIds)));
 		if (domain instanceof InvoicingService.ISupportInvoicing)

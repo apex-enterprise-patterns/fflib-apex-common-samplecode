@@ -24,7 +24,9 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public interface IAccounts extends fflib_ISObjectDomain
+public interface IAccounts extends fflib_ISObjects
 {
-	void updateOpportunityActivity(fflib_ISObjectUnitOfWork uow);
+	List<Account> getAccounts();
+	void setDescription(String description);
+	void updateOpportunityActivity();
 }
