@@ -24,9 +24,9 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class OpportunityTriggerHandler extends fflib_SObjectDomain
+public class OpportunitiesTriggerHandler extends fflib_SObjectDomain
 {
-	public OpportunityTriggerHandler(List<Opportunity> sObjectList)
+	public OpportunitiesTriggerHandler(List<Opportunity> sObjectList)
 	{
 		// Domain classes are initialised with lists to enforce bulkification throughout
 		super(sObjectList);
@@ -109,7 +109,7 @@ public class OpportunityTriggerHandler extends fflib_SObjectDomain
 	{
 		public fflib_SObjectDomain construct(List<SObject> sObjectList)
 		{
-			return new OpportunityTriggerHandler(sObjectList);
+			return new OpportunitiesTriggerHandler(sObjectList);
 		}
 	}
 }
