@@ -28,13 +28,13 @@
  * This test class demonstrates two approaches to unit testing, with and without DML, each has its own pros and cons
  **/
 @IsTest
-private class OpportunityTriggerHandlerTest 
+private class OpportunitiesTriggerHandlerTest 
 {
 
 	@IsTest
 	private static void testValidationWithoutDML()
 	{
-		OpportunityTriggerHandler opps = new OpportunityTriggerHandler(new Opportunity[] { new Opportunity ( Name = 'Test', Type = 'Existing Account' ) } );
+		OpportunitiesTriggerHandler opps = new OpportunitiesTriggerHandler(new Opportunity[] { new Opportunity ( Name = 'Test', Type = 'Existing Account' ) } );
 		opps.onValidate();
 		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
 		System.assertEquals('You must provide an Account for OpportunityTriggerHandler for existing Customers.', fflib_SObjectDomain.Errors.getAll()[0].message);
@@ -46,7 +46,7 @@ private class OpportunityTriggerHandlerTest
 	{
 		Opportunity opp = new Opportunity ( Name = 'Test', Type = 'Existing Account' );
 		fflib_SObjectDomain.Test.Database.onInsert(new Opportunity[] { opp } );		
-		fflib_SObjectDomain.triggerHandler(OpportunityTriggerHandler.class);
+		fflib_SObjectDomain.triggerHandler(OpportunitiesTriggerHandler.class);
 		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
 		System.assertEquals('You must provide an Account for OpportunityTriggerHandler for existing Customers.', fflib_SObjectDomain.Errors.getAll()[0].message);
 		System.assertEquals(Opportunity.AccountId, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		
@@ -58,7 +58,7 @@ private class OpportunityTriggerHandlerTest
 		Opportunity oldOpp = new Opportunity ( Name = 'Test', Type = 'Existing Account' );
 		Opportunity newOpp = new Opportunity ( Name = 'Test', Type = 'New Account' );
 		fflib_SObjectDomain.Test.Database.onUpdate(new Opportunity[] { newOpp }, new Map<Id, SObject> { newOpp.Id => oldOpp } );		
-		fflib_SObjectDomain.triggerHandler(OpportunityTriggerHandler.class);
+		fflib_SObjectDomain.triggerHandler(OpportunitiesTriggerHandler.class);
 		System.assertEquals(1, fflib_SObjectDomain.Errors.getAll().size());		
 		System.assertEquals('You cannot change the Opportunity type once it has been created.', fflib_SObjectDomain.Errors.getAll()[0].message);
 		System.assertEquals(Opportunity.Type, ((fflib_SObjectDomain.FieldError)fflib_SObjectDomain.Errors.getAll()[0]).field); 		
@@ -69,7 +69,7 @@ private class OpportunityTriggerHandlerTest
 	{
 		Opportunity opp = new Opportunity ( Name = 'Test' );
 		fflib_SObjectDomain.Test.Database.onInsert(new Opportunity[] { opp } );		
-		fflib_SObjectDomain.triggerHandler(OpportunityTriggerHandler.class);
+		fflib_SObjectDomain.triggerHandler(OpportunitiesTriggerHandler.class);
 		System.assertEquals(fflib_SObjectDomain.Errors.getAll().size(), 0);		
 	}
 
