@@ -33,16 +33,16 @@ private class AccountsServiceTest
 		// GIVEN a list of account records
 		List<Account> accounts = new List<Account>
 		{
-				new Account(Name = 'A', Id = fflib_IDGenerator.generate(Schema.Account.SObjectType)),
-				new Account(Name = 'B', Id = fflib_IDGenerator.generate(Schema.Account.SObjectType)),
-				new Account(Name = 'C', Id = fflib_IDGenerator.generate(Schema.Account.SObjectType))
+			new Account(Name = 'A', Id = fflib_IDGenerator.generate(Schema.Account.SObjectType)),
+			new Account(Name = 'B', Id = fflib_IDGenerator.generate(Schema.Account.SObjectType)),
+			new Account(Name = 'C', Id = fflib_IDGenerator.generate(Schema.Account.SObjectType))
 		};
 
 		Set<Id> accountIds = new Map<Id, SObject>(accounts).keySet();
 
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
 		fflib_ISObjectUnitOfWork unitOfWorkMock = new fflib_SObjectMocks.SObjectUnitOfWork(mocks);
-		IAccountsSelector selectorMock = (IAccountsSelector) mocks.mock(AccountsSelector.class);
+		IAccountsSelector selectorMock = (IAccountsSelector) mocks.mock(IAccountsSelector.class);
 		IAccounts domainMock = (IAccounts) mocks.mock(Accounts.class);
 
 		mocks.startStubbing();
