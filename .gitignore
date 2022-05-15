@@ -39,6 +39,7 @@ IlluminatedCloud/
 
 # SFDX Related
 .sfdx/
+.sf/
 
 # NPM Related
 package.json
