@@ -26,5 +26,8 @@
 
 public interface IOpportunitiesSelector extends fflib_ISObjectSelector 
 {
+	List<Opportunity> selectById(Set<Id> idSet);
 	List<Opportunity> selectByIdWithProducts(Set<Id> idSet);
+	List<OpportunityInfo> selectOpportunityInfo(Set<Id> idSet);
+	Database.QueryLocator queryLocatorReadyToInvoice();
 }
