@@ -1,11 +1,15 @@
 {
     "packageDirectories": [
         {
+            "path": "sfdx-source/untracked",
+            "default": false
+        },
+        {
             "path": "sfdx-source/apex-common-samplecode",
             "default": true
         }
     ],
     "namespace": "",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "53.0"
+    "sourceApiVersion": "55.0"
 }
