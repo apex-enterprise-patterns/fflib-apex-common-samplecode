@@ -9,6 +9,7 @@ temp/
 build.properties
 sfdx-source/apex-common-samplecode/main/default/
 sfdx-source/untracked/
+!sfdx-source/untracked/README.md
 .execanon
 
 # MavensMate IDE related
