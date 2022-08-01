@@ -25,7 +25,7 @@
 **/
 
 @IsTest
-private class OpportunitiesServiceTestIntegration 
+private class OpportunitiesServiceIntegrationTest 
 {
 	@IsTest
 	private static void testServiceClass() 

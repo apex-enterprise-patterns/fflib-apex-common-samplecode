@@ -42,20 +42,16 @@ public class OpportunitiesServiceImpl
 		);
 	}
 
-	public void applyDiscounts(IOpportunities opportunitiesWithProducts, Decimal discountPercentage)
+	private void applyDiscounts(IOpportunities opportunitiesWithProducts, Decimal discountPercentage)
 	{
 		// Create unit of work to capture work and commit it under one transaction
 	    fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
 
-		applyDiscounts(uow, opportunitiesWithProducts, discountPercentage);
+		// applyDiscounts(uow, opportunitiesWithProducts, discountPercentage);
+		opportunitiesWithProducts.applyDiscount(discountPercentage, uow);
 
 		// Commit updates to opportunities
 		uow.commitWork();
-	}
-
-	public void applyDiscounts(fflib_ISObjectUnitOfWork uow, IOpportunities opportunitiesWithProducts, Decimal discountPercentage)
-	{
-		opportunitiesWithProducts.applyDiscount(discountPercentage, uow);
 	}
 
 	public Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)

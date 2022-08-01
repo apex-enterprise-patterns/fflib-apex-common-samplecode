@@ -31,29 +31,6 @@ public class OpportunitiesTriggerHandler extends fflib_SObjectDomain
 		// Domain classes are initialised with lists to enforce bulkification throughout
 		super(sObjectList);
 	}
-	
-	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
-	{
-		// Utilise InvoiceFactory to create invoices from Opportunity details
-		for(Opportunity opportunity : (List<Opportunity>) this.records)
-		{
-			InvoicingService.Invoice invoice = new InvoicingService.Invoice();
-			invoice.Account = opportunity.AccountId;
-			invoice.Description = opportunity.Description;
-			invoice.InvoiceDate = opportunity.CloseDate.addDays(14);
-			invoice.Lines = new List<InvoicingService.InvoiceLine>();
-			for(OpportunityLineItem lineItem : opportunity.OpportunityLineItems)
-			{
-				InvoicingService.InvoiceLine invoiceLineItem = new InvoicingService.InvoiceLine();
-				invoiceLineItem.Description = lineItem.Description;
-				invoiceLineItem.Product = lineItem.PricebookEntry.Product2Id;
-				invoiceLineItem.UnitPrice = lineItem.UnitPrice;
-				invoiceLineItem.Quantity = lineItem.Quantity;
-				invoice.Lines.add(invoiceLineItem);
-			}			
-			invoiceFactory.add(invoice);
-		}
-	}
 
 	public override void onApplyDefaults()
 	{
@@ -69,7 +46,7 @@ public class OpportunitiesTriggerHandler extends fflib_SObjectDomain
 		// Validate OpportunityTriggerHandler
 		for(Opportunity opp : (List<Opportunity>) this.records)
 		{
-			if(opp.Type!=null && opp.Type.startsWith('Existing') && opp.AccountId == null)
+			if(opp.Type != null && opp.Type.startsWith('Existing') && opp.AccountId == null)
 			{
 				opp.AccountId.addError( error('You must provide an Account for OpportunityTriggerHandler for existing Customers.', opp, Opportunity.AccountId) );
 			}
@@ -79,10 +56,10 @@ public class OpportunitiesTriggerHandler extends fflib_SObjectDomain
 	public override void onValidate(Map<Id,SObject> existingRecords)
 	{
 		// Validate changes to OpportunityTriggerHandler
-		for(Opportunity opp : (List<Opportunity>) this.records)
+		for (Opportunity opp : (List<Opportunity>) this.records)
 		{
 			Opportunity existingOpp = (Opportunity) existingRecords.get(opp.Id);
-			if(opp.Type != existingOpp.Type)
+			if (opp.Type != existingOpp.Type)
 			{
 				opp.Type.addError( error('You cannot change the Opportunity type once it has been created.', opp, Opportunity.Type) );
 			}
@@ -97,7 +74,7 @@ public class OpportunitiesTriggerHandler extends fflib_SObjectDomain
 	private void updateOpportunityActivityOnAccount()
 	{
 		Set<Id> accountIds =
-				Opportunities.newInstance(this.Records)
+				Opportunities.newInstance(this.records)
 						.getAccountIds();
 
 		if (accountIds.isEmpty()) return;

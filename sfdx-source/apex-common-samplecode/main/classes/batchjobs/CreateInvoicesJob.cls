@@ -31,13 +31,13 @@
  *        focusing on passing parameters in and handling errors and notifications
  *
  **/ 
-global with sharing class CreateInvoicesJob
+public with sharing class CreateInvoicesJob
 	implements System.Schedulable, Database.Batchable<SObject>, Database.Stateful  
 {	
 	// Simple job log for errors
 	private List<JobError> jobErrors = new List<JobError>();
 	
-	global void execute(SchedulableContext sc)
+	public void execute(SchedulableContext sc)
 	{
 		// Start the job once the scheduled time has arrived
 		Database.executeBatch(new CreateInvoicesJob());		

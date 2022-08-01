@@ -24,19 +24,19 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-global with sharing class OpportunitiesService 
+public with sharing class OpportunitiesService 
 {		
-	global static void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
+	public static void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
 	{
 		service().applyDiscounts(opportunityIds, discountPercentage);
 	}
 	
-	global static Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)
+	public static Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)
 	{		
 		return service().createInvoices(opportunityIds, discountPercentage);
 	}
 	
-	global static Id submitInvoicingJob()
+	public static Id submitInvoicingJob()
 	{
 		return service().submitInvoicingJob();
 	}	
