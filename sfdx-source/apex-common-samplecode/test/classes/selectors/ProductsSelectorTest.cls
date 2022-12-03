@@ -43,10 +43,10 @@ private class ProductsSelectorTest
 			new ProductsSelector(true).selectById(new Set<Id> { product.Id });
 			
 		// Assert
-		System.assertEquals('Something cool', products[0].Description);		
-		System.assertEquals('CoolItem', products[0].Name);		
-		System.assertEquals(true, products[0].IsActive);		
-		System.assertEquals('My Text Field', products[0].SubscriberField__c);		
+		System.Assert.areEqual('Something cool', products[0].Description);		
+		System.Assert.areEqual('CoolItem', products[0].Name);		
+		System.Assert.isTrue(products[0].IsActive);		
+		System.Assert.areEqual('My Text Field', products[0].SubscriberField__c);		
 	}
 
 	@IsTest
@@ -67,9 +67,9 @@ private class ProductsSelectorTest
 		// Assert
 		Database.QueryLocatorIterator productsIterator = queryLocator.iterator();
 		Product2 queriedProduct = (Product2) productsIterator.next();
-		System.assertEquals('Something cool', queriedProduct.Description);		
-		System.assertEquals('CoolItem', queriedProduct.Name);		
-		System.assertEquals(true, queriedProduct.IsActive);		
-		System.assertEquals('My Text Field', queriedProduct.SubscriberField__c);		
+		System.Assert.areEqual('Something cool', queriedProduct.Description);		
+		System.Assert.areEqual('CoolItem', queriedProduct.Name);		
+		System.Assert.isTrue(queriedProduct.IsActive);		
+		System.Assert.areEqual('My Text Field', queriedProduct.SubscriberField__c);		
 	}
 }

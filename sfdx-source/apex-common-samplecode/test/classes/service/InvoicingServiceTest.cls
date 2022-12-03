@@ -60,6 +60,6 @@ private class InvoicingServiceTest
 		List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.Id });
 
 		// Assert Invoices
-		System.assertEquals(1, invoiceIds.size());
+		System.Assert.areEqual(1, invoiceIds.size());
 	}
 }

@@ -40,11 +40,11 @@ private class AccountsTest
 
 		// THEN the description should be updated
 		List<Account> result = domain.getAccounts();
-		System.assertEquals(3, result.size());
+		System.Assert.areEqual(3, result.size());
 		final String expectedValue = Accounts.OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today();
 		for (Account record : result)
 		{
-			System.assertEquals(expectedValue, record.Description);
+			System.Assert.areEqual(expectedValue, record.Description);
 		}
 	}
 

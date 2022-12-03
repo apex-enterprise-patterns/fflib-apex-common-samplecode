@@ -77,7 +77,7 @@ private class OpportunitiesTest
 		opps.applyDiscount(10, uow);
 		uow.commitWork();		
 		Opportunity assertOpp = [select Amount from Opportunity where Id = :opp.Id];
-		System.assertEquals(90, assertOpp.Amount);				
+		System.Assert.areEqual(90, assertOpp.Amount);				
 	}
 		
 	@IsTest
@@ -95,6 +95,6 @@ private class OpportunitiesTest
 			AccountId = account.Id );
 		insert opp;		
 		Account assertAccount = [select Description from Account where Id = :account.Id];
-		System.assertEquals('Last Opportunity Raised ' + System.today(), assertAccount.Description);		
+		System.Assert.areEqual('Last Opportunity Raised ' + System.today(), assertAccount.Description);		
 	}			
 }

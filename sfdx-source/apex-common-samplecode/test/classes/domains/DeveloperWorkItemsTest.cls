@@ -43,6 +43,6 @@ private class DeveloperWorkItemsTest {
         uow.commitWork();
         
         // Then
-        System.assertEquals(3100, [select DeveloperCost__c from DeveloperWorkItem__c where Id = :wi.Id].DeveloperCost__c);
+        System.Assert.areEqual(3100, [select DeveloperCost__c from DeveloperWorkItem__c where Id = :wi.Id].DeveloperCost__c);
     }
 }

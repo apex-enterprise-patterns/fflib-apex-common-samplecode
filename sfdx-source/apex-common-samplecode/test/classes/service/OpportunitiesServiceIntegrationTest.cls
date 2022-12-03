@@ -100,6 +100,6 @@ private class OpportunitiesServiceIntegrationTest
 		Test.stopTest();
 
 		// Assert
-		System.assertEquals(90, [select Amount from Opportunity limit 1][0].Amount);
+		System.Assert.areEqual(90, [select Amount from Opportunity limit 1][0].Amount);
 	}	
 }
