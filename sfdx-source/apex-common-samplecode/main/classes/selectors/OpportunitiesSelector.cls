@@ -84,14 +84,14 @@ public class OpportunitiesSelector extends fflib_SObjectSelector
 		List<OpportunityInfo> opportunityInfos = new List<OpportunityInfo>();
 
 		for(Opportunity opportunity : Database.query( newQueryFactory(false)
-														.selectField(Opportunity.Id)
-														.selectField(Opportunity.StageName)
-														.selectField(Opportunity.Amount)
-														.selectField('Account.Name')
-														.selectField('Account.AccountNumber')
-														.selectField('Account.Owner.Name')
-														.setCondition('id in :idSet')
-														.toSOQL() ))
+								.selectField(Opportunity.Id)
+								.selectField(Opportunity.StageName)
+								.selectField(Opportunity.Amount)
+								.selectField('Account.Name')
+								.selectField('Account.AccountNumber')
+								.selectField('Account.Owner.Name')
+								.setCondition('id in :idSet')
+								.toSOQL() ))
 		{
 			opportunityInfos.add(new OpportunityInfo(opportunity));
 		}
