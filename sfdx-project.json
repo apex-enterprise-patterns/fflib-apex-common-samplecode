@@ -1,15 +1,15 @@
 {
-    "packageDirectories": [
-        {
-            "path": "sfdx-source/untracked",
-            "default": false
-        },
-        {
-            "path": "sfdx-source/apex-common-samplecode",
-            "default": true
-        }
-    ],
-    "namespace": "",
-    "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "58.0"
+  "packageDirectories": [
+    {
+      "path": "sfdx-source/untracked",
+      "default": false
+    },
+    {
+      "path": "sfdx-source/apex-common-samplecode",
+      "default": true
+    }
+  ],
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "59.0"
 }
