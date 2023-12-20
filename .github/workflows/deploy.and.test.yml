@@ -15,23 +15,23 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
-      - name: Install SFDX CLI and authorize DevHub
+      - name: Install SF CLI and authorize DevHub
         uses: apex-enterprise-patterns/setup-sfdx@v2 #We're using a fork of https://github.com/sfdx-actions/setup-sfdx for safety
         with:
           sfdx-auth-url: ${{ secrets.DEVHUB_SFDXURL }}
-      # Install the required plugins
-      - run: echo y | sf plugins install shane-sfdx-plugins
-      # Setup the config parameters needed
-      - run: sf config set target-dev-hub SFDX-ENV --global #Even though the setup-sfdx action uses --setdefaultdevhubusername, it doesn't seem to stick since it uses --setdefaultusername so we brute force it here
-      # Create the scratch org
-      - run: sf org create scratch --definition-file config/project-scratch-def.json --set-default --duration-days 1 --no-track-source
-      # Install required dependency frameworks
-      - run: sf shane github src install --convert --githubuser apex-enterprise-patterns --repo fflib-apex-mocks --path sfdx-source/apex-mocks
+      - name: Install the required plugins
+        run: echo y | sf plugins install shane-sfdx-plugins
+      - name: Setup the config parameters needed
+        run: sf config set target-dev-hub SFDX-ENV --global #Even though the setup-sfdx action uses --setdefaultdevhubusername, it doesn't seem to stick since it uses --setdefaultusername so we brute force it here
+      - name: Create the scratch org
+        run: sf org create scratch --definition-file config/project-scratch-def.json --set-default --duration-days 1 --no-track-source
+      - name: Install required dependency frameworks
+        run: sf shane github src install --convert --githubuser apex-enterprise-patterns --repo fflib-apex-mocks --path sfdx-source/apex-mocks
       - run: sf shane github src install --convert --githubuser apex-enterprise-patterns --repo fflib-apex-common --path sfdx-source/apex-common
-      # Deploy/compile the codebase
-      - run: sf project deploy start
-      # Run the core framework tests
-      - run: sf apex run test --wait 5
+      - name: Deploy and compile the codebase
+        run: sf project deploy start
+      - name: Run the core framework tests
+        run: sf apex run test --wait 5
       - name: Destroy scratch org
         run: sf org delete scratch --no-prompt
         if: always()
