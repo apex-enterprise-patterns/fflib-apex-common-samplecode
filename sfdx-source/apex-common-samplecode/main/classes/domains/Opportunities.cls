@@ -79,7 +79,7 @@ public class Opportunities extends fflib_SObjects
 		{
 			// Apply to the Opportunity Amount?
 			if(opportunity.OpportunityLineItems == null 
-        || opportunity.OpportunityLineItems.isEmpty())
+        		|| opportunity.OpportunityLineItems.isEmpty())
 			{
 				// Adjust the Amount on the Opportunity if no lines
 				opportunity.Amount = opportunity.Amount * factor;
