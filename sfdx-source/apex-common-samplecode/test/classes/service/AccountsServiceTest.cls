@@ -41,7 +41,7 @@ private class AccountsServiceTest
 		Set<Id> accountIds = new Map<Id, SObject>(accounts).keySet();
 
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		fflib_ISObjectUnitOfWork unitOfWorkMock = new fflib_SObjectMocks.SObjectUnitOfWork(mocks);
+		fflib_ISObjectUnitOfWork unitOfWorkMock = (fflib_ISObjectUnitOfWork) mocks.mock(fflib_ISObjectUnitOfWork.class);
 		IAccountsSelector selectorMock = (IAccountsSelector) mocks.mock(IAccountsSelector.class);
 		IAccounts domainMock = (IAccounts) mocks.mock(Accounts.class);
 
