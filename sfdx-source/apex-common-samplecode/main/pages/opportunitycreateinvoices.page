@@ -4,7 +4,7 @@
 <apex:pageBlock title="Create Invoices">
 	<apex:pageBlockSection title="Opportunity Information">
 		<apex:pageBlockTable value="{!selected}" var="item">
-			<apex:column value="{!item.Name}"/>			
+			<apex:column value="{!item.Name}"/>
 		</apex:pageBlockTable>
 	</apex:pageBlockSection>
 	<apex:pageBlockSection title="Discount">

@@ -2,36 +2,43 @@
  * Copyright (c) 2012-2015, FinancialForce.com, inc
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, 
+ * Redistribution and use in source and binary forms, with or without modification,
  *   are permitted provided that the following conditions are met:
  *
- * - Redistributions of source code must retain the above copyright notice, 
+ * - Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice, 
- *      this list of conditions and the following disclaimer in the documentation 
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
  *      and/or other materials provided with the distribution.
- * - Neither the name of the FinancialForce.com, inc nor the names of its contributors 
- *      may be used to endorse or promote products derived from this software without 
+ * - Neither the name of the FinancialForce.com, inc nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
- *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
- *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+ *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  *  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class OpportunitiesSelector extends fflib_SObjectSelector
-	implements IOpportunitiesSelector
+public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 {
-	public static IOpportunitiesSelector newInstance()
+	@TestVisible
+	private static OpportunitiesSelector mock;
+	public static OpportunitiesSelector newInstance()
 	{
-		return (IOpportunitiesSelector) Application.Selector.newInstance(Opportunity.SObjectType);
+		if (mock != null) { return mock; }
+		return new OpportunitiesSelector();
 	}
-	
+
+	public OpportunitiesSelector() {
+		super(false);
+		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+	}
+
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {
@@ -49,7 +56,7 @@ public class OpportunitiesSelector extends fflib_SObjectSelector
 			Opportunity.DiscountType__c
 		};
 	}
-	
+
 	public Schema.SObjectType getSObjectType()
 	{
 		return Opportunity.SObjectType;
@@ -64,21 +71,21 @@ public class OpportunitiesSelector extends fflib_SObjectSelector
 	{
 		fflib_QueryFactory opportunitiesQueryFactory = newQueryFactory();
 
-		fflib_QueryFactory lineItemsQueryFactory = 
-			new OpportunityLineItemsSelector().
+		fflib_QueryFactory lineItemsQueryFactory =
+			OpportunityLineItemsSelector.newInstance().
 				addQueryFactorySubselect(opportunitiesQueryFactory);
-			
-		new PricebookEntriesSelector().
+
+		PricebookEntriesSelector.newInstance().
 			configureQueryFactoryFields(lineItemsQueryFactory, 'PricebookEntry');
-		new ProductsSelector().
+		ProductsSelector.newInstance().
 			configureQueryFactoryFields(lineItemsQueryFactory, 'PricebookEntry.Product2');
-		new PricebooksSelector().
+		PricebooksSelector.newInstance().
 			configureQueryFactoryFields(lineItemsQueryFactory, 'PricebookEntry.Pricebook2');
 
 		return (List<Opportunity>) Database.query(
 			opportunitiesQueryFactory.setCondition('id in :idSet').toSOQL());
 	}
-	
+
 	public List<OpportunityInfo> selectOpportunityInfo(Set<Id> idSet)
 	{
 		List<OpportunityInfo> opportunityInfos = new List<OpportunityInfo>();
@@ -95,10 +102,10 @@ public class OpportunitiesSelector extends fflib_SObjectSelector
 		{
 			opportunityInfos.add(new OpportunityInfo(opportunity));
 		}
-			
-		return opportunityInfos;	
+
+		return opportunityInfos;
 	}
-	
+
 	public Database.QueryLocator queryLocatorReadyToInvoice()
 	{
 		return Database.getQueryLocator(

@@ -27,26 +27,33 @@
 @IsTest
 private class AccountsTest
 {
-	@IsTest
-	static void itShouldUpdateTheOpportunityActivity()
+	@TestSetup
+	static void setup()
 	{
-		// Given a domain with few Account records with an empty description field
-		Accounts domain = new Accounts(new List<Account>{	new Account(), new Account(), new Account()	});
-
-		// WHEN we set the description field to a value
-		System.Test.startTest();
-		domain.updateOpportunityActivity();
-		System.Test.stopTest();
-
-		// THEN the description should be updated
-		List<Account> result = domain.getAccounts();
-		System.assertEquals(3, result.size());
-		final String expectedValue = Accounts.OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today();
-		for (Account record : result)
-		{
-			System.assertEquals(expectedValue, record.Description);
-		}
+		TestDataFactory.createUserWithSampleAppPermissions();
 	}
 
+	@IsTest
+	static void updateActivitySetsDescriptions()
+	{
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			// Given
+			Accounts domain = Accounts.newInstance(new List<Account> { new Account(), new Account(), new Account() });
 
+			// When
+			Test.startTest();
+			domain.updateOpportunityActivity();
+			Test.stopTest();
+
+			// Then
+			List<Account> result = domain.getAccounts();
+			System.assertEquals(3, result.size(), 'Should have 3 account records');
+			final String expectedValue = Accounts.OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today();
+			for (Account record : result)
+			{
+				System.assertEquals(expectedValue, record.Description, 'Account description should be updated');
+			}
+		}
+	}
 }

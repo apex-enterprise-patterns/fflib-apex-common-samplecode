@@ -2,22 +2,22 @@
  * Copyright (c) 2013, FinancialForce.com, inc
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, 
+ * Redistribution and use in source and binary forms, with or without modification,
  *   are permitted provided that the following conditions are met:
  *
- * - Redistributions of source code must retain the above copyright notice, 
+ * - Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice, 
- *      this list of conditions and the following disclaimer in the documentation 
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
  *      and/or other materials provided with the distribution.
- * - Neither the name of the FinancialForce.com, inc nor the names of its contributors 
- *      may be used to endorse or promote products derived from this software without 
+ * - Neither the name of the FinancialForce.com, inc nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
- *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
- *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+ *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  *  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
@@ -26,42 +26,58 @@
 
 /**
  * Controller shared by Apply Discount and Apply Discounts Custom Buttons (and related pages) on the Opportunity
- * 
+ *
  * NOTE: The same service method is called regardless, logic in this controller is thus very light,
  *        focusing on passing parameters in and handling errors and notifications
  **/
-public with sharing class OpportunityApplyDiscountController 
+public with sharing class OpportunityApplyDiscountController
 {
-	public Decimal DiscountPercentage { get; set; } 
-	
+	public Decimal DiscountPercentage { get; set; }
+
 	private ApexPages.StandardController standardController = null;
-	
-	private ApexPages.StandardSetController standardSetController = null; 
-	
+
+	private ApexPages.StandardSetController standardSetController = null;
+
+	private OpportunitiesService oppService;
+
 	public OpportunityApplyDiscountController(ApexPages.StandardController controller)
 	{
-		standardController = controller;
+		this(controller, OpportunitiesService.newInstance());
 	}
-	
+
 	public OpportunityApplyDiscountController(ApexPages.StandardSetController controller)
 	{
 		standardSetController = controller;
+		oppService = OpportunitiesService.newInstance();
 	}
-	
+
+	@TestVisible
+	private OpportunityApplyDiscountController(ApexPages.StandardController controller, OpportunitiesService svc)
+	{
+		standardController = controller;
+		oppService = svc;
+	}
+
+	@TestVisible
+	private OpportunityApplyDiscountController(ApexPages.StandardSetController controller, OpportunitiesService svc)
+	{
+		standardSetController = controller;
+		oppService = svc;
+	}
+
 	public PageReference applyDiscount()
 	{
 		try
 		{
-			// Apply discount entered to the current Opportunity
-			OpportunitiesService.applyDiscounts(
+			oppService.applyDiscounts(
 				new Set<Id> { standardController.getId() }, DiscountPercentage);
 		}
 		catch (Exception e)
 		{
 			ApexPages.addMessages(e);
-		}		
-		
-		return ApexPages.hasMessages() ? null : standardController.view();				
+		}
+
+		return ApexPages.hasMessages() ? null : standardController.view();
 	}
 
 	public PageReference applyDiscounts()
@@ -71,19 +87,18 @@ public with sharing class OpportunityApplyDiscountController
 			// Selected Opportunity Id's
 			Set<Id> selectedOpportunityIds =
 				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
-			
-			// Apply discount entered to the selected Opportunities
-			OpportunitiesService.applyDiscounts(
+
+			oppService.applyDiscounts(
 					selectedOpportunityIds, DiscountPercentage);
-			
+
 			// Confirm submission
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Opportunities updated.'));
 		}
 		catch (Exception e)
 		{
 			ApexPages.addMessages(e);
-		}		
-		
-		return null;				
+		}
+
+		return null;
 	}
 }
