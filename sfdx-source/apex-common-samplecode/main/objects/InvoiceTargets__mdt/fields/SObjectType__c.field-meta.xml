@@ -5,8 +5,8 @@
     <fieldManageability>SubscriberControlled</fieldManageability>
     <label>SObject Type</label>
     <referenceTo>EntityDefinition</referenceTo>
-    <relationshipLabel>DomainConfigurations</relationshipLabel>
-    <relationshipName>DomainConfigurations</relationshipName>
+    <relationshipLabel>Invoice Targets</relationshipLabel>
+    <relationshipName>InvoiceTargets</relationshipName>
     <required>true</required>
     <type>MetadataRelationship</type>
     <unique>false</unique>

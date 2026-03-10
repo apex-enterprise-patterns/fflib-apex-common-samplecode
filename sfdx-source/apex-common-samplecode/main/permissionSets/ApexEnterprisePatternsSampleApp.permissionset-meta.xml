@@ -2,7 +2,7 @@
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
-        <name>DomainConfiguration__mdt</name>
+        <name>InvoiceTargets__mdt</name>
     </customMetadataTypeAccesses>
     <description>Grants access to custom fields and objects used by Apex Enterprise Patterns sample app tests (USER_MODE enforcement)</description>
     <fieldPermissions>

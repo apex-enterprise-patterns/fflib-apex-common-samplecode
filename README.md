@@ -37,10 +37,10 @@ A detailed comparison by area:
 
 | Area | Original | Alternative |
 |------|----------|-------------|
-| **Factory pattern** | Uses `fflib_Application` (`Application.UnitOfWork`, `Application.Domain`, `Application.Selector`, `Application.Service`) | Largely removed; uses `newInstance()` and mock property setting. `DomainRegistry` is an example implementation to support the polymorphic domain pattern (e.g. `InvoicingService` resolving domains via Custom Metadata) |
+| **Factory pattern** | Uses `fflib_Application` (`Application.UnitOfWork`, `Application.Domain`, `Application.Selector`, `Application.Service`) | Largely removed; uses `newInstance()` and mock property setting. `InvoicingTargetsRegistry` is an example implementation to support the polymorphic domain pattern (e.g. `InvoicingService` resolving domains via Custom Metadata) |
 | **Interfaces** | Domain, selector, and service classes implement interfaces (e.g. IOpportunities, IAccountsSelector) | No interfaces; concrete classes used directly, leveraging Apex mocking support for concrete classes |
 | **Service layer** | Interface + Impl pattern (e.g. OpportunitiesServiceImpl, AccountsServiceImpl) | Single concrete service classes (OpportunitiesService, AccountsService) |
-| **USER_MODE / FLS** | System mode (no USER_MODE enforcement) | Selectors use `setDataAccess(USER_MODE)`; DomainRegistry query uses `WITH USER_MODE`; UnitOfWork uses `UserModeDML()` |
+| **USER_MODE / FLS** | System mode (no USER_MODE enforcement) | Selectors use `setDataAccess(USER_MODE)`; InvoicingTargetsRegistry query uses `WITH USER_MODE`; UnitOfWork uses `UserModeDML()` |
 | **Test setup** | No runAs; tests run as system user | `TestDataFactory` creates Standard User with `ApexEnterprisePatternsSampleApp` permission set; DML tests use `System.runAs()` |
 | **Permission set** | None | `ApexEnterprisePatternsSampleApp` grants field-level access for USER_MODE tests |
 | **OpportunityConsoleController** | Has `@RemoteAction applyDiscount` | Removed; VF Remoting is outdated technology and no longer relevant |

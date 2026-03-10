@@ -80,8 +80,8 @@ public with sharing class InvoicingService
 	{
 		fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
 		InvoiceFactory invoiceFactory = new InvoiceFactory(uow);
-		List<SObject> records = DomainRegistry.selectById(new Set<Id>(sourceRecordIds));
-		fflib_IDomain domain = DomainRegistry.newDomain(records);
+		List<SObject> records = InvoicingTargetsRegistry.selectById(new Set<Id>(sourceRecordIds));
+		fflib_IDomain domain = InvoicingTargetsRegistry.newDomain(records);
 		if (domain instanceof ISupportInvoicing)
 		{
 			((ISupportInvoicing) domain).generate(invoiceFactory);
