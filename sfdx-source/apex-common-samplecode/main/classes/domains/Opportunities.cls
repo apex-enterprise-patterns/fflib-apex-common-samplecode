@@ -27,14 +27,12 @@
 public class Opportunities extends fflib_SObjects
 	implements InvoicingService.ISupportInvoicing
 {
+	@TestVisible
+	private static Opportunities mock;
 	public static Opportunities newInstance(List<Opportunity> recordList)
 	{
-		return (Opportunities) DomainRegistry.newDomain(recordList);
-	}
-
-	public static Opportunities newInstance(Set<Id> recordIdSet)
-	{
-		return (Opportunities) DomainRegistry.newDomain(DomainRegistry.selectById(recordIdSet));
+		if (mock != null) { return mock; }
+		return new Opportunities(recordList);
 	}
 
 	public Opportunities(List<Opportunity> sObjectList)
@@ -93,7 +91,7 @@ public class Opportunities extends fflib_SObjects
 		}
 
 		// Apply discount to lines
-		OpportunityLineItems lineItems = (OpportunityLineItems) DomainRegistry.newDomain(linesToApplyDiscount);
+		OpportunityLineItems lineItems = OpportunityLineItems.newInstance(linesToApplyDiscount);
 		lineItems.applyDiscount(this, discountPercentage, uow);
 	}
 

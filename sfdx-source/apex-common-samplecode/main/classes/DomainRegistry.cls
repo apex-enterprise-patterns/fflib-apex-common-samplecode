@@ -1,19 +1,10 @@
 /**
- * Runtime registry for polymorphic domain/selector resolution via Custom Metadata.
+ * Registry for InvoicingService.generate: polymorphic resolution of domains/selectors
+ * for SObject types whose domain implements InvoicingService.ISupportInvoicing.
  *
- * Acts as a basic factory: given record Ids or records, it resolves the correct
- * selector and domain class from DomainConfiguration__mdt, then instantiates them.
- * Delegates domain construction to fflib_Application.DomainFactory.
- *
- * Basic factory example:
- * <pre>
- * Set&lt;Id&gt; ids = new Set&lt;Id&gt;{ someAccountId };
- * List&lt;SObject&gt; records = DomainRegistry.selectById(ids);  // resolves selector, executes query
- * fflib_IDomain domain = DomainRegistry.newDomain(records); // resolves domain, constructs instance
- * </pre>
- *
- * Use direct selector/domain construction (e.g. AccountsSelector.newInstance(), new Accounts(...))
- * when the SObject type is known at compile time, to avoid the registry indirection.
+ * Configure via DomainConfiguration__mdt only for SObject types whose domain implements ISupportInvoicing.
+ * Not a general-purpose factory. Use direct construction (e.g. AccountsSelector.newInstance(),
+ * Opportunities.newInstance(records)) when the SObject type is known at compile time.
  */
 public with sharing class DomainRegistry
 {
@@ -25,6 +16,7 @@ public with sharing class DomainRegistry
 	@TestVisible
 	private static Map<SObjectType, fflib_IDomain> mockDomains;
 
+	/** Build domain instance for given records; type resolved from metadata or mock. */
 	public static fflib_IDomain newDomain(List<SObject> records)
 	{
 		SObjectType t = records.getSObjectType();
@@ -36,6 +28,7 @@ public with sharing class DomainRegistry
 		return domainFactory.newInstance(records);
 	}
 
+	/** Query records by Id; selector resolved from metadata or mock. All Ids must be same SObject type. */
 	public static List<SObject> selectById(Set<Id> recordIds)
 	{
 		if (recordIds == null || recordIds.isEmpty()) { throw new DomainRegistryException('Invalid record Ids'); }
@@ -50,12 +43,14 @@ public with sharing class DomainRegistry
 		return selectorFactory.selectById(recordIds);
 	}
 
+	/** Lazy init: load DomainConfiguration__mdt and build selector/domain factories. */
 	private static void ensureInitialized()
 	{
 		if (selectorFactory != null) { return; }
 		Map<SObjectType, Type> sobjectToDomain = new Map<SObjectType, Type>();
 		Map<SObjectType, Type> sobjectToSelector = new Map<SObjectType, Type>();
 		Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
+		// Only include SObject types whose domain implements ISupportInvoicing
 		for (DomainConfiguration__mdt c : [
 			SELECT SObjectType__r.QualifiedApiName, DomainClass__c, SelectorClass__c
 			FROM DomainConfiguration__mdt
@@ -67,8 +62,8 @@ public with sharing class DomainRegistry
 			if (String.isNotBlank(apiName) && gd.containsKey(apiName))
 			{
 				SObjectType sot = gd.get(apiName);
-				if (String.isNotBlank(c.DomainClass__c)) { sobjectToDomain.put(sot, Type.forName(c.DomainClass__c)); }
-				if (String.isNotBlank(c.SelectorClass__c)) { sobjectToSelector.put(sot, Type.forName(c.SelectorClass__c)); }
+				sobjectToDomain.put(sot, Type.forName(c.DomainClass__c));
+				sobjectToSelector.put(sot, Type.forName(c.SelectorClass__c));
 			}
 		}
 		selectorFactory = new fflib_Application.SelectorFactory(sobjectToSelector);

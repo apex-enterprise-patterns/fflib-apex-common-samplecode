@@ -61,8 +61,7 @@ private class OpportunitiesServiceTest
 			mocks.stopStubbing();
 			UnitOfWork.mock = uowMock;
 			OpportunitiesSelector.mock = selectorMock;
-			DomainRegistry.mockDomains = new Map<SObjectType, fflib_IDomain>();
-			DomainRegistry.mockDomains.put(Opportunity.SObjectType, domainMock);
+			Opportunities.mock = domainMock;
 
 			// When
 			OpportunitiesService.newInstance().applyDiscounts(testOppsSet, 10);

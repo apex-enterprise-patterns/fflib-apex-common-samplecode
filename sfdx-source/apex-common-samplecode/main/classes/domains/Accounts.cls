@@ -28,14 +28,12 @@ public with sharing class Accounts extends fflib_SObjects
 {
 	public static final String OPPORTUNITY_RAISED_DESCRIPTION = 'Last Opportunity Raised';
 
+	@TestVisible
+	private static Accounts mock;
 	public static Accounts newInstance(List<Account> recordList)
 	{
-		return (Accounts) DomainRegistry.newDomain(recordList);
-	}
-
-	public static Accounts newInstance(Set<Id> recordIdSet)
-	{
-		return (Accounts) DomainRegistry.newDomain(DomainRegistry.selectById(recordIdSet));
+		if (mock != null) { return mock; }
+		return new Accounts(recordList);
 	}
 
 	public Accounts(List<Account> sObjectList)

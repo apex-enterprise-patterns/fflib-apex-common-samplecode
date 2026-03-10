@@ -6,7 +6,7 @@
     <externalId>false</externalId>
     <label>Domain Class</label>
     <length>255</length>
-    <required>false</required>
+    <required>true</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>
 </CustomField>

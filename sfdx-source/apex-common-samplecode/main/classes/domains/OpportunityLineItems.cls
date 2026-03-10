@@ -26,14 +26,12 @@
 
 public with sharing class OpportunityLineItems extends fflib_SObjectDomain
 {
+	@TestVisible
+	private static OpportunityLineItems mock;
 	public static OpportunityLineItems newInstance(List<OpportunityLineItem> recordList)
 	{
-		return (OpportunityLineItems) DomainRegistry.newDomain(recordList);
-	}
-
-	public static OpportunityLineItems newInstance(Set<Id> recordIdSet)
-	{
-		return (OpportunityLineItems) DomainRegistry.newDomain(DomainRegistry.selectById(recordIdSet));
+		if (mock != null) { return mock; }
+		return new OpportunityLineItems(recordList);
 	}
 
 	public OpportunityLineItems(List<OpportunityLineItem> sObjectList)

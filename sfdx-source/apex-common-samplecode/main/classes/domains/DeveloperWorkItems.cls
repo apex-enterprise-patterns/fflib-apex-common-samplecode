@@ -26,14 +26,12 @@
 
 public with sharing class DeveloperWorkItems extends AbstractChargeable
 {
+	@TestVisible
+	private static DeveloperWorkItems mock;
 	public static DeveloperWorkItems newInstance(List<DeveloperWorkItem__c> recordList)
 	{
-		return (DeveloperWorkItems) DomainRegistry.newDomain(recordList);
-	}
-
-	public static DeveloperWorkItems newInstance(Set<Id> recordIdSet)
-	{
-		return (DeveloperWorkItems) DomainRegistry.newDomain(DomainRegistry.selectById(recordIdSet));
+		if (mock != null) { return mock; }
+		return new DeveloperWorkItems(recordList);
 	}
 
 	public DeveloperWorkItems(List<DeveloperWorkItem__c> workItems)
