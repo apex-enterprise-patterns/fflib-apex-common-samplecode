@@ -34,7 +34,13 @@ public class UsersSelector extends fflib_SObjectSelector
 	{
 		return (IUsersSelector) Application.Selector.newInstance(User.SObjectType);
 	}
-		
+
+	public UsersSelector()
+	{
+		super(false);
+		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+	}
+
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
 		// Current app requirements driven solely by getUsersEmail at this stage

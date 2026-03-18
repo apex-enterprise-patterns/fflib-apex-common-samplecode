@@ -30,7 +30,7 @@ Differences from Original Sample
 This alternative diverges from the original sample in the following ways:
 
 - **Metadata-driven factory**—The `Application` class and its factories (Selector, Domain, UnitOfWork, Service) are configured via Custom Metadata (`Application__mdt`) instead of hardcoded mappings, enabling configuration without code changes.
-- **CRUD/FLS and user mode**—The sample can be configured to use fflib user mode for selectors and UnitOfWork where appropriate.
+- **CRUD/FLS and user mode**—UnitOfWork uses `UserModeDML()` for FLS on DML; selectors call `setDataAccess(USER_MODE)` for FLS on queries.
 - **Dependency injection**—Uses `Application.Selector.setMock()`, `Application.Domain.setMock()`, `Application.UnitOfWork.setMock()`, and `Application.Service.setMock()` for testability.
 
 A detailed comparison by area:
@@ -41,6 +41,8 @@ A detailed comparison by area:
 | **Interfaces** | Domain, selector, and service classes implement interfaces | Same; interfaces retained (e.g. IOpportunities, IAccountsSelector, IOpportunitiesService) |
 | **Service layer** | Interface + Impl pattern | Same (e.g. OpportunitiesServiceImpl, InvoicingServiceImpl) |
 | **Configuration** | Static code in Application.cls initializer | Driven by `Application__mdt` records |
+| **UnitOfWork DML** | SimpleDML (system mode) | Inner `UserModeUnitOfWorkFactory` in Application.cls; always uses `UserModeDML` for FLS |
+| **Selectors** | LEGACY (no FLS) | `super(false); setDataAccess(USER_MODE)` in constructors for FLS on SOQL |
 
 Application Enterprise Patterns on Salesforce Lightning Platform
 ================================================================

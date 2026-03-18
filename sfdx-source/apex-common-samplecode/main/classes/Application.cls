@@ -61,7 +61,15 @@ public class Application {
 		}
 		Selector = new fflib_Application.SelectorFactory(selectorTypeBySObject);
 		Domain = new fflib_Application.DomainFactory(Selector, constructorTypeBySObject);
-		UnitOfWork = new fflib_Application.UnitOfWorkFactory(unitOfWorkTypes);
+		UnitOfWork = new UserModeUnitOfWorkFactory(unitOfWorkTypes);
 		Service = new fflib_Application.ServiceFactory(implByInterface);
+	}
+
+	private class UserModeUnitOfWorkFactory extends fflib_Application.UnitOfWorkFactory {
+		public UserModeUnitOfWorkFactory(List<SObjectType> objectTypes) { super(objectTypes); }
+		public override fflib_ISObjectUnitOfWork newInstance() {
+			if (m_mockUow != null) return m_mockUow;
+			return new fflib_SObjectUnitOfWork(m_objectTypes, new fflib_SObjectUnitOfWork.UserModeDML());
+		}
 	}
 }

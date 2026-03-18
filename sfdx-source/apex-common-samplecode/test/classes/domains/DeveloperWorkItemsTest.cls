@@ -30,7 +30,7 @@ private class DeveloperWorkItemsTest {
     static testMethod void whenInsertingDeveloperWorkItemsThenCalcCost() {
         
         // Given
-        fflib_ISObjectUnitOfWOrk uow = Application.UnitOfWork.newInstance();
+        fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
         WorkOrder__c wo = new WorkOrder__c();
         DeveloperWorkItem__c wi = new DeveloperWorkItem__c();
         wi.CodingHours__c = 20;

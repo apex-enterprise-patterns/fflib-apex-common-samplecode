@@ -31,7 +31,13 @@ public class PricebooksSelector extends fflib_SObjectSelector
 	{
 		return (IPricebooksSelector) Application.Selector.newInstance(Pricebook2.SObjectType);
 	}
-	
+
+	public PricebooksSelector()
+	{
+		super(false);
+		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+	}
+
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {

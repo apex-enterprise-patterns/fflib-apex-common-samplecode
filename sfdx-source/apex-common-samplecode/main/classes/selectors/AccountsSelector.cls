@@ -34,7 +34,13 @@ public class AccountsSelector extends fflib_SObjectSelector
 	{
 		return (IAccountsSelector) Application.Selector.newInstance(Account.SObjectType);
 	}
-	
+
+	public AccountsSelector()
+	{
+		super(false);
+		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+	}
+
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {
