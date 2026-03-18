@@ -24,25 +24,34 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-@isTest
-private class DeveloperWorkItemsTest {
+@IsTest
+private class DeveloperWorkItemsTest
+{
+	@TestSetup
+	static void setup()
+	{
+		TestDataFactory.createUserWithSampleAppPermissions();
+	}
 
-    static testMethod void whenInsertingDeveloperWorkItemsThenCalcCost() {
-        
-        // Given
-        fflib_ISObjectUnitOfWOrk uow = Application.UnitOfWork.newInstance();
-        WorkOrder__c wo = new WorkOrder__c();
-        DeveloperWorkItem__c wi = new DeveloperWorkItem__c();
-        wi.CodingHours__c = 20;
-        wi.CodeReviewingHours__c = 1;
-        wi.TechnicalDesignHours__c = 10;
-        uow.registerNew(wo);
-        uow.registerNew(wi, DeveloperWorkItem__c.WorkOrder__c, wo);  
-        
-        // When
-        uow.commitWork();
-        
-        // Then
-        System.assertEquals(3100, [select DeveloperCost__c from DeveloperWorkItem__c where Id = :wi.Id].DeveloperCost__c);
-    }
+	@IsTest
+	private static void whenInsertingDeveloperWorkItemsThenCalcCost()
+	{
+		// Given - data setup in system context, DML in runAs for USER_MODE
+		WorkOrder__c wo = new WorkOrder__c();
+		DeveloperWorkItem__c wi = new DeveloperWorkItem__c();
+		wi.CodingHours__c = 20;
+		wi.CodeReviewingHours__c = 1;
+		wi.TechnicalDesignHours__c = 10;
+
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+			uow.registerNew(wo);
+			uow.registerNew(wi, DeveloperWorkItem__c.WorkOrder__c, wo);
+			uow.commitWork();
+		}
+
+		// Then
+		System.assertEquals(3100, [SELECT DeveloperCost__c FROM DeveloperWorkItem__c WHERE Id = :wi.Id].DeveloperCost__c);
+	}
 }

@@ -31,7 +31,13 @@ public class OpportunitiesSelector extends fflib_SObjectSelector
 	{
 		return (IOpportunitiesSelector) Application.Selector.newInstance(Opportunity.SObjectType);
 	}
-	
+
+	public OpportunitiesSelector()
+	{
+		super(false);
+		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+	}
+
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {

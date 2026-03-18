@@ -30,6 +30,12 @@
 @IsTest
 private class OpportunitiesTest 
 {
+	@TestSetup
+	static void setup()
+	{
+		TestDataFactory.createUserWithSampleAppPermissions();
+	}
+
 	@IsTest
 	private static void callingApplyDiscountShouldCalcDiscountAndRegisterDirty()
 	{
@@ -65,36 +71,46 @@ private class OpportunitiesTest
 	@IsTest
 	private static void testApplyDiscountWithoutOpportunityLines()
 	{
-		Opportunity opp = new Opportunity ( 
-			Name = 'Test', 
+		Opportunity opp = new Opportunity(
+			Name = 'Test',
 			Type = 'New Account',
 			StageName = 'Open',
-			CloseDate = System.today().addMonths(1), 
-			Amount = 100 );
-		insert opp;			
-		fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork( new Schema.SObjectType[] { Opportunity.SObjectType });				
-		Opportunities opps = new Opportunities(new List<Opportunity> { opp });
-		opps.applyDiscount(10, uow);
-		uow.commitWork();		
-		Opportunity assertOpp = [select Amount from Opportunity where Id = :opp.Id];
-		System.assertEquals(90, assertOpp.Amount);				
+			CloseDate = System.today().addMonths(1),
+			Amount = 100
+		);
+		insert opp;
+
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+			IOpportunities opps = Opportunities.newInstance(new List<Opportunity> { opp });
+			opps.applyDiscount(10, uow);
+			uow.commitWork();
+		}
+
+		Opportunity assertOpp = [SELECT Amount FROM Opportunity WHERE Id = :opp.Id];
+		System.assertEquals(90, assertOpp.Amount);
 	}
 		
 	@IsTest
 	private static void testUpdateAccountOnInsertOfOpportunity()
 	{
-		Account account = new Account( 
-			Name = 'Test', 
-			Description = null );
+		Account account = new Account(Name = 'Test', Description = null);
 		insert account;
-		Opportunity opp = new Opportunity ( 
-			Name = 'Test', 
-			Type = 'Existing Account',
-			StageName = 'Open',
-			CloseDate = System.today().addMonths(1), 
-			AccountId = account.Id );
-		insert opp;		
-		Account assertAccount = [select Description from Account where Id = :account.Id];
-		System.assertEquals('Last Opportunity Raised ' + System.today(), assertAccount.Description);		
+
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			Opportunity opp = new Opportunity(
+				Name = 'Test',
+				Type = 'Existing Account',
+				StageName = 'Open',
+				CloseDate = System.today().addMonths(1),
+				AccountId = account.Id
+			);
+			insert opp;
+		}
+
+		Account assertAccount = [SELECT Description FROM Account WHERE Id = :account.Id];
+		System.assertEquals('Last Opportunity Raised ' + System.today(), assertAccount.Description);
 	}			
 }
