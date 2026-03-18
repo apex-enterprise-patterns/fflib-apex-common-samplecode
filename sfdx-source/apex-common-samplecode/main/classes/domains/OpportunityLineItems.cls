@@ -63,12 +63,11 @@ public with sharing class OpportunityLineItems extends fflib_SObjectDomain
 					continue;
 				}
 			}
-					
-			// Adjust UnitPrice
-			line.UnitPrice = line.UnitPrice * factor;
-			
-			// Register this record as dirty with the unit of work
-			uow.registerDirty(line);
+
+			// Minimal record (Id + UnitPrice only): USER_MODE DML enforces FLS on every field in the record; queried records carry OpportunityId, PricebookEntryId, etc. that trigger "fields being inaccessible".
+			OpportunityLineItem updateOli = new OpportunityLineItem(Id = line.Id);
+			updateOli.UnitPrice = line.UnitPrice * factor;
+			uow.registerDirty(updateOli);
 		}
 	}
 		

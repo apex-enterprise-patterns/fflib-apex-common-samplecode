@@ -25,29 +25,35 @@
 **/
 
 @IsTest
-private class InvoicingServiceTest 
+private class InvoicingServiceTest
 {
+	@TestSetup
+	static void setup()
+	{
+		TestDataFactory.createUserWithSampleAppPermissions();
+	}
+
 	@IsTest
 	private static void testService()
 	{
-		// Create Test Data
+		// Given: create data in system context (PricebookEntry insert requires it)
 		fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
 		Opportunity opp = new Opportunity();
 		opp.Name = 'Opportunity';
 		opp.StageName = 'Open';
 		opp.CloseDate = System.today();
-		uow.registerNew(opp);		
-		for(Integer i=0; i<5; i++)
-		{						
+		uow.registerNew(opp);
+		for (Integer i = 0; i < 5; i++)
+		{
 			Product2 product = new Product2();
 			product.Name = opp.Name + ' : Product : ' + i;
-			uow.registerNew(product);		
+			uow.registerNew(product);
 			PricebookEntry pbe = new PricebookEntry();
 			pbe.UnitPrice = 10;
 			pbe.IsActive = true;
 			pbe.UseStandardPrice = false;
 			pbe.Pricebook2Id = Test.getStandardPricebookId();
-			uow.registerNew(pbe, PricebookEntry.Product2Id, product);		
+			uow.registerNew(pbe, PricebookEntry.Product2Id, product);
 			OpportunityLineItem oppLineItem = new OpportunityLineItem();
 			oppLineItem.Quantity = 1;
 			oppLineItem.TotalPrice = 10;
@@ -56,10 +62,13 @@ private class InvoicingServiceTest
 		}
 		uow.commitWork();
 
-		// Call Service
-		List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.Id });
+		// When: run service as permission-set user (USER_MODE selectors/DML)
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			List<Id> invoiceIds = InvoicingService.generate(new List<Id> { opp.Id });
 
-		// Assert Invoices
-		System.assertEquals(1, invoiceIds.size());
+			// Then
+			System.assertEquals(1, invoiceIds.size(), 'Should generate one invoice');
+		}
 	}
 }

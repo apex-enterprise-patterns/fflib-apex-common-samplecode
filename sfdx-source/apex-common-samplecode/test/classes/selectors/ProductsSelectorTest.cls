@@ -27,49 +27,59 @@
 @IsTest
 private class ProductsSelectorTest 
 {
+	@TestSetup
+	static void setup()
+	{
+		TestDataFactory.createUserWithSampleAppPermissions();
+	}
+
 	@IsTest
 	private static void testSelectById()
 	{
-		// Test data
-		Product2 product = new Product2();
-		product.Description = 'Something cool';
-		product.Name = 'CoolItem';
-		product.IsActive = true;
-		product.SubscriberField__c = 'My Text Field';
+		// Test data (insert in system context so PricebookEntry etc can be used if needed)
+		Product2 product = new Product2(
+			Description = 'Something cool',
+			Name = 'CoolItem',
+			IsActive = true,
+			SubscriberField__c = 'My Text Field'
+		);
 		insert product;
-				
-		// Query
-		List<Product2> products = 
-			new ProductsSelector(true).selectById(new Set<Id> { product.Id });
-			
-		// Assert
-		System.assertEquals('Something cool', products[0].Description);		
-		System.assertEquals('CoolItem', products[0].Name);		
-		System.assertEquals(true, products[0].IsActive);		
-		System.assertEquals('My Text Field', products[0].SubscriberField__c);		
+
+		// Query runs in USER_MODE - must run as user with permission set
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			List<Product2> products =
+				new ProductsSelector(true).selectById(new Set<Id> { product.Id });
+
+			System.assertEquals('Something cool', products[0].Description);
+			System.assertEquals('CoolItem', products[0].Name);
+			System.assertEquals(true, products[0].IsActive);
+			System.assertEquals('My Text Field', products[0].SubscriberField__c);
+		}
 	}
 
 	@IsTest
 	private static void testQueryLocatorById()
 	{
-		// Test data
-		Product2 product = new Product2();
-		product.Description = 'Something cool';
-		product.Name = 'CoolItem';
-		product.IsActive = true;
-		product.SubscriberField__c = 'My Text Field';
+		Product2 product = new Product2(
+			Description = 'Something cool',
+			Name = 'CoolItem',
+			IsActive = true,
+			SubscriberField__c = 'My Text Field'
+		);
 		insert product;
-				
-		// Query
-		Database.QueryLocator queryLocator = 
-			new ProductsSelector(true).queryLocatorById(new Set<Id> { product.Id });
-			
-		// Assert
-		Database.QueryLocatorIterator productsIterator = queryLocator.iterator();
-		Product2 queriedProduct = (Product2) productsIterator.next();
-		System.assertEquals('Something cool', queriedProduct.Description);		
-		System.assertEquals('CoolItem', queriedProduct.Name);		
-		System.assertEquals(true, queriedProduct.IsActive);		
-		System.assertEquals('My Text Field', queriedProduct.SubscriberField__c);		
+
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			Database.QueryLocator queryLocator =
+				new ProductsSelector(true).queryLocatorById(new Set<Id> { product.Id });
+			Database.QueryLocatorIterator productsIterator = queryLocator.iterator();
+			Product2 queriedProduct = (Product2) productsIterator.next();
+
+			System.assertEquals('Something cool', queriedProduct.Description);
+			System.assertEquals('CoolItem', queriedProduct.Name);
+			System.assertEquals(true, queriedProduct.IsActive);
+			System.assertEquals('My Text Field', queriedProduct.SubscriberField__c);
+		}
 	}
 }
