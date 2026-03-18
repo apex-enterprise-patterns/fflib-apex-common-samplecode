@@ -24,51 +24,44 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class Application 
-{
-	// Configure and create the UnitOfWorkFactory for this Application
-	public static final fflib_Application.UnitOfWorkFactory UnitOfWork = 
-		new fflib_Application.UnitOfWorkFactory(
-				new List<SObjectType> {
-					Account.SObjectType,
-					Invoice__c.SObjectType,
-					InvoiceLine__c.SObjectType,
-					Opportunity.SObjectType,
-					Product2.SObjectType,
-					PricebookEntry.SObjectType,
-					OpportunityLineItem.SObjectType,
-					WorkOrder__c.SObjectType,
-					DeveloperWorkItem__c.SObjectType,
-					TrainingWorkItem__c.SObjectType,
-					DesignWorkItem__c.SObjectType });	
+public class Application {
+	public static final fflib_Application.SelectorFactory Selector;
+	public static final fflib_Application.DomainFactory Domain;
+	public static final fflib_Application.UnitOfWorkFactory UnitOfWork;
+	public static final fflib_Application.ServiceFactory Service;
 
-	// Configure and create the ServiceFactory for this Application
-	public static final fflib_Application.ServiceFactory Service = 
-		new fflib_Application.ServiceFactory( 
-			new Map<Type, Type> {
-					IAccountsService.class => AccountsServiceImpl.class,
-					IOpportunitiesService.class => OpportunitiesServiceImpl.class,
-					IInvoicingService.class => InvoicingServiceImpl.class });
-
-	// Configure and create the SelectorFactory for this Application
-	public static final fflib_Application.SelectorFactory Selector = 
-		new fflib_Application.SelectorFactory(
-			new Map<SObjectType, Type> {
-					Account.SObjectType => AccountsSelector.class,
-					Opportunity.SObjectType => OpportunitiesSelector.class,
-					OpportunityLineItem.SObjectType => OpportunityLineItemsSelector.class,
-					PricebookEntry.SObjectType => PricebookEntriesSelector.class,
-					Pricebook2.SObjectType => PricebooksSelector.class,
-					Product2.SObjectType => ProductsSelector.class,
-					User.sObjectType => UsersSelector.class });
-
-	// Configure and create the DomainFactory for this Application
-	public static final fflib_Application.DomainFactory Domain = 
-		new fflib_Application.DomainFactory(
-			Application.Selector,
-			new Map<SObjectType, Type> {
-					Opportunity.SObjectType => Opportunities.Constructor.class,
-					OpportunityLineItem.SObjectType => OpportunityLineItems.Constructor.class,
-					Account.SObjectType => Accounts.Constructor.class,
-					DeveloperWorkItem__c.SObjectType => DeveloperWorkItems.class });
+	static {
+		Map<SObjectType, Type> selectorTypeBySObject = new Map<SObjectType, Type>();
+		Map<SObjectType, Type> constructorTypeBySObject = new Map<SObjectType, Type>();
+		List<SObjectType> unitOfWorkTypes = new List<SObjectType>();
+		Map<Type, Type> implByInterface = new Map<Type, Type>();
+		for (Application__mdt m : [
+			SELECT FactoryType__c, SObjectType__c, KeyClass__c, ValueClass__c, Order__c
+			FROM Application__mdt
+			WITH SYSTEM_MODE
+			ORDER BY FactoryType__c, Order__c ASC NULLS LAST
+		]) {
+			SObjectType sType = Schema.getGlobalDescribe().get(m.SObjectType__c);
+			Type keyType = Type.forName(m.KeyClass__c);
+			Type valueType = Type.forName(m.ValueClass__c);
+			switch on m.FactoryType__c {
+				when 'Selector' {
+					selectorTypeBySObject.put(sType, keyType);
+				}
+				when 'Domain' {
+					constructorTypeBySObject.put(sType, keyType);
+				}
+				when 'UnitOfWork' {
+					unitOfWorkTypes.add(sType);
+				}
+				when 'Service' {
+					implByInterface.put(keyType, valueType);
+				}
+			}
+		}
+		Selector = new fflib_Application.SelectorFactory(selectorTypeBySObject);
+		Domain = new fflib_Application.DomainFactory(Selector, constructorTypeBySObject);
+		UnitOfWork = new fflib_Application.UnitOfWorkFactory(unitOfWorkTypes);
+		Service = new fflib_Application.ServiceFactory(implByInterface);
+	}
 }

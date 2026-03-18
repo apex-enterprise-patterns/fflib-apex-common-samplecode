@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>UnitOfWork Opportunity Line Item</label>
+    <protected>false</protected>
+    <values>
+        <field>FactoryType__c</field>
+        <value xsi:type="xsd:string">UnitOfWork</value>
+    </values>
+    <values>
+        <field>SObjectType__c</field>
+        <value xsi:type="xsd:string">OpportunityLineItem</value>
+    </values>
+    <values>
+        <field>KeyClass__c</field>
+        <value xsi:type="xsd:string">Application</value>
+    </values>
+    <values>
+        <field>ValueClass__c</field>
+        <value xsi:type="xsd:string">Application</value>
+    </values>
+    <values>
+        <field>Order__c</field>
+        <value xsi:type="xsd:double">7</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FactoryType__c</fullName>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Factory Type</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>UnitOfWork</fullName>
+                <default>false</default>
+                <label>UnitOfWork</label>
+            </value>
+            <value>
+                <fullName>Selector</fullName>
+                <default>false</default>
+                <label>Selector</label>
+            </value>
+            <value>
+                <fullName>Domain</fullName>
+                <default>false</default>
+                <label>Domain</label>
+            </value>
+            <value>
+                <fullName>Service</fullName>
+                <default>false</default>
+                <label>Service</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
