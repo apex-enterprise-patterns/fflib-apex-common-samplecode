@@ -25,6 +25,7 @@
 **/
 
 public with sharing class DeveloperWorkItems extends AbstractChargeable
+	implements InvoicingService.ISupportInvoicing
 {
 	@TestVisible
 	private static DeveloperWorkItems mock;
@@ -58,6 +59,25 @@ public with sharing class DeveloperWorkItems extends AbstractChargeable
 				 workItem.TechnicalDesignHours__c));
 		}
 		return hoursWorked;
+	}
+
+	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
+	{
+		for (DeveloperWorkItem__c wi : (List<DeveloperWorkItem__c>) getRecords()) {
+			Id accountId = wi.WorkOrder__r != null ? wi.WorkOrder__r.Account__c : null;
+			if (accountId == null) { continue; }
+			InvoicingService.Invoice invoice = new InvoicingService.Invoice();
+			invoice.Account = accountId;
+			invoice.Description = 'Developer work: ' + (wi.Name != null ? wi.Name : 'Work Item');
+			invoice.InvoiceDate = Date.today();
+			InvoicingService.InvoiceLine line = new InvoicingService.InvoiceLine();
+			line.Description = 'Developer consultancy';
+			line.Product = null;
+			line.UnitPrice = wi.DeveloperCost__c != null ? wi.DeveloperCost__c : 0;
+			line.Quantity = 1;
+			invoice.Lines = new List<InvoicingService.InvoiceLine> { line };
+			invoiceFactory.add(invoice);
+		}
 	}
 
 	public class Constructor implements fflib_SObjectDomain.IConstructable

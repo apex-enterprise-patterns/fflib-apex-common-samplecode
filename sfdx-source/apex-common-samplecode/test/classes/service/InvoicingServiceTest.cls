@@ -71,4 +71,93 @@ private class InvoicingServiceTest
 			System.assertEquals(1, invoiceIds.size(), 'Should generate one invoice');
 		}
 	}
+
+	@IsTest
+	private static void generateFromDeveloperWorkItemReturnsInvoiceId()
+	{
+		// Given: Account, WorkOrder with Account, DeveloperWorkItem with cost
+		// Run entire flow as permission-set user (UnitOfWork uses UserModeDML)
+		List<Id> invoiceIds;
+		Id accId;
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
+			Account acc = new Account(Name = 'Client');
+			uow.registerNew(acc);
+			WorkOrder__c wo = new WorkOrder__c();
+			uow.registerNew(wo);
+			uow.registerRelationship(wo, WorkOrder__c.Account__c, acc);
+			DeveloperWorkItem__c wi = new DeveloperWorkItem__c();
+			wi.CodingHours__c = 10;
+			wi.CodeReviewingHours__c = 2;
+			wi.TechnicalDesignHours__c = 3;
+			uow.registerNew(wi, DeveloperWorkItem__c.WorkOrder__c, wo);
+			uow.commitWork();
+			accId = acc.Id;
+
+			// When
+			invoiceIds = InvoicingService.newInstance().generate(new List<Id> { wi.Id });
+		}
+
+		// Then
+		System.assertEquals(1, invoiceIds.size(), 'Should generate one invoice from DeveloperWorkItem');
+		Invoice__c inv = [SELECT Account__c, Description__c FROM Invoice__c WHERE Id = :invoiceIds[0]];
+		System.assertEquals(accId, inv.Account__c, 'Invoice should be for work order account');
+		System.assert(inv.Description__c != null && inv.Description__c.contains('Developer'), 'Description should mention developer work');
+	}
+
+	@IsTest
+	private static void generateFromTrainingWorkItemReturnsInvoiceId()
+	{
+		// Given: Account, WorkOrder with Account, TrainingWorkItem with cost
+		// Run entire flow as permission-set user (UnitOfWork uses UserModeDML)
+		List<Id> invoiceIds;
+		Id accId;
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
+			Account acc = new Account(Name = 'Client');
+			uow.registerNew(acc);
+			WorkOrder__c wo = new WorkOrder__c();
+			uow.registerNew(wo);
+			uow.registerRelationship(wo, WorkOrder__c.Account__c, acc);
+			TrainingWorkItem__c wi = new TrainingWorkItem__c();
+			wi.DeliveryHours__c = 8;
+			wi.PreparationHours__c = 2;
+			uow.registerNew(wi, TrainingWorkItem__c.WorkOrder__c, wo);
+			uow.commitWork();
+			accId = acc.Id;
+
+			// When
+			invoiceIds = InvoicingService.newInstance().generate(new List<Id> { wi.Id });
+		}
+
+		// Then
+		System.assertEquals(1, invoiceIds.size(), 'Should generate one invoice from TrainingWorkItem');
+		Invoice__c inv = [SELECT Account__c, Description__c FROM Invoice__c WHERE Id = :invoiceIds[0]];
+		System.assertEquals(accId, inv.Account__c, 'Invoice should be for work order account');
+		System.assert(inv.Description__c != null && inv.Description__c.contains('Training'), 'Description should mention training');
+	}
+
+	@IsTest
+	private static void generateWithUnsupportedSourceTypeThrows()
+	{
+		// Given: Account is not an invoice target
+		Account acc = new Account(Name = 'Test');
+		insert acc;
+
+		// When / Then
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			try
+			{
+				InvoicingService.newInstance().generate(new List<Id> { acc.Id });
+				System.assert(false, 'Expected exception for unsupported source type');
+			}
+			catch (Exception e)
+			{
+				System.assert(true, 'Exception thrown as expected: ' + e.getTypeName());
+			}
+		}
+	}
 }
