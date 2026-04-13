@@ -34,8 +34,7 @@ public class OpportunityLineItemsSelector extends fflib_SObjectSelector
 
 	public OpportunityLineItemsSelector()
 	{
-		super(false);
-		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
 	public List<Schema.SObjectField> getSObjectFieldList()

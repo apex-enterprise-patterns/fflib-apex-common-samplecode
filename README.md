@@ -27,11 +27,11 @@ This repository contains a sample application illustrating the Apex Enterprise P
 User Mode and CRUD/FLS
 ----------------------
 
-This sample enforces field-level security (FLS) by using fflib user mode throughout. Selectors use `setDataAccess(USER_MODE)` for FLS on queries; the UnitOfWork uses `UserModeDML()` via an inner `UserModeUnitOfWorkFactory` in `Application.cls` for FLS on DML. Tests that exercise USER_MODE code use `TestDataFactory` to create a Standard User with the `ApexEnterprisePatternsSampleApp` permission set, then run under `System.runAs(getRunAsUser())`; data setup requiring elevated permissions (e.g. PricebookEntry insert) runs in system context.
+This sample enforces field-level security (FLS) by using fflib user mode throughout. Selectors pass `fflib_SObjectSelector.DataAccess.USER_MODE` into the `super(...)` constructor for FLS on queries; the UnitOfWork uses `UserModeDML()` via an inner `UserModeUnitOfWorkFactory` in `Application.cls` for FLS on DML. Tests that exercise USER_MODE code use `TestDataFactory` to create a Standard User with the `ApexEnterprisePatternsSampleApp` permission set, then run under `System.runAs(getRunAsUser())`; data setup requiring elevated permissions (e.g. PricebookEntry insert) runs in system context.
 
 | Area | Approach |
 |------|----------|
-| **Selectors** | `super(false); setDataAccess(USER_MODE)` in all selector constructors |
+| **Selectors** | `super(false, fflib_SObjectSelector.DataAccess.USER_MODE)` in selector constructors (and `includeFieldSetFields` overload where present) |
 | **UnitOfWork** | Inner `UserModeUnitOfWorkFactory` in Application.cls; uses `UserModeDML()` |
 | **Tests** | `TestDataFactory`; `@TestSetup` + `System.runAs(getRunAsUser())` for DML/selector tests |
 | **Permission set** | `ApexEnterprisePatternsSampleApp` grants field-level access for USER_MODE tests |
@@ -46,7 +46,7 @@ More Information on Trailhead
 
 There are two Trailhead Modules for Apex Enterprise Patterns:
 
+- [Apex Enterprise Patterns - Separation of Concerns](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl/apex_patterns_sl_soc)
 - [Apex Enterprise Patterns - Service Layer](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl)
-    - [Separation of Concerns](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl/apex_patterns_sl_soc)
 - [Apex Enterprise Patterns - Domain and Selector Layer](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_dsl)
 
