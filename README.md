@@ -30,7 +30,7 @@ Differences from Original Sample
 This alternative diverges from the original sample in the following ways:
 
 - **Metadata-driven factory**—The `Application` class and its factories (Selector, Domain, UnitOfWork, Service) are configured via Custom Metadata (`Application__mdt`) instead of hardcoded mappings, enabling configuration without code changes.
-- **CRUD/FLS and user mode**—UnitOfWork uses `UserModeDML()` for FLS on DML; selectors call `setDataAccess(USER_MODE)` for FLS on queries.
+- **CRUD/FLS and user mode**—UnitOfWork uses `UserModeDML()` for FLS on DML; selectors pass `fflib_SObjectSelector.DataAccess.USER_MODE` into `super(...)` for FLS on queries.
 - **Dependency injection**—Uses `Application.Selector.setMock()`, `Application.Domain.setMock()`, `Application.UnitOfWork.setMock()`, and `Application.Service.setMock()` for testability.
 
 A detailed comparison by area:
@@ -42,7 +42,7 @@ A detailed comparison by area:
 | **Service layer** | Interface + Impl pattern | Same (e.g. OpportunitiesServiceImpl, InvoicingServiceImpl) |
 | **Configuration** | Static code in Application.cls initializer | Driven by `Application__mdt` records |
 | **UnitOfWork DML** | SimpleDML (system mode) | Inner `UserModeUnitOfWorkFactory` in Application.cls; always uses `UserModeDML` for FLS |
-| **Selectors** | LEGACY (no FLS) | `super(false); setDataAccess(USER_MODE)` in constructors for FLS on SOQL |
+| **Selectors** | LEGACY (no FLS) | `super(false, fflib_SObjectSelector.DataAccess.USER_MODE)` in constructors (and `includeFieldSetFields` overload where present) for FLS on SOQL |
 
 Application Enterprise Patterns on Salesforce Lightning Platform
 ================================================================
@@ -54,6 +54,6 @@ More Information on Trailhead
 
 There are two Trailhead Modules for Apex Enterprise Patterns:
 
+- [Apex Enterprise Patterns - Separation of Concerns](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl/apex_patterns_sl_soc)
 - [Apex Enterprise Patterns - Service Layer](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl)
-    - [Separation of Concerns](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_sl/apex_patterns_sl_soc)
 - [Apex Enterprise Patterns - Domain and Selector Layer](https://trailhead.salesforce.com/en/content/learn/modules/apex_patterns_dsl)

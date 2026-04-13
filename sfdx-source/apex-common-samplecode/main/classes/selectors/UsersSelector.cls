@@ -37,8 +37,7 @@ public class UsersSelector extends fflib_SObjectSelector
 
 	public UsersSelector()
 	{
-		super(false);
-		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
 	public List<Schema.SObjectField> getSObjectFieldList()
