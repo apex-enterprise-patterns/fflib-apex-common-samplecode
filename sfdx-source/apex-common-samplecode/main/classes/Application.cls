@@ -26,9 +26,9 @@
 
 public class Application 
 {
-	// Configure and create the UnitOfWorkFactory for this Application
-	public static final fflib_Application.UnitOfWorkFactory UnitOfWork = 
-		new fflib_Application.UnitOfWorkFactory(
+	// Configure and create the UnitOfWorkFactory for this Application (UserMode DML for FLS)
+	public static final fflib_Application.UnitOfWorkFactory UnitOfWork =
+		new UserModeUnitOfWorkFactory(
 				new List<SObjectType> {
 					Account.SObjectType,
 					Invoice__c.SObjectType,
@@ -40,7 +40,7 @@ public class Application
 					WorkOrder__c.SObjectType,
 					DeveloperWorkItem__c.SObjectType,
 					TrainingWorkItem__c.SObjectType,
-					DesignWorkItem__c.SObjectType });	
+					DesignWorkItem__c.SObjectType });
 
 	// Configure and create the ServiceFactory for this Application
 	public static final fflib_Application.ServiceFactory Service = 
@@ -71,4 +71,13 @@ public class Application
 					OpportunityLineItem.SObjectType => OpportunityLineItems.Constructor.class,
 					Account.SObjectType => Accounts.Constructor.class,
 					DeveloperWorkItem__c.SObjectType => DeveloperWorkItems.class });
+
+	// Custom UnitOfWork factory that uses UserModeDML for FLS enforcement
+	private class UserModeUnitOfWorkFactory extends fflib_Application.UnitOfWorkFactory {
+		public UserModeUnitOfWorkFactory(List<SObjectType> objectTypes) { super(objectTypes); }
+		public override fflib_ISObjectUnitOfWork newInstance() {
+			if (m_mockUow != null) return m_mockUow;
+			return new fflib_SObjectUnitOfWork(m_objectTypes, new fflib_SObjectUnitOfWork.UserModeDML());
+		}
+	}
 }

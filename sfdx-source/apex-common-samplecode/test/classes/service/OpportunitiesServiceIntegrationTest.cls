@@ -27,10 +27,16 @@
 @IsTest
 private class OpportunitiesServiceIntegrationTest 
 {
+	@TestSetup
+	static void setup()
+	{
+		TestDataFactory.createUserWithSampleAppPermissions();
+	}
+
 	@IsTest
 	private static void testServiceClass() 
 	{
-		// Create Opportunity, Lines, Pricebooks and Products
+		// Create Opportunity, Lines, Pricebooks and Products (system context for inserts)
 		List<Opportunity> opps = new List<Opportunity>();
 		List<List<Product2>> productsByOpp = new List<List<Product2>>(); 		
 		List<List<PricebookEntry>> pricebookEntriesByOpp = new List<List<PricebookEntry>>(); 		
@@ -94,12 +100,15 @@ private class OpportunitiesServiceIntegrationTest
 		}			
 		insert allOppLineItems;
 
-		// Test
-		Test.startTest();
-		OpportunitiesService.applyDiscounts(new Set<Id> { opp.Id }, 10);
-		Test.stopTest();
+		// Test - applyDiscounts uses USER_MODE selectors/DML, must run as user with permission set
+		System.runAs(TestDataFactory.getRunAsUser())
+		{
+			Test.startTest();
+			OpportunitiesService.applyDiscounts(new Set<Id> { opp.Id }, 10);
+			Test.stopTest();
+		}
 
 		// Assert
-		System.assertEquals(90, [select Amount from Opportunity limit 1][0].Amount);
+		System.assertEquals(90, [SELECT Amount FROM Opportunity LIMIT 1][0].Amount);
 	}	
 }

@@ -34,12 +34,12 @@ public class ProductsSelector extends fflib_SObjectSelector
 	
 	public ProductsSelector()
 	{
-		super(false);
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
-	
+
 	public ProductsSelector(Boolean includeFieldSetFields)
 	{
-		super(includeFieldSetFields);
+		super(includeFieldSetFields, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 	
 	public List<Schema.SObjectField> getSObjectFieldList()
