@@ -35,8 +35,7 @@ public with sharing class OpportunitiesSelector extends fflib_SObjectSelector
 	}
 
 	public OpportunitiesSelector() {
-		super(false);
-		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
 	public List<Schema.SObjectField> getSObjectFieldList()

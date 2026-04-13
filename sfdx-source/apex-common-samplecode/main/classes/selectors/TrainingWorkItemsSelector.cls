@@ -10,8 +10,7 @@ public with sharing class TrainingWorkItemsSelector extends fflib_SObjectSelecto
 	}
 
 	public TrainingWorkItemsSelector() {
-		super(false);
-		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
 	public List<Schema.SObjectField> getSObjectFieldList() {

@@ -38,8 +38,7 @@ public class AccountsSelector extends fflib_SObjectSelector
 	}
 
 	public AccountsSelector() {
-		super(false);
-		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
 	public List<Schema.SObjectField> getSObjectFieldList()

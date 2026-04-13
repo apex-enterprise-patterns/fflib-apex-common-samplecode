@@ -35,8 +35,7 @@ public class PricebookEntriesSelector extends fflib_SObjectSelector
 	}
 
 	public PricebookEntriesSelector() {
-		super(false);
-		setDataAccess(fflib_SObjectSelector.DataAccess.USER_MODE);
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
 	public List<Schema.SObjectField> getSObjectFieldList()
