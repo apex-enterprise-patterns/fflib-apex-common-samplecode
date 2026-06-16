@@ -19,17 +19,20 @@ jobs:
         uses: apex-enterprise-patterns/setup-sfdx@v2 #We're using a fork of https://github.com/sfdx-actions/setup-sfdx for safety
         with:
           sfdx-auth-url: ${{ secrets.DEVHUB_SFDXURL }}
-      - name: Install the required plugins
-        run: echo y | sf plugins install shane-sfdx-plugins
       - name: Setup the config parameters needed
         run: sf config set target-dev-hub SFDX-ENV --global #Even though the setup-sfdx action uses --setdefaultdevhubusername, it doesn't seem to stick since it uses --setdefaultusername so we brute force it here
       - name: Create the scratch org
-        run: sf org create scratch --definition-file config/project-scratch-def.json --set-default --duration-days 1 --no-track-source
-      - name: Install required dependency frameworks
-        run: sf shane github src install --convert --githubuser apex-enterprise-patterns --repo fflib-apex-mocks --path sfdx-source/apex-mocks
-      - run: sf shane github src install --convert --githubuser apex-enterprise-patterns --repo fflib-apex-common --path sfdx-source/apex-common
+        run: sf org create scratch --definition-file config/project-scratch-def.json --set-default --duration-days 1 --no-track-source --alias fflibsamples
+      - name: Clone fflib-apex-mocks repo
+        run: mkdir -p temp && git clone https://github.com/apex-enterprise-patterns/fflib-apex-mocks.git temp/fflib-apex-mocks
+      - name: Deploy and compile the fflib-apex-mocks codebase
+        run: cd temp/fflib-apex-mocks && sf project deploy start --ignore-conflicts --target-org fflibsamples && cd ../..
+      - name: Clone fflib-apex-common repo
+        run: git clone https://github.com/apex-enterprise-patterns/fflib-apex-common.git temp/fflib-apex-common
+      - name: Deploy and compile the fflib-apex-common codebase
+        run: cd temp/fflib-apex-common && sf project deploy start --ignore-conflicts --target-org fflibsamples && cd ../..
       - name: Deploy and compile the codebase
-        run: sf project deploy start
+        run: sf project deploy start --ignore-conflicts
       - name: Run the core framework tests
         run: sf apex run test --wait 5
       - name: Destroy scratch org
