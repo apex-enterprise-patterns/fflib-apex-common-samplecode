@@ -30,7 +30,7 @@ This repository contains a sample application illustrating the Apex Enterprise P
 Architecture Notes
 ------------------
 
-This sample uses **concrete** Domain, Selector, and Service classes with static `newInstance()` factories and `@TestVisible` mock hooks for unit tests. There is no `Application.cls` dependency-injection factory.
+This sample uses **concrete** Domain, Selector, and Service classes with static `newInstance()` factories and `@TestVisible` mock hooks for unit tests. There is no `Application.cls` dependency-injection factory — see [Apex Enterprise Patterns: Recent Updates and Thoughts on the Application Class](https://andyinthecloud.com/2026/04/13/apex-enterprise-patterns-recent-updates-and-thoughts-on-the-application-class/) for background on this approach.
 
 | Component | Role |
 |-----------|------|
