@@ -24,91 +24,76 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+/**
+ * Integration test for OpportunitiesService.applyDiscounts.
+ */
 @IsTest
-private class OpportunitiesServiceIntegrationTest 
+private class OpportunitiesServiceIntegrationTest
 {
 	@TestSetup
 	static void setup()
 	{
+		// Given a run-as user with sample app permissions
 		TestDataFactory.createUserWithSampleAppPermissions();
 	}
 
 	@IsTest
-	private static void testServiceClass() 
+	private static void applyDiscountsAsRunAsUserReducesAmount()
 	{
-		// Create Opportunity, Lines, Pricebooks and Products (system context for inserts)
-		List<Opportunity> opps = new List<Opportunity>();
-		List<List<Product2>> productsByOpp = new List<List<Product2>>(); 		
-		List<List<PricebookEntry>> pricebookEntriesByOpp = new List<List<PricebookEntry>>(); 		
-		List<List<OpportunityLineItem>> oppLinesByOpp = new List<List<OpportunityLineItem>>(); 		
-		Opportunity opp = new Opportunity();
-		opp.Name = 'Test';
-		opp.StageName = 'Open';
-		opp.CloseDate = System.today();
-		opps.add(opp);
-		List<Product2> products = new List<Product2>();
-		List<PricebookEntry> pricebookEntries = new List<PricebookEntry>();
-		List<OpportunityLineItem> oppLineItems = new List<OpportunityLineItem>();
-		for(Integer i=0; i<10; i++) {						
-			Product2 product = new Product2();
-			product.Name = opp.Name + ' : Product : ' + i;
-			products.add(product);
-			PricebookEntry pbe = new PricebookEntry();
-			pbe.UnitPrice = 10;
-			pbe.IsActive = true;
-			pbe.UseStandardPrice = false;
-			pbe.Pricebook2Id = Test.getStandardPricebookId();
-			pricebookEntries.add(pbe);
-			OpportunityLineItem oppLineItem = new OpportunityLineItem();
-			oppLineItem.Quantity = 1;
-			oppLineItem.TotalPrice = 10;
-			oppLineItems.add(oppLineItem);
-		}
-		productsByOpp.add(products);
-		pricebookEntriesByOpp.add(pricebookEntries);
-		oppLinesByOpp.add(oppLineItems);				
-		// Insert Opportunities
-		insert opps;
-		// Insert Products
-		List<Product2> allProducts = new List<Product2>(); 
-		for(List<Product2> oppProducts : productsByOpp)
-			allProducts.addAll(oppProducts);			
-		insert allProducts;
-		// Insert Pricebooks
-		Integer oppIdx = 0;			
-		List<PricebookEntry> allPricebookEntries = new List<PricebookEntry>();				
-		for(List<PricebookEntry> oppPricebookEntries : pricebookEntriesByOpp) {
-			List<Product2> pbproducts = productsByOpp[oppIdx++];
-			Integer lineIdx = 0;
-			for(PricebookEntry pricebookEntry : oppPricebookEntries)
-				pricebookEntry.Product2Id = pbproducts[lineIdx++].Id;
-			allPricebookEntries.addAll(oppPricebookEntries);
-		}			
-		insert allPricebookEntries;
-		// Insert Opportunity Lines
-		oppIdx = 0;						
-		List<OpportunityLineItem> allOppLineItems = new List<OpportunityLineItem>(); 			
-		for(List<OpportunityLineItem> oppLines : oppLinesByOpp) {
-			List<PricebookEntry> oppPricebookEntries = pricebookEntriesByOpp[oppIdx];
-			Integer lineIdx = 0;
-			for(OpportunityLineItem oppLine : oppLines) {
-				oppLine.OpportunityId = opps[oppIdx].Id;
-				oppLine.PricebookEntryId = oppPricebookEntries[lineIdx++].Id;
-			}
-			allOppLineItems.addAll(oppLines);
-			oppIdx++;
-		}			
-		insert allOppLineItems;
+		// Given an opportunity with priced line items
+		Opportunity opp = new Opportunity(
+			Name = 'Test',
+			StageName = 'Open',
+			CloseDate = System.today(),
+			Pricebook2Id = Test.getStandardPricebookId()
+		);
+		insert opp;
 
-		// Test - applyDiscounts uses USER_MODE selectors/DML, must run as user with permission set
+		List<Product2> products = new List<Product2>();
+		for(Integer i = 0; i < 10; i++)
+		{
+			products.add(new Product2(Name = opp.Name + ' : Product : ' + i, IsActive = true));
+		}
+		insert products;
+
+		List<PricebookEntry> pricebookEntries = new List<PricebookEntry>();
+		for(Product2 product : products)
+		{
+			pricebookEntries.add(
+				new PricebookEntry(
+					Product2Id = product.Id,
+					UnitPrice = 10,
+					IsActive = true,
+					UseStandardPrice = false,
+					Pricebook2Id = Test.getStandardPricebookId()
+				)
+			);
+		}
+		insert pricebookEntries;
+
+		List<OpportunityLineItem> oppLineItems = new List<OpportunityLineItem>();
+		for(PricebookEntry pbe : pricebookEntries)
+		{
+			oppLineItems.add(
+				new OpportunityLineItem(
+					OpportunityId = opp.Id,
+					PricebookEntryId = pbe.Id,
+					Quantity = 1,
+					TotalPrice = 10
+				)
+			);
+		}
+		insert oppLineItems;
+
 		System.runAs(TestDataFactory.getRunAsUser())
 		{
+			// When discounts are applied for the opportunity
 			Test.startTest();
-			OpportunitiesService.applyDiscounts(new Set<Id> { opp.Id }, 10);
+			OpportunitiesService.newInstance().applyDiscounts(new Set<Id>{ opp.Id }, 10);
 			Test.stopTest();
 		}
 
-		// Assert
-		System.assertEquals(90, [SELECT Amount FROM Opportunity LIMIT 1][0].Amount);
-	}	
+		// Then the opportunity amount reflects the discount
+		System.assertEquals(90, [SELECT Amount FROM Opportunity WHERE Id = :opp.Id].Amount);
+	}
 }

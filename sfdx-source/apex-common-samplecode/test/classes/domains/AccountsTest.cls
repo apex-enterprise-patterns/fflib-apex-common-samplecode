@@ -24,29 +24,35 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+/**
+ * Domain tests for Accounts.
+ */
 @IsTest
 private class AccountsTest
 {
 	@IsTest
-	static void itShouldUpdateTheOpportunityActivity()
+	static void updateOpportunityActivitySetsDescription()
 	{
-		// Given a domain with few Account records with an empty description field
-		Accounts domain = new Accounts(new List<Account>{	new Account(), new Account(), new Account()	});
+		// Given accounts without an opportunity activity description
+		List<Account> accountRecords = new List<Account>{
+			new Account(Name = 'A'),
+			new Account(Name = 'B'),
+			new Account(Name = 'C')
+		};
+		Accounts domain = Accounts.newInstance(accountRecords);
 
-		// WHEN we set the description field to a value
-		System.Test.startTest();
+		// When opportunity activity is updated on the domain
 		domain.updateOpportunityActivity();
-		System.Test.stopTest();
 
-		// THEN the description should be updated
-		List<Account> result = domain.getAccounts();
-		System.assertEquals(3, result.size());
-		final String expectedValue = Accounts.OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today();
-		for (Account record : result)
+		// Then each account description records today's opportunity activity
+		String expectedDescription = Accounts.OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today();
+		for(Account account : accountRecords)
 		{
-			System.assertEquals(expectedValue, record.Description);
+			System.assertEquals(
+				expectedDescription,
+				account.Description,
+				'Description should include opportunity raised text'
+			);
 		}
 	}
-
-
 }

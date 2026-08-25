@@ -1,7 +1,0 @@
-<apex:page standardController="Opportunity" extensions="OpportunityInvoicingController" recordSetVar="opps" tabStyle="Opportunity">
-	<apex:sectionHeader title="Batch Invoicing" subtitle="Process Opportunities available for invoicing."/> 
-	<apex:pageMessages />
-	<apex:form >
-		<apex:commandButton action="{!startJob}" value="Start" rendered="{!ISNULL(JobId)}"/>
-	</apex:form>
-</apex:page>

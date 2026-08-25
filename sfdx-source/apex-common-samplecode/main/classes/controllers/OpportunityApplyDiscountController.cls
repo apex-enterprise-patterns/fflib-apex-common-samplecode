@@ -25,65 +25,33 @@
 **/
 
 /**
- * Controller shared by Apply Discount and Apply Discounts Custom Buttons (and related pages) on the Opportunity
- * 
- * NOTE: The same service method is called regardless, logic in this controller is thus very light,
- *        focusing on passing parameters in and handling errors and notifications
- **/
-public with sharing class OpportunityApplyDiscountController 
+ * Controller for the Apply Discount Lightning action.
+ * Delegates discounting to {@link OpportunitiesService}.
+ */
+public inherited sharing class OpportunityApplyDiscountController
 {
-	public Decimal DiscountPercentage { get; set; } 
-	
-	private ApexPages.StandardController standardController = null;
-	
-	private ApexPages.StandardSetController standardSetController = null; 
-	
-	public OpportunityApplyDiscountController(ApexPages.StandardController controller)
-	{
-		standardController = controller;
-	}
-	
-	public OpportunityApplyDiscountController(ApexPages.StandardSetController controller)
-	{
-		standardSetController = controller;
-	}
-	
-	public PageReference applyDiscount()
+	/**
+	 * Applies a discount to a single Opportunity from the Lightning action.
+	 * @param opportunityId Opportunity Id to discount. Cannot be null.
+	 * @param discountPercentage Discount percent to apply (for example 10 for 10%).
+	 */
+	@AuraEnabled(cacheable=false)
+	public static void applyDiscount(Id opportunityId, Decimal discountPercentage)
 	{
 		try
 		{
-			// Apply discount entered to the current Opportunity
-			OpportunitiesService.applyDiscounts(
-				new Set<Id> { standardController.getId() }, DiscountPercentage);
+			OpportunitiesService.newInstance().applyDiscounts(new Set<Id>{ opportunityId }, discountPercentage);
 		}
 		catch (Exception e)
 		{
-			ApexPages.addMessages(e);
-		}		
-		
-		return ApexPages.hasMessages() ? null : standardController.view();				
+			throw toAura(e);
+		}
 	}
 
-	public PageReference applyDiscounts()
+	private static AuraHandledException toAura(Exception e)
 	{
-		try
-		{
-			// Selected Opportunity Id's
-			Set<Id> selectedOpportunityIds =
-				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
-			
-			// Apply discount entered to the selected Opportunities
-			OpportunitiesService.applyDiscounts(
-					selectedOpportunityIds, DiscountPercentage);
-			
-			// Confirm submission
-			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Opportunities updated.'));
-		}
-		catch (Exception e)
-		{
-			ApexPages.addMessages(e);
-		}		
-		
-		return null;				
+		AuraHandledException auraException = new AuraHandledException(e.getMessage());
+		auraException.setMessage(e.getMessage());
+		return auraException;
 	}
 }

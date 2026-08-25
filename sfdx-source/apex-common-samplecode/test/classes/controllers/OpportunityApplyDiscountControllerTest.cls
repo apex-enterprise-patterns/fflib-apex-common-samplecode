@@ -24,30 +24,28 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+/**
+ * Unit tests for OpportunityApplyDiscountController using fflib-apex-mocks.
+ */
 @IsTest
-private class OpportunityApplyDiscountControllerTest 
+private class OpportunityApplyDiscountControllerTest
 {
 	@IsTest
-	private static void callingApplyDiscountOnControllerShouldCallService()
+	private static void applyDiscountCallsService()
 	{
+		// Given a mocked opportunities service
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
+		OpportunitiesService mockService = (OpportunitiesService) mocks.mock(OpportunitiesService.class);
+		Id opportunityId = TestIdGenerator.generate(Opportunity.SObjectType);
+		OpportunitiesService.mock = mockService;
 
-		// Given
-		Id opportunityId = fflib_IDGenerator.generate(Opportunity.SObjectType);
-		Opportunity opp = new Opportunity(Id = opportunityId, Amount = 100, Name = 'Test');
-		ApexPages.StandardController standardController = new ApexPages.StandardController(opp);
+		// When apply discount is invoked from the Lightning action
+		OpportunityApplyDiscountController.applyDiscount(opportunityId, 10);
 
-		IOpportunitiesService mockService = (IOpportunitiesService) mocks.mock(IOpportunitiesService.class);
-
-		Application.Service.setMock(IOpportunitiesService.class, mockService);
-
-		// When
-		OpportunityApplyDiscountController controller = new OpportunityApplyDiscountController(standardController);
-		controller.DiscountPercentage = 10;
-		controller.applyDiscount();
-
-		// Then
-		((IOpportunitiesService) 
-			mocks.verify(mockService, 1)).applyDiscounts(new Set<Id> { opportunityId }, 10);
+		// Then the service is called with the opportunity id and discount percentage
+		((OpportunitiesService) mocks.verify(mockService)).applyDiscounts(
+			new Set<Id>{ opportunityId },
+			10
+		);
 	}
 }

@@ -25,112 +25,201 @@
 **/
 
 /**
- * This controller is not using the pattern approach in this code sample version. See the other two controllers
- *   in this sample for an illustration of how the patterns are used.
- **/
-public with sharing class QuickOpportunityWizardController
-{	
-	public ViewState ViewState { get; set; }
-	
-	private ApexPages.StandardController standardController;
-
-	public QuickOpportunityWizardController(ApexPages.StandardController controller)
-	{
-		standardController = controller;
-
-		// Create a new Opportunity defaulting from the Account
-		Account account = (Account) standardController.getRecord();
-		viewState = new ViewState();
-		viewState.Opportunity = new Opportunity();
-		viewState.Opportunity.Name = account.Name; 
-		viewState.Opportunity.AccountId = account.Id;
-		viewState.Opportunity.DiscountType__c = OpportunitySettings__c.getInstance().DiscountType__c;
-		viewState.SelectLineItemList = new List<SelectLineItem>();
-			
-		// Recently used Opportunity lines
-		List<OpportunityLineItem> lines = 
-			[SELECT
-				Id, 
-				Description, 
-				ListPrice, 
-				OpportunityId, 
-				PricebookEntryId, 
-				Quantity, 
-				SortOrder, 
-				TotalPrice, 
-				UnitPrice, 
-				PricebookEntry.Id,
-				PricebookEntry.IsActive,
-				PricebookEntry.Name,
-				PricebookEntry.Pricebook2Id,
-				PricebookEntry.Product2Id,
-				PricebookEntry.ProductCode,
-				PricebookEntry.UnitPrice,
-				PricebookEntry.UseStandardPrice,
-				PricebookEntry.Pricebook2.Description,
-				PricebookEntry.Pricebook2.Id,
-				PricebookEntry.Pricebook2.IsActive,
-				PricebookEntry.Pricebook2.IsStandard,
-				PricebookEntry.Pricebook2.Name 
-			 FROM OpportunityLineItem
-			 WHERE Opportunity.Account.Id = :account.Id
-			 ORDER BY SystemModstamp
-			 DESC LIMIT 10];
-			 
-		//  Clone these to be available for selection for the new opportunity
-		for(OpportunityLineItem item : lines)
-		{
-			SelectLineItem sli = new SelectLineItem();
-			sli.OpportunityLineItem = item.clone(false, true, false, false);
-			sli.OpportunityLineItem.OpportunityId = null; // this will be set as the new opportunity Id
-			sli.OpportunityLineItem.TotalPrice = null; // must null this as the record also includes a unit price
-			sli.Selected = false; 
-			viewState.SelectLineItemList.add(sli);
-		}
-	}
-	
- 	public PageReference createOpportunity()
+ * Wizard to create an Opportunity from recently used line items on an Account.
+ * Intentionally not pattern-based (matches sample).
+ */
+public inherited sharing class QuickOpportunityWizardController
+{
+	/**
+	 * Loads default Opportunity name and recently used line items for the Account Lightning action.
+	 * @param accountId Account Id whose recent opportunity products are offered. Cannot be null.
+	 * @return Wizard state with default name and selectable line items.
+	 */
+	@AuraEnabled(cacheable=false)
+	public static ViewState getWizardData(Id accountId)
 	{
 		try
 		{
-			// Insert new Opportunity 
-			insert Viewstate.Opportunity;
-			
-			// Insert selected Opportunity Lines (cloned from those recently used)
-			List<OpportunityLineItem> lines = new List<OpportunityLineItem>(); 
-			for(SelectLineItem item : ViewState.SelectLineItemList)
+			Account account = [SELECT Id, Name FROM Account WHERE Id = :accountId];
+			ViewState viewState = new ViewState();
+			viewState.opportunityName = account.Name;
+			viewState.selectLineItemList = new List<SelectLineItem>();
+
+			List<OpportunityLineItem> lines = [
+				SELECT
+					Id,
+					OpportunityId,
+					Description,
+					Quantity,
+					UnitPrice,
+					ListPrice,
+					PricebookEntryId,
+					SortOrder,
+					PricebookEntry.Name,
+					PricebookEntry.Product2Id,
+					PricebookEntry.Product2.DiscountingApproved__c,
+					PricebookEntry.Pricebook2.Name
+				FROM OpportunityLineItem
+				WHERE Opportunity.Account.Id = :account.Id
+				ORDER BY SystemModstamp DESC
+				LIMIT 10
+			];
+
+			Integer rowKey = 0;
+			for(OpportunityLineItem item : lines)
 			{
-				if(item.Selected)
-				{
-					OpportunityLineItem line = item.OpportunityLineItem;
-					line.OpportunityId = ViewState.Opportunity.Id;
-					lines.add(line);
-				}
+				SelectLineItem sli = new SelectLineItem();
+				sli.key = String.valueOf(rowKey++);
+				sli.selected = false;
+				sli.productName = item.PricebookEntry.Name;
+				sli.pricebookName = item.PricebookEntry.Pricebook2.Name;
+				sli.description = item.Description;
+				sli.listPrice = item.ListPrice;
+				sli.unitPrice = item.UnitPrice;
+				sli.quantity = item.Quantity;
+				sli.pricebookEntryId = item.PricebookEntryId;
+				viewState.selectLineItemList.add(sli);
 			}
-			insert lines;
-			
-			// Redirect to the new Opportunity
-			return new PageReference('/' + viewState.Opportunity.Id);
+			return viewState;
 		}
 		catch (Exception e)
 		{
-			ApexPages.addMessages(e);
+			throw toAura(e);
 		}
-		
-		return null;
 	}
 
+	/**
+	 * Inserts the Opportunity and selected line items, then returns the new Opportunity Id.
+	 * @param accountId Account Id to own the Opportunity. Cannot be null.
+	 * @param name Opportunity name.
+	 * @param stageName Opportunity stage.
+	 * @param closeDate Opportunity close date.
+	 * @param selectLineItemList Line items from the wizard; only selected rows are inserted.
+	 * @return Id of the inserted Opportunity.
+	 */
+	@AuraEnabled(cacheable=false)
+	public static Id createOpportunity(
+		Id accountId,
+		String name,
+		String stageName,
+		Date closeDate,
+		List<SelectLineItem> selectLineItemList
+	)
+	{
+		try
+		{
+			Opportunity opportunity = new Opportunity();
+			opportunity.Name = name;
+			opportunity.AccountId = accountId;
+			opportunity.StageName = stageName;
+			opportunity.CloseDate = closeDate;
+			opportunity.DiscountType__c = OpportunitySettings__c.getInstance().DiscountType__c;
+			Database.insert(opportunity);
+
+			List<OpportunityLineItem> lines = new List<OpportunityLineItem>();
+			if(selectLineItemList!=null)
+			{
+				for(SelectLineItem item : selectLineItemList)
+				{
+					if(item!=null && item.selected==true)
+					{
+						lines.add(
+							new OpportunityLineItem(
+								OpportunityId = opportunity.Id,
+								PricebookEntryId = item.pricebookEntryId,
+								Description = item.description,
+								Quantity = item.quantity,
+								UnitPrice = item.unitPrice
+							)
+						);
+					}
+				}
+			}
+			if(!lines.isEmpty())
+			{
+				Database.insert(lines);
+			}
+			return opportunity.Id;
+		}
+		catch (Exception e)
+		{
+			throw toAura(e);
+		}
+	}
+
+	private static AuraHandledException toAura(Exception e)
+	{
+		AuraHandledException auraException = new AuraHandledException(e.getMessage());
+		auraException.setMessage(e.getMessage());
+		return auraException;
+	}
+
+	/**
+	 * Holds wizard Opportunity defaults and selectable recent line items.
+	 */
 	public class ViewState
-	{
-		public Opportunity Opportunity {get;set;}
-		
-		public List<SelectLineItem> SelectLineItemList {get;set;}
+{
+		/**
+		 * Default Opportunity name, taken from the Account.
+		 */
+		@AuraEnabled
+		public String opportunityName { get; set; }
+		/**
+		 * Recent line items the user may select to copy onto the new Opportunity.
+		 */
+		@AuraEnabled
+		public List<SelectLineItem> selectLineItemList { get; set; }
 	}
 
+	/**
+	 * Wrapper for a cloned OpportunityLineItem and its selection flag in the wizard.
+	 */
 	public class SelectLineItem
-	{
-		public OpportunityLineItem OpportunityLineItem {get;set;}
-		
-		public Boolean Selected {get;set;}
+{
+		/**
+		 * Client-side row key for the datatable.
+		 */
+		@AuraEnabled
+		public String key { get; set; }
+		/**
+		 * Whether the user selected this line for the new Opportunity.
+		 */
+		@AuraEnabled
+		public Boolean selected { get; set; }
+		/**
+		 * Product name from the price book entry.
+		 */
+		@AuraEnabled
+		public String productName { get; set; }
+		/**
+		 * Price book name from the price book entry.
+		 */
+		@AuraEnabled
+		public String pricebookName { get; set; }
+		/**
+		 * Line description to insert when selected.
+		 */
+		@AuraEnabled
+		public String description { get; set; }
+		/**
+		 * List price shown read-only in the wizard.
+		 */
+		@AuraEnabled
+		public Decimal listPrice { get; set; }
+		/**
+		 * Unit price to insert when selected.
+		 */
+		@AuraEnabled
+		public Decimal unitPrice { get; set; }
+		/**
+		 * Quantity to insert when selected.
+		 */
+		@AuraEnabled
+		public Decimal quantity { get; set; }
+		/**
+		 * Price book entry used when inserting the line.
+		 */
+		@AuraEnabled
+		public Id pricebookEntryId { get; set; }
 	}
 }

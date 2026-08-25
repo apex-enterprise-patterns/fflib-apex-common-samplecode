@@ -24,25 +24,148 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class OpportunitiesService 
-{		
-	public static void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
-	{
-		service().applyDiscounts(opportunityIds, discountPercentage);
-	}
-	
-	public static Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)
-	{		
-		return service().createInvoices(opportunityIds, discountPercentage);
-	}
-	
-	public static Id submitInvoicingJob()
-	{
-		return service().submitInvoicingJob();
-	}	
+/**
+ * Service for Opportunity discounting, invoice creation, and invoicing job submission.
+ */
+public inherited sharing class OpportunitiesService
+{
+	@TestVisible
+	private static OpportunitiesService mock;
 
-	private static IOpportunitiesService service()
+	/**
+	 * Factory that returns this service, or {@link #mock} when tests have set one.
+	 * @return {@link OpportunitiesService} instance.
+	 */
+	public static OpportunitiesService newInstance()
 	{
-		return (IOpportunitiesService) Application.Service.newInstance(IOpportunitiesService.class);
-	}	
+		return mock!=null ? mock : new OpportunitiesService();
+	}
+
+	private OpportunitiesSelector selector;
+
+	/**
+	 * Creates a service using {@link OpportunitiesSelector#newInstance}.
+	 */
+	public OpportunitiesService()
+	{
+		this.selector = OpportunitiesSelector.newInstance();
+	}
+
+	/**
+	 * Loads Opportunities with products and applies a percentage discount and commits the updates.
+	 * @param opportunityIds Opportunity Ids to discount. Empty set performs no DML.
+	 * @param discountPercentage Discount percent to apply (for example 10 for 10%).
+	 * @throws OpportunitiesServiceException When commit fails or another unexpected error occurs.
+	 */
+	public void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
+	{
+		applyDiscounts(selector.selectByIdWithProducts(opportunityIds), discountPercentage);
+	}
+
+	/**
+	 * Applies a percentage discount to the given Opportunities (with products) and commits the updates.
+	 * @param opportunitiesWithProducts Opportunities including line items and product discount flags as needed.
+	 * @param discountPercentage Discount percent to apply (for example 10 for 10%).
+	 * @throws OpportunitiesServiceException When commit fails or another unexpected error occurs.
+	 */
+	public void applyDiscounts(List<Opportunity> opportunitiesWithProducts, Decimal discountPercentage)
+	{
+		try
+		{
+			fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
+			Opportunities.newInstance(opportunitiesWithProducts).applyDiscount(discountPercentage, uow);
+			uow.commitWork();
+		}
+		catch (Exception e)
+		{
+			throw wrap(e);
+		}
+	}
+
+	/**
+	 * Optionally discounts Opportunities, then creates Invoice__c and InvoiceLine__c records.
+	 * Invoice date is CloseDate (the simple Opportunity path; {@link InvoicingService} uses CloseDate plus 14 days).
+	 * @param opportunityIds Opportunity Ids to invoice. Empty set returns an empty set.
+	 * @param discountPercentage Optional discount applied before invoicing when greater than zero; null or zero skips discounting.
+	 * @return Ids of inserted Invoice__c records; empty set when no invoices were created.
+	 * @throws OpportunitiesServiceException When commit fails or another unexpected error occurs.
+	 */
+	public Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)
+	{
+		try
+		{
+			fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
+			Opportunities opps = Opportunities.newInstance(selector.selectByIdWithProducts(opportunityIds));
+			if(discountPercentage!=null && discountPercentage > 0)
+			{
+				opps.applyDiscount(discountPercentage, uow);
+			}
+
+			List<Invoice__c> invoices = new List<Invoice__c>();
+			for(Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())
+			{
+				Invoice__c invoice = new Invoice__c();
+				invoice.Account__c = opportunityRecord.AccountId;
+				invoice.Description__c = opportunityRecord.Description;
+				invoice.InvoiceDate__c = opportunityRecord.CloseDate;
+				invoice.Opportunity__c = opportunityRecord.Id;
+				uow.registerNew(invoice);
+				invoices.add(invoice);
+				if(opportunityRecord.OpportunityLineItems==null)
+				{
+					continue;
+				}
+				for(OpportunityLineItem lineItem : opportunityRecord.OpportunityLineItems)
+				{
+					InvoiceLine__c invoiceLineItem = new InvoiceLine__c();
+					invoiceLineItem.Description__c = lineItem.Description;
+					invoiceLineItem.Product__c = lineItem.PricebookEntry.Product2Id;
+					invoiceLineItem.UnitPrice__c = lineItem.UnitPrice;
+					invoiceLineItem.Quantity__c = lineItem.Quantity;
+					uow.registerNew(invoiceLineItem, InvoiceLine__c.Invoice__c, invoice);
+				}
+			}
+			uow.commitWork();
+
+			Set<Id> invoiceIds = new Set<Id>();
+			for(Invoice__c invoice : invoices)
+			{
+				invoiceIds.add(invoice.Id);
+			}
+			return invoiceIds;
+		}
+		catch (Exception e)
+		{
+			throw wrap(e);
+		}
+	}
+
+	/**
+	 * Submits {@link CreateInvoicesJob} as a Batch Apex job.
+	 * @return Async Apex job Id returned by {@code Database.executeBatch}.
+	 */
+	public Id submitInvoicingJob()
+	{
+		return Database.executeBatch(new CreateInvoicesJob());
+	}
+
+	private static OpportunitiesServiceException wrap(Exception e)
+	{
+		if(e instanceof OpportunitiesServiceException)
+		{
+			return (OpportunitiesServiceException) e;
+		}
+		if(e instanceof DmlException)
+		{
+			return new OpportunitiesServiceException('Error applying discounts or creating invoices: ' + ((DmlException) e).getDmlMessage(0), e);
+		}
+		return new OpportunitiesServiceException(e.getMessage(), e);
+	}
+
+	/**
+	 * Represents an exception thrown by {@link OpportunitiesService} operations.
+	 */
+	public class OpportunitiesServiceException extends Exception
+	{
+	}
 }

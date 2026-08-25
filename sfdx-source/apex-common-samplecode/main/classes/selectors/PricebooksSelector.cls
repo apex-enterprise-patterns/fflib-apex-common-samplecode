@@ -24,22 +24,38 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class PricebooksSelector extends fflib_SObjectSelector
-	implements IPricebooksSelector
+/**
+ * Selector for Pricebook2 queries.
+ */
+public virtual inherited sharing class PricebooksSelector extends fflib_SObjectSelector
 {
-	public static IPricebooksSelector newInstance()
+	@TestVisible
+	private static PricebooksSelector mock;
+
+	/**
+	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * @return {@link PricebooksSelector} instance.
+	 */
+	public static PricebooksSelector newInstance()
 	{
-		return (IPricebooksSelector) Application.Selector.newInstance(Pricebook2.SObjectType);
+		return mock!=null ? mock : new PricebooksSelector();
 	}
 
+	/**
+	 * Creates a selector that queries in user mode.
+	 */
 	public PricebooksSelector()
 	{
 		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
+	/**
+	 * Fields included in default queries from this selector.
+	 * @return Pricebook2 Description, Id, IsActive, IsStandard, and Name.
+	 */
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
-		return new List<Schema.SObjectField> {
+		return new List<Schema.SObjectField>{
 			Pricebook2.Description,
 			Pricebook2.Id,
 			Pricebook2.IsActive,
@@ -48,13 +64,22 @@ public class PricebooksSelector extends fflib_SObjectSelector
 		};
 	}
 
+	/**
+	 * SObject type this selector queries.
+	 * @return {@code Pricebook2.SObjectType}.
+	 */
 	public Schema.SObjectType getSObjectType()
 	{
 		return Pricebook2.SObjectType;
 	}
 
+	/**
+	 * Selects Pricebooks by Id with Description, active, and standard flags.
+	 * @param idSet Pricebook2 Ids to query. Empty set returns an empty list.
+	 * @return Matching Pricebook2 records; empty list when none match.
+	 */
 	public List<Pricebook2> selectById(Set<Id> idSet)
 	{
 		return (List<Pricebook2>) selectSObjectsById(idSet);
-	}	
+	}
 }

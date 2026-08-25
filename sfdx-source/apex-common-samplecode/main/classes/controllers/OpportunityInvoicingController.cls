@@ -25,37 +25,31 @@
 **/
 
 /**
- * Small example showing a controller using the service layer to submit a Batch Apex job
- **/
-public with sharing class OpportunityInvoicingController 
+ * Controller that submits the Opportunity invoicing Batch Apex job from a headless Lightning action.
+ */
+public inherited sharing class OpportunityInvoicingController
 {
-	public Id JobId {get;set;}
-	
-	public OpportunityInvoicingController(ApexPages.StandardSetController standardSetControlelr)
-	{
-		ApexPages.addMessage(
-			new ApexPages.Message(
-				ApexPages.Severity.INFO, 'Click Start to scan Opportunities that are ready for invoicing and process them.'));
-	}
-	
-	public PageReference startJob()
+	/**
+	 * Submits {@link CreateInvoicesJob} through {@link OpportunitiesService#submitInvoicingJob}.
+	 * @return Async Apex job Id returned after a successful submit.
+	 */
+	@AuraEnabled(cacheable=false)
+	public static Id startJob()
 	{
 		try
-		{	
-			// Ask the service to submit the job
-			JobId = OpportunitiesService.submitInvoicingJob();
-			
-			// Confirm
-			ApexPages.addMessage(
-				new ApexPages.Message(
-					ApexPages.Severity.INFO, 'The job has been submitted, you will receive an email notificaiton of any issues.'));
+		{
+			return OpportunitiesService.newInstance().submitInvoicingJob();
 		}
 		catch (Exception e)
 		{
-			// Client displays any issues submitting the job 		
-			ApexPages.addMessages(e);
+			throw toAura(e);
 		}
-		
-		return null;
+	}
+
+	private static AuraHandledException toAura(Exception e)
+	{
+		AuraHandledException auraException = new AuraHandledException(e.getMessage());
+		auraException.setMessage(e.getMessage());
+		return auraException;
 	}
 }

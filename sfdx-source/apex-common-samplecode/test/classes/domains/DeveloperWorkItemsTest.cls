@@ -24,34 +24,45 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+/**
+ * Integration test for DeveloperWorkItems cost calculation.
+ */
 @IsTest
 private class DeveloperWorkItemsTest
 {
 	@TestSetup
 	static void setup()
 	{
+		// Given a run-as user with sample app permissions
 		TestDataFactory.createUserWithSampleAppPermissions();
 	}
 
 	@IsTest
-	private static void whenInsertingDeveloperWorkItemsThenCalcCost()
+	static void insertWorkItemsCalculatesCost()
 	{
-		// Given - data setup in system context, DML in runAs for USER_MODE
-		WorkOrder__c wo = new WorkOrder__c();
-		DeveloperWorkItem__c wi = new DeveloperWorkItem__c();
-		wi.CodingHours__c = 20;
-		wi.CodeReviewingHours__c = 1;
-		wi.TechnicalDesignHours__c = 10;
-
 		System.runAs(TestDataFactory.getRunAsUser())
 		{
-			fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
-			uow.registerNew(wo);
-			uow.registerNew(wi, DeveloperWorkItem__c.WorkOrder__c, wo);
-			uow.commitWork();
-		}
+			// Given a work order and developer work item with hours
+			WorkOrder__c wo = new WorkOrder__c();
+			insert wo;
+			DeveloperWorkItem__c wi = new DeveloperWorkItem__c(
+				WorkOrder__c = wo.Id,
+				CodingHours__c = 20,
+				CodeReviewingHours__c = 1,
+				TechnicalDesignHours__c = 10
+			);
 
-		// Then
-		System.assertEquals(3100, [SELECT DeveloperCost__c FROM DeveloperWorkItem__c WHERE Id = :wi.Id].DeveloperCost__c);
+			// When the work item is inserted
+			Test.startTest();
+			insert wi;
+			Test.stopTest();
+
+			// Then the developer cost is calculated from hours worked
+			System.assertEquals(
+				3100,
+				[SELECT DeveloperCost__c FROM DeveloperWorkItem__c WHERE Id = :wi.Id].DeveloperCost__c,
+				'Developer cost should be 3100'
+			);
+		}
 	}
 }

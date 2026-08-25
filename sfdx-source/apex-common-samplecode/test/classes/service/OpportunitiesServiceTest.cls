@@ -24,47 +24,47 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+/**
+ * Unit tests for OpportunitiesService using fflib-apex-mocks. No DML.
+ */
 @IsTest
-private class OpportunitiesServiceTest 
+private class OpportunitiesServiceTest
 {
 	@IsTest
-	private static void callingServiceShouldCallSelectorApplyDiscountInDomainAndCommit()
+	private static void serviceApplyDiscountsCallsSelectorDomainAndCommit()
 	{
-		// Create mocks
+		// Given an opportunity with amount and no lines, returned by a mocked selector
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		
-		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(fflib_ISObjectUnitOfWork.class);
-		IOpportunities domainMock = (IOpportunities) mocks.mock(IOpportunities.class);
-		IOpportunitiesSelector selectorMock = (IOpportunitiesSelector) mocks.mock(IOpportunitiesSelector.class);
-
-
-		// Given
-		mocks.startStubbing();
-		List<Opportunity> testOppsList = new List<Opportunity> { 
+		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(
+			fflib_ISObjectUnitOfWork.class
+		);
+		Opportunities domainMock = (Opportunities) mocks.mock(Opportunities.class);
+		OpportunitiesSelector selectorMock = (OpportunitiesSelector) mocks.mock(
+			OpportunitiesSelector.class
+		);
+		List<Opportunity> testOppsList = new List<Opportunity>{
 			new Opportunity(
-				Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+				Id = TestIdGenerator.generate(Opportunity.SObjectType),
 				Name = 'Test Opportunity',
 				StageName = 'Open',
 				Amount = 1000,
-				CloseDate = System.today()) };
+				CloseDate = System.today()
+			)
+		};
 		Set<Id> testOppsSet = new Map<Id, Opportunity>(testOppsList).keySet();
-		mocks.when(domainMock.getType()).thenReturn(Opportunity.SObjectType);
-		mocks.when(selectorMock.sObjectType()).thenReturn(Opportunity.SObjectType);
+		mocks.startStubbing();
 		mocks.when(selectorMock.selectByIdWithProducts(testOppsSet)).thenReturn(testOppsList);
 		mocks.stopStubbing();
-		Application.UnitOfWork.setMock(uowMock);
-		Application.Domain.setMock(domainMock);
-		Application.Selector.setMock(selectorMock);
+		UnitOfWork.mock = uowMock;
+		OpportunitiesSelector.mock = selectorMock;
+		Opportunities.mock = domainMock;
 
-		// When
-		OpportunitiesService.applyDiscounts(testOppsSet, 10);
+		// When discounts are applied through the service
+		OpportunitiesService.newInstance().applyDiscounts(testOppsSet, 10);
 
-		// Then
-		((IOpportunitiesSelector) 
-			mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);
-		((IOpportunities) 
-			mocks.verify(domainMock)).applyDiscount(10, uowMock);
-		((fflib_ISObjectUnitOfWork) 
-			mocks.verify(uowMock, 1)).commitWork();
+		// Then the selector, domain, and unit of work are used
+		((OpportunitiesSelector) mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);
+		((Opportunities) mocks.verify(domainMock)).applyDiscount(10, uowMock);
+		((fflib_ISObjectUnitOfWork) mocks.verify(uowMock, 1)).commitWork();
 	}
 }

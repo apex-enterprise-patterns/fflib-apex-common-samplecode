@@ -24,22 +24,38 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class PricebookEntriesSelector extends fflib_SObjectSelector
-	implements IPricebookEntriesSelector
+/**
+ * Selector for PricebookEntry queries.
+ */
+public virtual inherited sharing class PricebookEntriesSelector extends fflib_SObjectSelector
 {
-	public static IPricebookEntriesSelector newInstance()
+	@TestVisible
+	private static PricebookEntriesSelector mock;
+
+	/**
+	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * @return {@link PricebookEntriesSelector} instance.
+	 */
+	public static PricebookEntriesSelector newInstance()
 	{
-		return (IPricebookEntriesSelector) Application.Selector.newInstance(PricebookEntry.SObjectType);
+		return mock!=null ? mock : new PricebookEntriesSelector();
 	}
 
+	/**
+	 * Creates a selector that queries in user mode.
+	 */
 	public PricebookEntriesSelector()
 	{
 		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
+	/**
+	 * Fields included in default queries from this selector.
+	 * @return PricebookEntry Id, IsActive, Name, Pricebook2Id, Product2Id, ProductCode, UnitPrice, and UseStandardPrice.
+	 */
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
-		return new List<Schema.SObjectField> {
+		return new List<Schema.SObjectField>{
 			PricebookEntry.Id,
 			PricebookEntry.IsActive,
 			PricebookEntry.Name,
@@ -51,11 +67,20 @@ public class PricebookEntriesSelector extends fflib_SObjectSelector
 		};
 	}
 
+	/**
+	 * SObject type this selector queries.
+	 * @return {@code PricebookEntry.SObjectType}.
+	 */
 	public Schema.SObjectType getSObjectType()
 	{
 		return PricebookEntry.SObjectType;
 	}
 
+	/**
+	 * Selects PricebookEntries by Id with standard pricing fields.
+	 * @param idSet PricebookEntry Ids to query. Empty set returns an empty list.
+	 * @return Matching PricebookEntry records; empty list when none match.
+	 */
 	public List<PricebookEntry> selectById(Set<Id> idSet)
 	{
 		return (List<PricebookEntry>) selectSObjectsById(idSet);

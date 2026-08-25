@@ -1,9 +1,19 @@
 {
     "orgName": "apex-common-samplecode",
     "edition": "Developer",
+    "features": ["EnableSetPasswordInApi", "Einstein1AIPlatform"],
     "settings": {
         "lightningExperienceSettings": {
             "enableS1DesktopEnabled": true
+        },
+        "mobileSettings": {
+            "enableS1EncryptedStoragePref2": false
+        },
+        "agentPlatformSettings": {
+            "enableAgentPlatform": true
+        },
+        "einsteinGptSettings": {
+            "enableEinsteinGptPlatform": true
         }
     }
 }

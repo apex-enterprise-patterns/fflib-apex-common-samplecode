@@ -24,27 +24,57 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class ProductsSelector extends fflib_SObjectSelector
-	implements IProductsSelector
+/**
+ * Selector for Product2 queries, optionally including OpportunityDiscount field set members.
+ */
+public virtual inherited sharing class ProductsSelector extends fflib_SObjectSelector
 {
-	public static IProductsSelector newInstance()
+	@TestVisible
+	private static ProductsSelector mock;
+
+	/**
+	 * Factory that returns a selector without field set fields, or {@link #mock} when tests have set one.
+	 * @return {@link ProductsSelector} instance.
+	 */
+	public static ProductsSelector newInstance()
 	{
-		return (IProductsSelector) Application.Selector.newInstance(Product2.SObjectType);
-	}
-	
-	public ProductsSelector()
-	{
-		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
+		return newInstance(false);
 	}
 
+	/**
+	 * Factory that returns a selector with optional field set fields, or {@link #mock} when tests have set one.
+	 * @param includeFieldSetFields When true, OpportunityDiscount field set fields are included.
+	 * @return {@link ProductsSelector} instance.
+	 */
+	public static ProductsSelector newInstance(Boolean includeFieldSetFields)
+	{
+		return mock!=null ? mock : new ProductsSelector(includeFieldSetFields);
+	}
+
+	/**
+	 * Creates a selector that queries only the default product field list.
+	 */
+	public ProductsSelector()
+	{
+		this(false);
+	}
+
+	/**
+	 * Creates a selector that optionally includes OpportunityDiscount field set fields.
+	 * @param includeFieldSetFields When true, fields from Product2.FieldSets.OpportunityDiscount are added to the SELECT list.
+	 */
 	public ProductsSelector(Boolean includeFieldSetFields)
 	{
-		super(includeFieldSetFields, fflib_SObjectSelector.DataAccess.USER_MODE);
+		super(includeFieldSetFields==true, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
-	
+
+	/**
+	 * Fields included in default queries from this selector.
+	 * @return Product2 Description, Id, IsActive, Name, ProductCode, and DiscountingApproved__c.
+	 */
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
-		return new List<Schema.SObjectField> {
+		return new List<Schema.SObjectField>{
 			Product2.Description,
 			Product2.Id,
 			Product2.IsActive,
@@ -54,18 +84,41 @@ public class ProductsSelector extends fflib_SObjectSelector
 		};
 	}
 
+	/**
+	 * SObject type this selector queries.
+	 * @return {@code Product2.SObjectType}.
+	 */
 	public Schema.SObjectType getSObjectType()
 	{
 		return Product2.SObjectType;
 	}
 
+	/**
+	 * Field sets optionally added when the selector is constructed with includeFieldSetFields.
+	 * @return {@code Product2.FieldSets.OpportunityDiscount}.
+	 */
+	public override List<Schema.FieldSet> getSObjectFieldSetList()
+	{
+		return new List<Schema.FieldSet>{ SObjectType.Product2.FieldSets.OpportunityDiscount };
+	}
+
+	/**
+	 * Selects Products by Id using the configured field list.
+	 * @param idSet Product2 Ids to query. Empty set returns an empty list.
+	 * @return Matching Product2 records; empty list when none match.
+	 */
 	public List<Product2> selectById(Set<Id> idSet)
 	{
 		return (List<Product2>) selectSObjectsById(idSet);
 	}
-	
-	public override List<Schema.FieldSet> getSObjectFieldSetList()
+
+	/**
+	 * Returns a QueryLocator for Products by Id using the configured field list.
+	 * @param idSet Product2 Ids to include in the locator.
+	 * @return QueryLocator suitable for Batch Apex or large result sets.
+	 */
+	public override Database.QueryLocator queryLocatorById(Set<Id> idSet)
 	{
-		return new List<Schema.FieldSet> { SObjectType.Product2.FieldSets.OpportunityDiscount };
+		return Database.getQueryLocator(newQueryFactory().setCondition('Id IN :idSet').toSOQL());
 	}
 }
