@@ -41,8 +41,10 @@ public inherited sharing class OpportunityCreateInvoiceController
 	{
 		try
 		{
-			Set<Id> invoiceIds = OpportunitiesService.newInstance().createInvoices(new Set<Id>{ opportunityId }, discountPercentage);
-			return new List<Id>(invoiceIds)[0];
+			Map<Id, Id> invoiceIdByOpportunityId = OpportunitiesService.newInstance().applyDiscountsAndCreateInvoices(
+				new Map<Id, Decimal>{ opportunityId => discountPercentage }
+			);
+			return invoiceIdByOpportunityId.get(opportunityId);
 		}
 		catch (Exception e)
 		{

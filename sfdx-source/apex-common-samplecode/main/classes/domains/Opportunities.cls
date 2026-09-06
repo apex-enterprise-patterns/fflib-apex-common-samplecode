@@ -89,7 +89,7 @@ public virtual inherited sharing class Opportunities extends fflib_SObjects
 	 * @param discountByOpportunityId Map of Opportunity Id to discount percent.
 	 * @param uow Unit of Work that receives dirty Opportunity / line item records. Cannot be null.
 	 */
-	public virtual void applyDiscounts(Map<Id, Decimal> discountByOpportunityId, fflib_ISObjectUnitOfWork uow)
+	public virtual void applyDiscounts(Map<Id, Decimal> discountByOpportunityId, fflib_SObjectUnitOfWork uow)
 	{
 		if(discountByOpportunityId==null || discountByOpportunityId.isEmpty())
 		{

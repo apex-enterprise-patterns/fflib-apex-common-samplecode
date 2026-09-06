@@ -52,7 +52,7 @@ public inherited sharing class AccountsService
 			return;
 		}
 
-		fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
+		fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
 		List<Account> accountRecords = AccountsSelector.newInstance().selectById(accountIds);
 		Accounts accountsDomain = Accounts.newInstance(accountRecords);
 		accountsDomain.updateOpportunityActivity();

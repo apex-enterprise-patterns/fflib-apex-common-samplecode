@@ -63,7 +63,7 @@ public virtual inherited sharing class OpportunityLineItems extends fflib_SObjec
 	public virtual void applyDiscounts(
 		Opportunities opps,
 		Map<Id, Decimal> discountByOpportunityLineItemId,
-		fflib_ISObjectUnitOfWork uow
+		fflib_SObjectUnitOfWork uow
 	)
 	{
 		Map<Id, Opportunity> opportunitiesById = new Map<Id, Opportunity>((List<Opportunity>) opps.getRecords());

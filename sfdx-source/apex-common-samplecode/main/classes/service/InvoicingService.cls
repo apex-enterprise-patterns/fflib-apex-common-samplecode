@@ -59,7 +59,7 @@ public inherited sharing class InvoicingService
 	 */
 	public class InvoiceFactory
 {
-		private fflib_ISObjectUnitOfWork unitOfWork;
+		private fflib_SObjectUnitOfWork unitOfWork;
 		/**
 		 * Invoice__c headers accumulated so far; Ids are set after commit.
 		 */
@@ -69,7 +69,7 @@ public inherited sharing class InvoicingService
 		 * Creates a factory that registers invoices on the given Unit of Work.
 		 * @param unitOfWork Unit of Work that will insert headers and lines. Cannot be null.
 		 */
-		public InvoiceFactory(fflib_ISObjectUnitOfWork unitOfWork)
+		public InvoiceFactory(fflib_SObjectUnitOfWork unitOfWork)
 		{
 			this.unitOfWork = unitOfWork;
 			this.Invoices = new List<Invoice__c>();
@@ -137,7 +137,7 @@ public inherited sharing class InvoicingService
 	{
 		try
 		{
-			fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
+			fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
 			InvoiceFactory invoiceFactory = new InvoiceFactory(uow);
 			List<SObject> records = InvoicingTargetsRegistry.selectById(new Set<Id>(sourceRecordIds));
 			Object domain = InvoicingTargetsRegistry.newDomain(records);

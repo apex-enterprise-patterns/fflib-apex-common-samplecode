@@ -30,7 +30,7 @@
  */
 public inherited sharing class CreateInvoice {
 	/**
-	 * Creates an Invoice for each request via {@link OpportunitiesService#createInvoices}.
+	 * Creates invoices for all requests via {@link OpportunitiesService#applyDiscountsAndCreateInvoices}.
 	 * @param requests Opportunity Id and optional discount percent per request. Cannot be null.
 	 * @return Invoice Id and Name in the same order as {@code requests}.
 	 */
@@ -40,29 +40,40 @@ public inherited sharing class CreateInvoice {
 		category='Opportunities'
 	)
 	public static List<Result> execute(List<Request> requests) {
+
+		// Build the map of Opportunity Ids and discount percentages.
+		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
+		for (Request request : requests) {
+			discountByOpportunityId.put(request.opportunityId, request.discountPercentage);
+		}
+
+		// Apply discounts and create invoices.
+		Map<Id, Id> invoiceIdByOpportunityId =
+			OpportunitiesService.newInstance().applyDiscountsAndCreateInvoices(discountByOpportunityId);
+		Map<Id, String> invoiceNameById = invoiceNamesById(invoiceIdByOpportunityId.values());
+
+		// Build the results.
 		List<Result> results = new List<Result>();
 		for (Request request : requests) {
-			Set<Id> invoiceIds = OpportunitiesService.newInstance().createInvoices(
-				new Set<Id>{ request.opportunityId },
-				request.discountPercentage
-			);
-			Id invoiceId = new List<Id>(invoiceIds)[0];
+			Id invoiceId = invoiceIdByOpportunityId.get(request.opportunityId);
 			Result result = new Result();
 			result.invoiceId = invoiceId;
-			result.invoiceName = invoiceName(invoiceId);
+			result.invoiceName = invoiceNameById.get(invoiceId);
 			results.add(result);
 		}
 		return results;
 	}
 
-	@TestVisible
-	private static String testInvoiceName;
-
-	private static String invoiceName(Id invoiceId) {
-		if (testInvoiceName != null) {
-			return testInvoiceName;
+	private static Map<Id, String> invoiceNamesById(Iterable<Id> invoiceIds) {
+		Set<Id> invoiceIdSet = new Set<Id>();
+		for (Id invoiceId : invoiceIds) {
+			invoiceIdSet.add(invoiceId);
 		}
-		return [SELECT Name FROM Invoice__c WHERE Id = :invoiceId].Name;
+		Map<Id, String> invoiceNameById = new Map<Id, String>();
+		for (Invoice__c invoice : InvoicesSelector.newInstance().selectById(invoiceIdSet)) {
+			invoiceNameById.put(invoice.Id, invoice.Name);
+		}
+		return invoiceNameById;
 	}
 
 	/**

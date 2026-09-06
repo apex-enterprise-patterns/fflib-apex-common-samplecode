@@ -43,8 +43,8 @@ private class OpportunitiesTest
 		);
 		Opportunities opps = Opportunities.newInstance(new List<Opportunity>{ opp });
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(
-			fflib_ISObjectUnitOfWork.class
+		fflib_SObjectUnitOfWork uowMock = (fflib_SObjectUnitOfWork) mocks.mock(
+			fflib_SObjectUnitOfWork.class
 		);
 
 		// When a discount is applied in the domain
@@ -54,7 +54,7 @@ private class OpportunitiesTest
 		System.assertEquals(1, opps.getRecords().size(), 'Domain should still wrap one opportunity');
 		System.assertEquals(900, opp.Amount, 'Amount should be discounted to 900');
 		System.assertEquals(900, ((Opportunity) opps.getRecords()[0]).Amount, 'getRecords amount should be 900');
-		((fflib_ISObjectUnitOfWork) mocks.verify(uowMock)).registerDirty(opp);
+		((fflib_SObjectUnitOfWork) mocks.verify(uowMock)).registerDirty(opp);
 	}
 
 	@IsTest
@@ -72,7 +72,7 @@ private class OpportunitiesTest
 
 		// When discounts are applied and updates are committed by the caller
 		Opportunities opps = Opportunities.newInstance(new List<Opportunity>{ opp });
-		fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
+		fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
 		opps.applyDiscounts(new Map<Id, Decimal>{ opp.Id => 10 }, uow);
 		uow.commitWork();
 

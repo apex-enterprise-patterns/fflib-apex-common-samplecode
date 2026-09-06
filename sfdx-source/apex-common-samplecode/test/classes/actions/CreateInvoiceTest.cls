@@ -31,17 +31,21 @@
 private class CreateInvoiceTest {
 	@IsTest
 	private static void executeCallsServiceAndReturnsInvoiceId() {
-		// Given a mocked opportunities service that returns an invoice id
+		// Given mocked service and selector
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
 		OpportunitiesService mockService = (OpportunitiesService) mocks.mock(OpportunitiesService.class);
+		InvoicesSelector mockSelector = (InvoicesSelector) mocks.mock(InvoicesSelector.class);
 		Id opportunityId = TestIdGenerator.generate(Opportunity.SObjectType);
 		Id invoiceId = TestIdGenerator.generate(Invoice__c.SObjectType);
-		Set<Id> invoiceIds = new Set<Id>{ invoiceId };
+		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>{ opportunityId => 10 };
+		Map<Id, Id> invoiceIdByOpportunityId = new Map<Id, Id>{ opportunityId => invoiceId };
+		Invoice__c invoice = (Invoice__c) JSON.deserialize('{"Id":"' + invoiceId + '","Name":"INV-00000001"}', Invoice__c.class);
 		mocks.startStubbing();
-		mocks.when(mockService.createInvoices(new Set<Id>{ opportunityId }, 10)).thenReturn(invoiceIds);
+		mocks.when(mockService.applyDiscountsAndCreateInvoices(discountByOpportunityId)).thenReturn(invoiceIdByOpportunityId);
+		mocks.when(mockSelector.selectById(new Set<Id>{ invoiceId })).thenReturn(new List<Invoice__c>{ invoice });
 		mocks.stopStubbing();
 		OpportunitiesService.mock = mockService;
-		CreateInvoice.testInvoiceName = 'INV-00000001';
+		InvoicesSelector.mock = mockSelector;
 		CreateInvoice.Request request = new CreateInvoice.Request();
 		request.opportunityId = opportunityId;
 		request.discountPercentage = 10;
@@ -51,11 +55,11 @@ private class CreateInvoiceTest {
 			new List<CreateInvoice.Request>{ request }
 		);
 
-		// Then the service is called and the invoice id is returned
-		((OpportunitiesService) mocks.verify(mockService)).createInvoices(
-			new Set<Id>{ opportunityId },
-			10
+		// Then the service and selector are called and the invoice id is returned
+		((OpportunitiesService) mocks.verify(mockService)).applyDiscountsAndCreateInvoices(
+			new Map<Id, Decimal>{ opportunityId => 10 }
 		);
+		((InvoicesSelector) mocks.verify(mockSelector)).selectById(new Set<Id>{ invoiceId });
 		System.assertEquals(1, results.size(), 'One result should be returned');
 		System.assertEquals(invoiceId, results[0].invoiceId, 'Created invoice Id should be returned');
 		System.assertEquals('INV-00000001', results[0].invoiceName, 'Created invoice Name should be returned');

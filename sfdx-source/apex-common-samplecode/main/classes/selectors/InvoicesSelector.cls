@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-2014, FinancialForce.com, inc
+ * Copyright (c) 2013-2016, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -25,43 +25,58 @@
 **/
 
 /**
- * Visualforce controller for the Create Invoices list-view button.
- * Delegates invoice creation to {@link OpportunitiesService}.
+ * Selector for Invoice__c queries used by invocable and UI entry points.
  */
-public inherited sharing class OpportunityCreateInvoicesController {
-	/**
-	 * Optional discount percent applied before invoice creation
-	 * (for example 10 for 10%).
-	 */
-	public Decimal discountPercentage { get; set; }
-
-	private ApexPages.StandardSetController standardSetController;
+public virtual inherited sharing class InvoicesSelector extends fflib_SObjectSelector
+{
+	@TestVisible
+	private static InvoicesSelector mock;
 
 	/**
-	 * Creates a controller for a list StandardSetController (bulk create).
-	 * @param controller StandardSetController with selected Opportunities. Cannot be null.
+	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * @return {@link InvoicesSelector} instance.
 	 */
-	public OpportunityCreateInvoicesController(ApexPages.StandardSetController controller) {
-		standardSetController = controller;
+	public static InvoicesSelector newInstance()
+	{
+		return mock!=null ? mock : new InvoicesSelector();
 	}
 
 	/**
-	 * Creates invoices for all selected Opportunities on the list view.
-	 * @return Null so the list page remains; adds an info message on success.
+	 * Creates a selector that queries in user mode.
 	 */
-	public PageReference createInvoices() {
-		try {
-			Set<Id> selectedOpportunityIds =
-				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
-			Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
-			for (Id opportunityId : selectedOpportunityIds) {
-				discountByOpportunityId.put(opportunityId, discountPercentage);
-			}
-			OpportunitiesService.newInstance().applyDiscountsAndCreateInvoices(discountByOpportunityId);
-			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Invoices created.'));
-		} catch (Exception e) {
-			ApexPages.addMessages(e);
-		}
-		return null;
+	public InvoicesSelector()
+	{
+		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
+	}
+
+	/**
+	 * Fields included in default queries from this selector.
+	 * @return Invoice__c Id and Name.
+	 */
+	public List<Schema.SObjectField> getSObjectFieldList()
+	{
+		return new List<Schema.SObjectField>{
+			Invoice__c.Id,
+			Invoice__c.Name
+		};
+	}
+
+	/**
+	 * SObject type this selector queries.
+	 * @return {@code Invoice__c.SObjectType}.
+	 */
+	public Schema.SObjectType getSObjectType()
+	{
+		return Invoice__c.SObjectType;
+	}
+
+	/**
+	 * Selects Invoice__c records by Id with Id and Name.
+	 * @param idSet Invoice Ids to query. Empty set returns an empty list.
+	 * @return Matching invoices; empty list when none match.
+	 */
+	public List<Invoice__c> selectById(Set<Id> idSet)
+	{
+		return (List<Invoice__c>) selectSObjectsById(idSet);
 	}
 }

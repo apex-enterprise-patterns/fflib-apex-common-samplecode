@@ -63,7 +63,11 @@ public inherited sharing class CreateInvoicesJob
 		try
 		{
 			Set<Id> opportunitiesToInvoice = new Map<Id, SObject>(opps).keySet();
-			OpportunitiesService.newInstance().createInvoices(opportunitiesToInvoice, 0);	
+			Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
+			for (Id opportunityId : opportunitiesToInvoice) {
+				discountByOpportunityId.put(opportunityId, 0);
+			}
+			OpportunitiesService.newInstance().applyDiscountsAndCreateInvoices(discountByOpportunityId);
 		}
 		catch (Exception e)
 		{

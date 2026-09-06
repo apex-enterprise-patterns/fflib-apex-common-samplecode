@@ -36,9 +36,10 @@ private class OpportunityCreateInvoiceControllerTest {
 		OpportunitiesService mockService = (OpportunitiesService) mocks.mock(OpportunitiesService.class);
 		Id opportunityId = TestIdGenerator.generate(Opportunity.SObjectType);
 		Id invoiceId = TestIdGenerator.generate(Invoice__c.SObjectType);
-		Set<Id> invoiceIds = new Set<Id>{ invoiceId };
+		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>{ opportunityId => 10 };
+		Map<Id, Id> invoiceIdByOpportunityId = new Map<Id, Id>{ opportunityId => invoiceId };
 		mocks.startStubbing();
-		mocks.when(mockService.createInvoices(new Set<Id>{ opportunityId }, 10)).thenReturn(invoiceIds);
+		mocks.when(mockService.applyDiscountsAndCreateInvoices(discountByOpportunityId)).thenReturn(invoiceIdByOpportunityId);
 		mocks.stopStubbing();
 		OpportunitiesService.mock = mockService;
 
@@ -46,9 +47,8 @@ private class OpportunityCreateInvoiceControllerTest {
 		Id resultId = OpportunityCreateInvoiceController.createInvoice(opportunityId, 10);
 
 		// Then the service is called and the invoice id is returned
-		((OpportunitiesService) mocks.verify(mockService)).createInvoices(
-			new Set<Id>{ opportunityId },
-			10
+		((OpportunitiesService) mocks.verify(mockService)).applyDiscountsAndCreateInvoices(
+			new Map<Id, Decimal>{ opportunityId => 10 }
 		);
 		System.assertEquals(invoiceId, resultId, 'Created invoice Id should be returned');
 	}
