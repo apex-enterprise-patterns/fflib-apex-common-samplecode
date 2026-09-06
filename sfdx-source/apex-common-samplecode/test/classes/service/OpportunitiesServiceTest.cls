@@ -35,8 +35,8 @@ private class OpportunitiesServiceTest
 	{
 		// Given an opportunity with amount and no lines, returned by a mocked selector
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(
-			fflib_ISObjectUnitOfWork.class
+		fflib_SObjectUnitOfWork uowMock = (fflib_SObjectUnitOfWork) mocks.mock(
+			fflib_SObjectUnitOfWork.class
 		);
 		Opportunities domainMock = (Opportunities) mocks.mock(Opportunities.class);
 		OpportunitiesSelector selectorMock = (OpportunitiesSelector) mocks.mock(
@@ -65,6 +65,6 @@ private class OpportunitiesServiceTest
 		// Then the selector, domain, and unit of work are used
 		((OpportunitiesSelector) mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);
 		((Opportunities) mocks.verify(domainMock)).applyDiscount(10, uowMock);
-		((fflib_ISObjectUnitOfWork) mocks.verify(uowMock, 1)).commitWork();
+		((fflib_SObjectUnitOfWork) mocks.verify(uowMock, 1)).commitWork();
 	}
 }

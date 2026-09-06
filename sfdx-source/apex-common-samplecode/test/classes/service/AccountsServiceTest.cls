@@ -50,7 +50,7 @@ private class AccountsServiceTest
 			Set<Id> accountIds = new Map<Id, SObject>(accounts).keySet();
 
 			fflib_ApexMocks mocks = new fflib_ApexMocks();
-			fflib_ISObjectUnitOfWork unitOfWorkMock = (fflib_ISObjectUnitOfWork) mocks.mock(fflib_ISObjectUnitOfWork.class);
+			fflib_SObjectUnitOfWork unitOfWorkMock = (fflib_SObjectUnitOfWork) mocks.mock(fflib_SObjectUnitOfWork.class);
 			AccountsSelector selectorMock = (AccountsSelector) mocks.mock(AccountsSelector.class);
 
 			mocks.startStubbing();
@@ -65,8 +65,8 @@ private class AccountsServiceTest
 			Test.stopTest();
 
 			((AccountsSelector) mocks.verify(selectorMock)).selectById(accountIds);
-			((fflib_ISObjectUnitOfWork) mocks.verify(unitOfWorkMock)).registerDirty(accounts);
-			((fflib_ISObjectUnitOfWork) mocks.verify(unitOfWorkMock)).commitWork();
+			((fflib_SObjectUnitOfWork) mocks.verify(unitOfWorkMock)).registerDirty(accounts);
+			((fflib_SObjectUnitOfWork) mocks.verify(unitOfWorkMock)).commitWork();
 		}
 	}
 }

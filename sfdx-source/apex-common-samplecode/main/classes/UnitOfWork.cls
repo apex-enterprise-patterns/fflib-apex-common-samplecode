@@ -29,14 +29,14 @@
  */
 public inherited sharing class UnitOfWork {
 	@TestVisible
-	private static fflib_ISObjectUnitOfWork mock;
+	private static fflib_SObjectUnitOfWork mock;
 
 	/**
 	 * Returns a Unit of Work registered for this app's types, or {@link #mock} when tests have set one.
 	 * DML runs in user mode.
 	 * @return Unit of Work instance.
 	 */
-	public static fflib_ISObjectUnitOfWork newInstance() {
+	public static fflib_SObjectUnitOfWork newInstance() {
 		if (mock != null) {
 			return mock;
 		}
