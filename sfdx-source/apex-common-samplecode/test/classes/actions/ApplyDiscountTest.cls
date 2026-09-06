@@ -47,8 +47,7 @@ private class ApplyDiscountTest {
 
 		// Then the service is called and the opportunity id is returned
 		((OpportunitiesService) mocks.verify(mockService)).applyDiscounts(
-			new Set<Id>{ opportunityId },
-			10
+			new Map<Id, Decimal>{ opportunityId => 10 }
 		);
 		System.assertEquals(1, results.size(), 'One result should be returned');
 		System.assertEquals(opportunityId, results[0].opportunityId, 'Opportunity Id should be returned');

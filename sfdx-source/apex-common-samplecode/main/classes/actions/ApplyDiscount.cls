@@ -30,7 +30,7 @@
  */
 public inherited sharing class ApplyDiscount {
 	/**
-	 * Applies a discount for each request via {@link OpportunitiesService#applyDiscounts}.
+	 * Applies discounts for all requests via {@link OpportunitiesService#applyDiscounts}.
 	 * @param requests Opportunity Id and discount percent per request. Cannot be null.
 	 * @return Opportunity Ids in the same order as {@code requests}.
 	 */
@@ -40,12 +40,19 @@ public inherited sharing class ApplyDiscount {
 		category='Opportunities'
 	)
 	public static List<Result> execute(List<Request> requests) {
+
+		// Build the map of Opportunity Ids and discount percentages.
+		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
+		for (Request request : requests) {
+			discountByOpportunityId.put(request.opportunityId, request.discountPercentage);
+		}
+
+		// Apply discounts to the Opportunities.
+		OpportunitiesService.newInstance().applyDiscounts(discountByOpportunityId);
+
+		// Build the results.
 		List<Result> results = new List<Result>();
 		for (Request request : requests) {
-			OpportunitiesService.newInstance().applyDiscounts(
-				new Set<Id>{ request.opportunityId },
-				request.discountPercentage
-			);
 			Result result = new Result();
 			result.opportunityId = request.opportunityId;
 			result.discountPercentage = request.discountPercentage;

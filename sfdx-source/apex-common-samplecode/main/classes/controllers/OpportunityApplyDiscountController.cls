@@ -40,7 +40,9 @@ public inherited sharing class OpportunityApplyDiscountController
 	{
 		try
 		{
-			OpportunitiesService.newInstance().applyDiscounts(new Set<Id>{ opportunityId }, discountPercentage);
+			OpportunitiesService.newInstance().applyDiscounts(
+				new Map<Id, Decimal>{ opportunityId => discountPercentage }
+			);
 		}
 		catch (Exception e)
 		{

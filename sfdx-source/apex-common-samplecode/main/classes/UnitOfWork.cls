@@ -26,6 +26,14 @@
 
 /**
  * Thin Unit of Work factory for the sample app. No Application class.
+ *
+ * This sample uses one app-level registry of {@code SObjectType} values so services can share
+ * the same Unit of Work instance within a transaction (for example discounting and invoicing
+ * in a single commit).
+ *
+ * An alternative is per-service factories with {@code newInstance(List<SObjectType> types)}
+ * for a narrower scope per call site. That can reduce the central type list but makes it
+ * harder to pass one Unit of Work between services.
  */
 public inherited sharing class UnitOfWork {
 	@TestVisible

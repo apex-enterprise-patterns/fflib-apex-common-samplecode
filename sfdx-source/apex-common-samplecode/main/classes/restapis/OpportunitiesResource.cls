@@ -43,6 +43,8 @@ global inherited sharing class OpportunitiesResource
 		Id opportunityId = uriParts[2];
 		String discountParam = req.params.get('discount');
 		Decimal discountPercent = discountParam!=null ? Decimal.valueOf(discountParam) : 0;
-		OpportunitiesService.newInstance().applyDiscounts(new Set<Id>{ opportunityId }, discountPercent);
+		OpportunitiesService.newInstance().applyDiscounts(
+			new Map<Id, Decimal>{ opportunityId => discountPercent }
+		);
 	}
 }

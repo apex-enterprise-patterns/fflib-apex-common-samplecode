@@ -84,30 +84,47 @@ public virtual inherited sharing class Opportunities extends fflib_SObjects
 	}
 
 	/**
-	 * Applies a percentage discount to Opportunities without lines, or to their line items.
+	 * Applies discounts for each Opportunity Id and percentage pair on this domain instance.
 	 * Registers dirty records on the Unit of Work. Does not commit.
-	 * @param discountPercentage Discount percent to apply (for example 10 for 10%). Null is treated as zero.
+	 * @param discountByOpportunityId Map of Opportunity Id to discount percent.
 	 * @param uow Unit of Work that receives dirty Opportunity / line item records. Cannot be null.
 	 */
-	public virtual void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
+	public virtual void applyDiscounts(Map<Id, Decimal> discountByOpportunityId, fflib_ISObjectUnitOfWork uow)
 	{
-		Decimal factor = calculateDiscountFactor(discountPercentage);
+		if(discountByOpportunityId==null || discountByOpportunityId.isEmpty())
+		{
+			return;
+		}
 		List<OpportunityLineItem> linesToApplyDiscount = new List<OpportunityLineItem>();
+		Map<Id, Decimal> discountByOpportunityLineItemId = new Map<Id, Decimal>();
 
+		// Apply discounts to Opportunities without lines, or to their line items.
 		for(Opportunity opportunity : (List<Opportunity>) getRecords())
 		{
+			Decimal discountPercentage = discountByOpportunityId.get(opportunity.Id);
 			if(opportunity.OpportunityLineItems==null || opportunity.OpportunityLineItems.isEmpty())
 			{
+				// Apply discount to the Opportunity (no line items).
+				Decimal factor = calculateDiscountFactor(discountPercentage);
 				opportunity.Amount = opportunity.Amount * factor;
 				uow.registerDirty(opportunity);
 			}
 			else
 			{
-				linesToApplyDiscount.addAll(opportunity.OpportunityLineItems);
+				for(OpportunityLineItem lineItem : opportunity.OpportunityLineItems)
+				{
+					linesToApplyDiscount.add(lineItem);
+					discountByOpportunityLineItemId.put(lineItem.Id, discountPercentage);
+				}
 			}
 		}
 
-		OpportunityLineItems.newInstance(linesToApplyDiscount).applyDiscount(this, discountPercentage, uow);
+		// Apply discounts to line items.
+		if(!linesToApplyDiscount.isEmpty())
+		{
+			OpportunityLineItems.newInstance(linesToApplyDiscount)
+				.applyDiscounts(this, discountByOpportunityLineItemId, uow);
+		}
 	}
 
 	/**

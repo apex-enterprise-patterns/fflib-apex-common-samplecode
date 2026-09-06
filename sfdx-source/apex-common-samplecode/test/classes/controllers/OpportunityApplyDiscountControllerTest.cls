@@ -44,8 +44,7 @@ private class OpportunityApplyDiscountControllerTest
 
 		// Then the service is called with the opportunity id and discount percentage
 		((OpportunitiesService) mocks.verify(mockService)).applyDiscounts(
-			new Set<Id>{ opportunityId },
-			10
+			new Map<Id, Decimal>{ opportunityId => 10 }
 		);
 	}
 }

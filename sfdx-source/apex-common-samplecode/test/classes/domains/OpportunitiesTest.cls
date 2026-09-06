@@ -48,7 +48,7 @@ private class OpportunitiesTest
 		);
 
 		// When a discount is applied in the domain
-		opps.applyDiscount(10, uowMock);
+		opps.applyDiscounts(new Map<Id, Decimal>{ opp.Id => 10 }, uowMock);
 
 		// Then the amount is reduced on the wrapped records and registered dirty
 		System.assertEquals(1, opps.getRecords().size(), 'Domain should still wrap one opportunity');
@@ -73,7 +73,7 @@ private class OpportunitiesTest
 		// When discounts are applied and updates are committed by the caller
 		Opportunities opps = Opportunities.newInstance(new List<Opportunity>{ opp });
 		fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
-		opps.applyDiscount(10, uow);
+		opps.applyDiscounts(new Map<Id, Decimal>{ opp.Id => 10 }, uow);
 		uow.commitWork();
 
 		// Then the stored amount reflects the discount

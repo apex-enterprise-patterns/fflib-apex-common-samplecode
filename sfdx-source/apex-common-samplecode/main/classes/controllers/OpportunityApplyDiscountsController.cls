@@ -32,7 +32,7 @@ public inherited sharing class OpportunityApplyDiscountsController {
 	/**
 	 * Discount percent entered on the list page (for example 10 for 10%).
 	 */
-	public Decimal DiscountPercentage { get; set; }
+	public Decimal discountPercentage { get; set; }
 
 	private ApexPages.StandardSetController standardSetController;
 
@@ -45,15 +45,18 @@ public inherited sharing class OpportunityApplyDiscountsController {
 	}
 
 	/**
-	 * Applies {@link #DiscountPercentage} to all selected Opportunities on the list view.
+	 * Applies {@link #discountPercentage} to all selected Opportunities on the list view.
 	 * @return Null so the list page remains; adds an info message on success.
 	 */
 	public PageReference applyDiscounts() {
 		try {
 			Set<Id> selectedOpportunityIds =
 				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
-			OpportunitiesService.newInstance()
-				.applyDiscounts(selectedOpportunityIds, DiscountPercentage);
+			Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
+			for (Id opportunityId : selectedOpportunityIds) {
+				discountByOpportunityId.put(opportunityId, discountPercentage);
+			}
+			OpportunitiesService.newInstance().applyDiscounts(discountByOpportunityId);
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Opportunities updated.'));
 		} catch (Exception e) {
 			ApexPages.addMessages(e);

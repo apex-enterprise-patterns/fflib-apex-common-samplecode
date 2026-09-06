@@ -33,7 +33,7 @@ public inherited sharing class OpportunityCreateInvoicesController {
 	 * Optional discount percent applied before invoice creation
 	 * (for example 10 for 10%).
 	 */
-	public Decimal DiscountPercentage { get; set; }
+	public Decimal discountPercentage { get; set; }
 
 	private ApexPages.StandardSetController standardSetController;
 
@@ -54,7 +54,7 @@ public inherited sharing class OpportunityCreateInvoicesController {
 			Set<Id> selectedOpportunityIds =
 				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
 			OpportunitiesService.newInstance()
-				.createInvoices(selectedOpportunityIds, DiscountPercentage);
+				.createInvoices(selectedOpportunityIds, discountPercentage);
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Invoices created.'));
 		} catch (Exception e) {
 			ApexPages.addMessages(e);

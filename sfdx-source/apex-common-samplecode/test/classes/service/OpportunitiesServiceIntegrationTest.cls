@@ -89,7 +89,9 @@ private class OpportunitiesServiceIntegrationTest
 		{
 			// When discounts are applied for the opportunity
 			Test.startTest();
-			OpportunitiesService.newInstance().applyDiscounts(new Set<Id>{ opp.Id }, 10);
+			OpportunitiesService.newInstance().applyDiscounts(
+				new Map<Id, Decimal>{ opp.Id => 10 }
+			);
 			Test.stopTest();
 		}
 

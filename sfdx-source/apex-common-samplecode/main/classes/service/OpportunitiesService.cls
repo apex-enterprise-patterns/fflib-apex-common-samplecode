@@ -52,28 +52,22 @@ public inherited sharing class OpportunitiesService
 	}
 
 	/**
-	 * Loads Opportunities with products and applies a percentage discount and commits the updates.
-	 * @param opportunityIds Opportunity Ids to discount. Empty set performs no DML.
-	 * @param discountPercentage Discount percent to apply (for example 10 for 10%).
+	 * Applies discounts in one query and one commit.
+	 * @param discountByOpportunityId Map of Opportunity Id to discount percent. Empty map performs no DML.
 	 * @throws OpportunitiesServiceException When commit fails or another unexpected error occurs.
 	 */
-	public void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
+	public void applyDiscounts(Map<Id, Decimal> discountByOpportunityId)
 	{
-		applyDiscounts(selector.selectByIdWithProducts(opportunityIds), discountPercentage);
-	}
-
-	/**
-	 * Applies a percentage discount to the given Opportunities (with products) and commits the updates.
-	 * @param opportunitiesWithProducts Opportunities including line items and product discount flags as needed.
-	 * @param discountPercentage Discount percent to apply (for example 10 for 10%).
-	 * @throws OpportunitiesServiceException When commit fails or another unexpected error occurs.
-	 */
-	public void applyDiscounts(List<Opportunity> opportunitiesWithProducts, Decimal discountPercentage)
-	{
+		if(discountByOpportunityId==null || discountByOpportunityId.isEmpty())
+		{
+			return;
+		}
 		try
 		{
 			fflib_ISObjectUnitOfWork uow = UnitOfWork.newInstance();
-			Opportunities.newInstance(opportunitiesWithProducts).applyDiscount(discountPercentage, uow);
+			List<Opportunity> opportunitiesWithProducts = selector.selectByIdWithProducts(discountByOpportunityId.keySet());
+			Opportunities opportunities = Opportunities.newInstance(opportunitiesWithProducts);
+			opportunities.applyDiscounts(discountByOpportunityId, uow);
 			uow.commitWork();
 		}
 		catch (Exception e)
@@ -98,7 +92,12 @@ public inherited sharing class OpportunitiesService
 			Opportunities opps = Opportunities.newInstance(selector.selectByIdWithProducts(opportunityIds));
 			if(discountPercentage!=null && discountPercentage > 0)
 			{
-				opps.applyDiscount(discountPercentage, uow);
+				Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
+				for(Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())
+				{
+					discountByOpportunityId.put(opportunityRecord.Id, discountPercentage);
+				}
+				opps.applyDiscounts(discountByOpportunityId, uow);
 			}
 
 			List<Invoice__c> invoices = new List<Invoice__c>();

@@ -52,21 +52,25 @@ public virtual inherited sharing class OpportunityLineItems extends fflib_SObjec
 	}
 
 	/**
-	 * Applies a percentage discount to UnitPrice on the wrapped line items.
+	 * Applies discounts for each Opportunity Line Item Id and percentage pair.
 	 * When the parent Opportunity DiscountType__c is Approved Products, only lines whose
 	 * product has DiscountingApproved__c true are changed. Registers a minimal dirty
 	 * record (Id + UnitPrice) on the Unit of Work so user-mode DML does not touch unread fields.
 	 * @param opps Parent opportunities providing DiscountType__c context. Cannot be null.
-	 * @param discountPercentage Discount percent to apply. Null is treated as zero by {@link Opportunities#calculateDiscountFactor}.
+	 * @param discountByOpportunityLineItemId Map of Opportunity Line Item Id to discount percent.
 	 * @param uow Unit of Work that receives dirty line items. Cannot be null.
 	 */
-	public virtual void applyDiscount(Opportunities opps, Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
+	public virtual void applyDiscounts(
+		Opportunities opps,
+		Map<Id, Decimal> discountByOpportunityLineItemId,
+		fflib_ISObjectUnitOfWork uow
+	)
 	{
 		Map<Id, Opportunity> opportunitiesById = new Map<Id, Opportunity>((List<Opportunity>) opps.getRecords());
-		Decimal factor = Opportunities.calculateDiscountFactor(discountPercentage);
-
 		for(OpportunityLineItem line : (List<OpportunityLineItem>) getRecords())
 		{
+			// Apply discount to the line item only if the parent product has Approved Products discounting.
+			Decimal discountPercentage = discountByOpportunityLineItemId.get(line.Id);
 			Opportunity opportunity = opportunitiesById.get(line.OpportunityId);
 			if(opportunity.DiscountType__c=='Approved Products')
 			{
@@ -75,6 +79,7 @@ public virtual inherited sharing class OpportunityLineItems extends fflib_SObjec
 					continue;
 				}
 			}
+			Decimal factor = Opportunities.calculateDiscountFactor(discountPercentage);
 			line.UnitPrice = line.UnitPrice * factor;
 			uow.registerDirty(new OpportunityLineItem(Id = line.Id, UnitPrice = line.UnitPrice));
 		}

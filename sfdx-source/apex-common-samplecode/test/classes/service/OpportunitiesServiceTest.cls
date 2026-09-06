@@ -60,11 +60,16 @@ private class OpportunitiesServiceTest
 		Opportunities.mock = domainMock;
 
 		// When discounts are applied through the service
-		OpportunitiesService.newInstance().applyDiscounts(testOppsSet, 10);
+		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
+		for(Id opportunityId : testOppsSet)
+		{
+			discountByOpportunityId.put(opportunityId, 10);
+		}
+		OpportunitiesService.newInstance().applyDiscounts(discountByOpportunityId);
 
 		// Then the selector, domain, and unit of work are used
 		((OpportunitiesSelector) mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);
-		((Opportunities) mocks.verify(domainMock)).applyDiscount(10, uowMock);
+		((Opportunities) mocks.verify(domainMock)).applyDiscounts(discountByOpportunityId, uowMock);
 		((fflib_SObjectUnitOfWork) mocks.verify(uowMock, 1)).commitWork();
 	}
 }
