@@ -44,14 +44,12 @@ private class CreateInvoiceTest {
 		mocks.when(mockService.applyDiscountsAndCreateInvoices(discountByOpportunityId)).thenReturn(invoiceIdByOpportunityId);
 		mocks.when(mockSelector.selectById(new Set<Id>{ invoiceId })).thenReturn(new List<Invoice__c>{ invoice });
 		mocks.stopStubbing();
-		OpportunitiesService.mock = mockService;
-		InvoicesSelector.mock = mockSelector;
 		CreateInvoice.Request request = new CreateInvoice.Request();
 		request.opportunityId = opportunityId;
 		request.discountPercentage = 10;
 
 		// When the invocable action is executed
-		List<CreateInvoice.Result> results = CreateInvoice.execute(
+		List<CreateInvoice.Result> results = new CreateInvoice(mockService, mockSelector).run(
 			new List<CreateInvoice.Request>{ request }
 		);
 

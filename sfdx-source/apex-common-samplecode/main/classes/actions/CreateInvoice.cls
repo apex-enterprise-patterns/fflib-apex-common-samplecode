@@ -27,8 +27,31 @@
 /**
  * Invocable action that creates an Invoice from an Opportunity.
  * Delegates to {@link OpportunitiesService}.
+ *
+ * Prefer the no-arg constructor / {@link #execute} for the default service and selector.
+ * Use the constructor when composing deliberately (including tests).
  */
 public inherited sharing class CreateInvoice {
+	private final OpportunitiesService service;
+	private final InvoicesSelector selector;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance} and {@link InvoicesSelector#newInstance}.
+	 */
+	public CreateInvoice() {
+		this(OpportunitiesService.newInstance(), InvoicesSelector.newInstance());
+	}
+
+	/**
+	 * Creates an action with the given service and selector.
+	 * @param service Opportunities service used to create invoices. Cannot be null.
+	 * @param selector Selector used to load created invoice names. Cannot be null.
+	 */
+	public CreateInvoice(OpportunitiesService service, InvoicesSelector selector) {
+		this.service = service;
+		this.selector = selector;
+	}
+
 	/**
 	 * Creates invoices for all requests via {@link OpportunitiesService#applyDiscountsAndCreateInvoices}.
 	 * @param requests Opportunity Id and optional discount percent per request. Cannot be null.
@@ -40,6 +63,15 @@ public inherited sharing class CreateInvoice {
 		category='Opportunities'
 	)
 	public static List<Result> execute(List<Request> requests) {
+		return new CreateInvoice().run(requests);
+	}
+
+	/**
+	 * Instance entry used by {@link #execute} and by callers that inject collaborators.
+	 * @param requests Opportunity Id and optional discount percent per request. Cannot be null.
+	 * @return Invoice Id and Name in the same order as {@code requests}.
+	 */
+	public List<Result> run(List<Request> requests) {
 
 		// Build the map of Opportunity Ids and discount percentages.
 		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
@@ -49,7 +81,7 @@ public inherited sharing class CreateInvoice {
 
 		// Apply discounts and create invoices.
 		Map<Id, Id> invoiceIdByOpportunityId =
-			OpportunitiesService.newInstance().applyDiscountsAndCreateInvoices(discountByOpportunityId);
+			service.applyDiscountsAndCreateInvoices(discountByOpportunityId);
 		Map<Id, String> invoiceNameById = invoiceNamesById(invoiceIdByOpportunityId.values());
 
 		// Build the results.
@@ -64,13 +96,13 @@ public inherited sharing class CreateInvoice {
 		return results;
 	}
 
-	private static Map<Id, String> invoiceNamesById(Iterable<Id> invoiceIds) {
+	private Map<Id, String> invoiceNamesById(Iterable<Id> invoiceIds) {
 		Set<Id> invoiceIdSet = new Set<Id>();
 		for (Id invoiceId : invoiceIds) {
 			invoiceIdSet.add(invoiceId);
 		}
 		Map<Id, String> invoiceNameById = new Map<Id, String>();
-		for (Invoice__c invoice : InvoicesSelector.newInstance().selectById(invoiceIdSet)) {
+		for (Invoice__c invoice : selector.selectById(invoiceIdSet)) {
 			invoiceNameById.put(invoice.Id, invoice.Name);
 		}
 		return invoiceNameById;

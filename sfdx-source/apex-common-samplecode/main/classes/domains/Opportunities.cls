@@ -36,6 +36,8 @@ public virtual inherited sharing class Opportunities extends fflib_SObjects
 
 	/**
 	 * Factory that wraps the given Opportunity records, or {@link #mock} when tests have set one.
+	 * Domain records are not known until the caller has them, so this factory (not a constructor
+	 * collaborator) is the seam for substituting a domain created mid-method.
 	 * @param recordList Opportunities to manage. Null is treated as an empty list.
 	 * @return {@link Opportunities} instance.
 	 */

@@ -37,10 +37,8 @@ private class OpportunityApplyDiscountControllerTest
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
 		OpportunitiesService mockService = (OpportunitiesService) mocks.mock(OpportunitiesService.class);
 		Id opportunityId = TestIdGenerator.generate(Opportunity.SObjectType);
-		OpportunitiesService.mock = mockService;
-
 		// When apply discount is invoked from the Lightning action
-		OpportunityApplyDiscountController.applyDiscount(opportunityId, 10);
+		new OpportunityApplyDiscountController(mockService).apply(opportunityId, 10);
 
 		// Then the service is called with the opportunity id and discount percentage
 		((OpportunitiesService) mocks.verify(mockService)).applyDiscounts(

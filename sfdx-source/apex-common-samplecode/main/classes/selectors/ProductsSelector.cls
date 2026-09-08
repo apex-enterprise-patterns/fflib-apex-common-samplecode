@@ -29,11 +29,8 @@
  */
 public virtual inherited sharing class ProductsSelector extends fflib_SObjectSelector
 {
-	@TestVisible
-	private static ProductsSelector mock;
-
 	/**
-	 * Factory that returns a selector without field set fields, or {@link #mock} when tests have set one.
+	 * Factory that returns a selector without field set fields.
 	 * @return {@link ProductsSelector} instance.
 	 */
 	public static ProductsSelector newInstance()
@@ -42,13 +39,13 @@ public virtual inherited sharing class ProductsSelector extends fflib_SObjectSel
 	}
 
 	/**
-	 * Factory that returns a selector with optional field set fields, or {@link #mock} when tests have set one.
+	 * Factory that returns a selector with optional field set fields.
 	 * @param includeFieldSetFields When true, OpportunityDiscount field set fields are included.
 	 * @return {@link ProductsSelector} instance.
 	 */
 	public static ProductsSelector newInstance(Boolean includeFieldSetFields)
 	{
-		return mock!=null ? mock : new ProductsSelector(includeFieldSetFields);
+		return new ProductsSelector(includeFieldSetFields);
 	}
 
 	/**

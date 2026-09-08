@@ -29,16 +29,13 @@
  */
 public virtual inherited sharing class InvoicesSelector extends fflib_SObjectSelector
 {
-	@TestVisible
-	private static InvoicesSelector mock;
-
 	/**
-	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * Factory that returns this selector.
 	 * @return {@link InvoicesSelector} instance.
 	 */
 	public static InvoicesSelector newInstance()
 	{
-		return mock!=null ? mock : new InvoicesSelector();
+		return new InvoicesSelector();
 	}
 
 	/**

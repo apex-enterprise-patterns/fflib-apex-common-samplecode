@@ -29,16 +29,13 @@
  */
 public virtual inherited sharing class AccountsSelector extends fflib_SObjectSelector
 {
-	@TestVisible
-	private static AccountsSelector mock;
-
 	/**
-	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * Factory that returns this selector.
 	 * @return {@link AccountsSelector} instance.
 	 */
 	public static AccountsSelector newInstance()
 	{
-		return mock!=null ? mock : new AccountsSelector();
+		return new AccountsSelector();
 	}
 
 	/**

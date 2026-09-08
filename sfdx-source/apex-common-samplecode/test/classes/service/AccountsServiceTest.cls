@@ -57,11 +57,8 @@ private class AccountsServiceTest
 			mocks.when(selectorMock.selectById(accountIds)).thenReturn(accounts);
 			mocks.stopStubbing();
 
-			UnitOfWork.mock = unitOfWorkMock;
-			AccountsSelector.mock = selectorMock;
-
 			Test.startTest();
-			AccountsService.newInstance().updateOpportunityActivity(accountIds);
+			new AccountsService(selectorMock, unitOfWorkMock).updateOpportunityActivity(accountIds);
 			Test.stopTest();
 
 			((AccountsSelector) mocks.verify(selectorMock)).selectById(accountIds);

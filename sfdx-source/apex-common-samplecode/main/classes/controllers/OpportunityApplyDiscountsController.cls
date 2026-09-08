@@ -27,6 +27,9 @@
 /**
  * Visualforce controller for the Apply Discounts list-view button.
  * Delegates discounting to {@link OpportunitiesService}.
+ *
+ * Prefer the StandardSetController constructor for the default service.
+ * Use the service overload when composing deliberately (including tests).
  */
 public inherited sharing class OpportunityApplyDiscountsController {
 	/**
@@ -35,13 +38,27 @@ public inherited sharing class OpportunityApplyDiscountsController {
 	public Decimal discountPercentage { get; set; }
 
 	private ApexPages.StandardSetController standardSetController;
+	private final OpportunitiesService service;
 
 	/**
-	 * Creates a controller for a list StandardSetController (bulk apply).
+	 * Default composition: {@link OpportunitiesService#newInstance}.
 	 * @param controller StandardSetController with selected Opportunities. Cannot be null.
 	 */
 	public OpportunityApplyDiscountsController(ApexPages.StandardSetController controller) {
-		standardSetController = controller;
+		this(controller, OpportunitiesService.newInstance());
+	}
+
+	/**
+	 * Creates a controller with the given StandardSetController and service.
+	 * @param controller StandardSetController with selected Opportunities. Cannot be null.
+	 * @param service Opportunities service used to apply discounts. Cannot be null.
+	 */
+	public OpportunityApplyDiscountsController(
+		ApexPages.StandardSetController controller,
+		OpportunitiesService service
+	) {
+		this.standardSetController = controller;
+		this.service = service;
 	}
 
 	/**
@@ -56,7 +73,7 @@ public inherited sharing class OpportunityApplyDiscountsController {
 			for (Id opportunityId : selectedOpportunityIds) {
 				discountByOpportunityId.put(opportunityId, discountPercentage);
 			}
-			OpportunitiesService.newInstance().applyDiscounts(discountByOpportunityId);
+			service.applyDiscounts(discountByOpportunityId);
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Opportunities updated.'));
 		} catch (Exception e) {
 			ApexPages.addMessages(e);

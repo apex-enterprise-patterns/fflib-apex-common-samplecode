@@ -27,9 +27,31 @@
 /**
  * Controller for the Create Invoice Lightning action.
  * Delegates invoice creation to {@link OpportunitiesService}.
+ *
+ * Prefer the no-arg constructor / {@link #createInvoice} for the default service.
+ * Use the service constructor when composing deliberately (including tests).
  */
 public inherited sharing class OpportunityCreateInvoiceController
 {
+	private final OpportunitiesService service;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance}.
+	 */
+	public OpportunityCreateInvoiceController()
+	{
+		this(OpportunitiesService.newInstance());
+	}
+
+	/**
+	 * Creates a controller with the given service.
+	 * @param service Opportunities service used to create invoices. Cannot be null.
+	 */
+	public OpportunityCreateInvoiceController(OpportunitiesService service)
+	{
+		this.service = service;
+	}
+
 	/**
 	 * Creates an invoice for a single Opportunity from the Lightning action.
 	 * @param opportunityId Opportunity Id to invoice. Cannot be null.
@@ -39,9 +61,20 @@ public inherited sharing class OpportunityCreateInvoiceController
 	@AuraEnabled(cacheable=false)
 	public static Id createInvoice(Id opportunityId, Decimal discountPercentage)
 	{
+		return new OpportunityCreateInvoiceController().create(opportunityId, discountPercentage);
+	}
+
+	/**
+	 * Instance entry used by {@link #createInvoice} and by callers that inject a service.
+	 * @param opportunityId Opportunity Id to invoice. Cannot be null.
+	 * @param discountPercentage Optional discount applied before invoicing when greater than zero.
+	 * @return Id of the first created Invoice__c.
+	 */
+	public Id create(Id opportunityId, Decimal discountPercentage)
+	{
 		try
 		{
-			Map<Id, Id> invoiceIdByOpportunityId = OpportunitiesService.newInstance().applyDiscountsAndCreateInvoices(
+			Map<Id, Id> invoiceIdByOpportunityId = service.applyDiscountsAndCreateInvoices(
 				new Map<Id, Decimal>{ opportunityId => discountPercentage }
 			);
 			return invoiceIdByOpportunityId.get(opportunityId);

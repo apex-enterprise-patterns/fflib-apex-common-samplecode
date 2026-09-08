@@ -26,9 +26,31 @@
 
 /**
  * Controller that submits the Opportunity invoicing Batch Apex job from a headless Lightning action.
+ *
+ * Prefer the no-arg constructor / {@link #startJob} for the default service.
+ * Use the service constructor when composing deliberately (including tests).
  */
 public inherited sharing class OpportunityInvoicingController
 {
+	private final OpportunitiesService service;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance}.
+	 */
+	public OpportunityInvoicingController()
+	{
+		this(OpportunitiesService.newInstance());
+	}
+
+	/**
+	 * Creates a controller with the given service.
+	 * @param service Opportunities service used to submit the job. Cannot be null.
+	 */
+	public OpportunityInvoicingController(OpportunitiesService service)
+	{
+		this.service = service;
+	}
+
 	/**
 	 * Submits {@link CreateInvoicesJob} through {@link OpportunitiesService#submitInvoicingJob}.
 	 * @return Async Apex job Id returned after a successful submit.
@@ -36,9 +58,18 @@ public inherited sharing class OpportunityInvoicingController
 	@AuraEnabled(cacheable=false)
 	public static Id startJob()
 	{
+		return new OpportunityInvoicingController().start();
+	}
+
+	/**
+	 * Instance entry used by {@link #startJob} and by callers that inject a service.
+	 * @return Async Apex job Id returned after a successful submit.
+	 */
+	public Id start()
+	{
 		try
 		{
-			return OpportunitiesService.newInstance().submitInvoicingJob();
+			return service.submitInvoicingJob();
 		}
 		catch (Exception e)
 		{

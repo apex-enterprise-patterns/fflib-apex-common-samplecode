@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-2015, FinancialForce.com, inc
+ * Copyright (c) 2012-2014, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -25,57 +25,33 @@
 **/
 
 /**
- * Selector for User email addresses used by job notification flows.
+ * Unit tests for OpportunityApplyDiscountsController using fflib-apex-mocks.
  */
-public virtual inherited sharing class UsersSelector extends fflib_SObjectSelector
-{
-	/**
-	 * Factory that returns this selector.
-	 * @return {@link UsersSelector} instance.
-	 */
-	public static UsersSelector newInstance()
-	{
-		return new UsersSelector();
-	}
+@IsTest
+private class OpportunityApplyDiscountsControllerTest {
+	@IsTest
+	private static void applyDiscountsCallsService() {
+		// Given selected opportunities and a mocked opportunities service
+		fflib_ApexMocks mocks = new fflib_ApexMocks();
+		OpportunitiesService mockService = (OpportunitiesService) mocks.mock(OpportunitiesService.class);
+		Id opportunityId = TestIdGenerator.generate(Opportunity.SObjectType);
+		List<Opportunity> selected = new List<Opportunity>{
+			new Opportunity(Id = opportunityId)
+		};
+		ApexPages.StandardSetController standardSetController = new ApexPages.StandardSetController(selected);
+		standardSetController.setSelected(selected);
+		OpportunityApplyDiscountsController controller = new OpportunityApplyDiscountsController(
+			standardSetController,
+			mockService
+		);
+		controller.discountPercentage = 10;
 
-	/**
-	 * Creates a selector that queries in user mode.
-	 */
-	public UsersSelector()
-	{
-		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
-	}
+		// When apply discounts is invoked from the list view
+		controller.applyDiscounts();
 
-	/**
-	 * Fields included in default queries from this selector.
-	 * @return User Id and Email.
-	 */
-	public List<Schema.SObjectField> getSObjectFieldList()
-	{
-		return new List<Schema.SObjectField>{ User.Id, User.Email };
-	}
-
-	/**
-	 * SObject type this selector queries.
-	 * @return {@code User.SObjectType}.
-	 */
-	public Schema.SObjectType getSObjectType()
-	{
-		return User.SObjectType;
-	}
-
-	/**
-	 * Maps User Ids to their Email addresses.
-	 * @param userIds User Ids to query. Empty set returns an empty map.
-	 * @return Map of User Id to Email; users without a matching row are omitted.
-	 */
-	public Map<Id, String> getUsersEmail(Set<Id> userIds)
-	{
-		Map<Id, String> emailsById = new Map<Id, String>();
-		for(User u : (List<User>) selectSObjectsById(userIds))
-		{
-			emailsById.put(u.Id, u.Email);
-		}
-		return emailsById;
+		// Then the service is called with the selected opportunity ids and discount percentage
+		((OpportunitiesService) mocks.verify(mockService)).applyDiscounts(
+			new Map<Id, Decimal>{ opportunityId => 10 }
+		);
 	}
 }

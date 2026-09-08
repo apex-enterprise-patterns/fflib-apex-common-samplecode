@@ -34,6 +34,7 @@ public virtual inherited sharing class OpportunityLineItems extends fflib_SObjec
 
 	/**
 	 * Factory that wraps the given line items, or {@link #mock} when tests have set one.
+	 * Used when another domain constructs line items mid-method (records are not known earlier).
 	 * @param recordList Opportunity line items to manage. Null is treated as an empty list.
 	 * @return {@link OpportunityLineItems} instance.
 	 */

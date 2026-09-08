@@ -26,29 +26,37 @@
 
 /**
  * Service for Opportunity discounting, invoice creation, and invoicing job submission.
+ *
+ * Prefer {@link #newInstance} for the default selector and Unit of Work.
+ * Use the constructor when tests inject mocks or a caller composes deliberately
+ * (for example one Unit of Work shared with another service).
  */
 public inherited sharing class OpportunitiesService
 {
-	@TestVisible
-	private static OpportunitiesService mock;
+	private final OpportunitiesSelector selector;
+	private final fflib_SObjectUnitOfWork uow;
 
 	/**
-	 * Factory that returns this service, or {@link #mock} when tests have set one.
+	 * Default composition: {@link OpportunitiesSelector#newInstance} and {@link UnitOfWork#newInstance}.
 	 * @return {@link OpportunitiesService} instance.
 	 */
 	public static OpportunitiesService newInstance()
 	{
-		return mock!=null ? mock : new OpportunitiesService();
+		return new OpportunitiesService(
+			OpportunitiesSelector.newInstance(),
+			UnitOfWork.newInstance()
+		);
 	}
 
-	private OpportunitiesSelector selector;
-
 	/**
-	 * Creates a service using {@link OpportunitiesSelector#newInstance}.
+	 * Creates a service with the given selector and Unit of Work.
+	 * @param selector Opportunity selector used to load records. Cannot be null.
+	 * @param uow Unit of Work used to register and commit changes. Cannot be null.
 	 */
-	public OpportunitiesService()
+	public OpportunitiesService(OpportunitiesSelector selector, fflib_SObjectUnitOfWork uow)
 	{
-		this.selector = OpportunitiesSelector.newInstance();
+		this.selector = selector;
+		this.uow = uow;
 	}
 
 	/**
@@ -64,7 +72,6 @@ public inherited sharing class OpportunitiesService
 		}
 		try
 		{
-			fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
 			List<Opportunity> opportunitiesWithProducts = selector.selectByIdWithProducts(discountByOpportunityId.keySet());
 			Opportunities opportunities = Opportunities.newInstance(opportunitiesWithProducts);
 			opportunities.applyDiscounts(discountByOpportunityId, uow);
@@ -91,9 +98,6 @@ public inherited sharing class OpportunitiesService
 		}
 		try
 		{
-			// Unit of Work to apply discounts and create invoices.
-			fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
-
 			// Select the Opportunities and apply discounts.
 			Opportunities opps = Opportunities.newInstance(selector.selectByIdWithProducts(discountByOpportunityId.keySet()));
 			opps.applyDiscounts(discountByOpportunityId, uow);

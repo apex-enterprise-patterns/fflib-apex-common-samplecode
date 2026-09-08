@@ -27,9 +27,31 @@
 /**
  * Controller for the Apply Discount Lightning action.
  * Delegates discounting to {@link OpportunitiesService}.
+ *
+ * Prefer the no-arg constructor / {@link #applyDiscount} for the default service.
+ * Use the service constructor when composing deliberately (including tests).
  */
 public inherited sharing class OpportunityApplyDiscountController
 {
+	private final OpportunitiesService service;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance}.
+	 */
+	public OpportunityApplyDiscountController()
+	{
+		this(OpportunitiesService.newInstance());
+	}
+
+	/**
+	 * Creates a controller with the given service.
+	 * @param service Opportunities service used to apply discounts. Cannot be null.
+	 */
+	public OpportunityApplyDiscountController(OpportunitiesService service)
+	{
+		this.service = service;
+	}
+
 	/**
 	 * Applies a discount to a single Opportunity from the Lightning action.
 	 * @param opportunityId Opportunity Id to discount. Cannot be null.
@@ -38,9 +60,19 @@ public inherited sharing class OpportunityApplyDiscountController
 	@AuraEnabled(cacheable=false)
 	public static void applyDiscount(Id opportunityId, Decimal discountPercentage)
 	{
+		new OpportunityApplyDiscountController().apply(opportunityId, discountPercentage);
+	}
+
+	/**
+	 * Instance entry used by {@link #applyDiscount} and by callers that inject a service.
+	 * @param opportunityId Opportunity Id to discount. Cannot be null.
+	 * @param discountPercentage Discount percent to apply (for example 10 for 10%).
+	 */
+	public void apply(Id opportunityId, Decimal discountPercentage)
+	{
 		try
 		{
-			OpportunitiesService.newInstance().applyDiscounts(
+			service.applyDiscounts(
 				new Map<Id, Decimal>{ opportunityId => discountPercentage }
 			);
 		}

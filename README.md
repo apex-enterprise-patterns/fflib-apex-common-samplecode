@@ -30,13 +30,15 @@ This repository contains a sample application illustrating the Apex Enterprise P
 Architecture Notes
 ------------------
 
-This sample uses **concrete** Domain, Selector, and Service classes with static `newInstance()` factories and `@TestVisible` mock hooks for unit tests. There is no `Application.cls` dependency-injection factory — see [Apex Enterprise Patterns: Recent Updates and Thoughts on the Application Class](https://andyinthecloud.com/2026/04/13/apex-enterprise-patterns-recent-updates-and-thoughts-on-the-application-class/) for background on this approach.
+This sample uses **concrete** Domain, Selector, and Service classes. Constructors take collaborators; `newInstance()` is the default composition. Prefer `X.newInstance()` at entry points over `new X()`. Use the constructor to inject mocks (during Apex Tests) or to compose deliberately (for example one Unit of Work passed to two services). `X.newInstance()` is also the single place a later metadata-driven factory would resolve which service, selector, or domain implementation to construct.
+
+Domains wrap records, so they are constructed when those records are in hand — including mid-method, as when `Opportunities.applyDiscounts` builds `OpportunityLineItems`. Domain `newInstance(records)` keeps a `@TestVisible` mock for that case. This sample no longer includes an `Application` factory; that is reserved for more advanced DI, such as via [AT4DX](https://github.com/apex-enterprise-patterns/at4dx).
 
 | Component | Role |
 |-----------|------|
 | **Services** | `OpportunitiesService`, `InvoicingService`, `AccountsService` — orchestrate selectors, domains, and Unit of Work |
-| **Domains** | Business logic on records (e.g. discounting, invoice DTO generation) |
-| **Trigger handlers** | `fflib_SObjectDomain` subclasses wired from triggers |
+| **Domains** | `Opportunities`, `OpportunityLineItems`, `Accounts` — record behaviour (discounting, invoice DTOs) on `fflib_SObjects`. Constructed via `newInstance(records)` when the records are in hand; not trigger lifecycle |
+| **Trigger handlers** | `OpportunitiesTriggerHandler` — `fflib_SObjectDomain` trigger lifecycle (defaults, validation, related updates) |
 | **UnitOfWork** | `UnitOfWork.cls` — thin factory returning `fflib_SObjectUnitOfWork` with `UserModeDML()` |
 | **InvoicingTargetsRegistry** | Resolves invoice targets from `InvoiceTargets__mdt` at runtime |
 

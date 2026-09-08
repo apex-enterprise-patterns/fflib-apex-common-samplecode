@@ -41,10 +41,8 @@ private class OpportunityCreateInvoiceControllerTest {
 		mocks.startStubbing();
 		mocks.when(mockService.applyDiscountsAndCreateInvoices(discountByOpportunityId)).thenReturn(invoiceIdByOpportunityId);
 		mocks.stopStubbing();
-		OpportunitiesService.mock = mockService;
-
 		// When create invoice is invoked from the Lightning action
-		Id resultId = OpportunityCreateInvoiceController.createInvoice(opportunityId, 10);
+		Id resultId = new OpportunityCreateInvoiceController(mockService).create(opportunityId, 10);
 
 		// Then the service is called and the invoice id is returned
 		((OpportunitiesService) mocks.verify(mockService)).applyDiscountsAndCreateInvoices(

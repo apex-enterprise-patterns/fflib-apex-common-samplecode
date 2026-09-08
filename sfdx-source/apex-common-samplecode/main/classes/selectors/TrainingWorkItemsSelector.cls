@@ -28,15 +28,12 @@
  * Selector for TrainingWorkItem__c including related Work Order account for invoicing.
  */
 public virtual inherited sharing class TrainingWorkItemsSelector extends fflib_SObjectSelector {
-	@TestVisible
-	private static TrainingWorkItemsSelector mock;
-
 	/**
-	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * Factory that returns this selector.
 	 * @return {@link TrainingWorkItemsSelector} instance.
 	 */
 	public static TrainingWorkItemsSelector newInstance() {
-		return mock != null ? mock : new TrainingWorkItemsSelector();
+		return new TrainingWorkItemsSelector();
 	}
 
 	/**

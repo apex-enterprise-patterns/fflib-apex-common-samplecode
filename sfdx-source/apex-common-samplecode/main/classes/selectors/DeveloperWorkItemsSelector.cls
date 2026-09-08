@@ -28,15 +28,12 @@
  * Selector for DeveloperWorkItem__c including related Work Order account for invoicing.
  */
 public virtual inherited sharing class DeveloperWorkItemsSelector extends fflib_SObjectSelector {
-	@TestVisible
-	private static DeveloperWorkItemsSelector mock;
-
 	/**
-	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * Factory that returns this selector.
 	 * @return {@link DeveloperWorkItemsSelector} instance.
 	 */
 	public static DeveloperWorkItemsSelector newInstance() {
-		return mock != null ? mock : new DeveloperWorkItemsSelector();
+		return new DeveloperWorkItemsSelector();
 	}
 
 	/**

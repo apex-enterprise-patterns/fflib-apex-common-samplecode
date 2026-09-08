@@ -35,13 +35,12 @@ private class ApplyDiscountTest {
 		fflib_ApexMocks mocks = new fflib_ApexMocks();
 		OpportunitiesService mockService = (OpportunitiesService) mocks.mock(OpportunitiesService.class);
 		Id opportunityId = TestIdGenerator.generate(Opportunity.SObjectType);
-		OpportunitiesService.mock = mockService;
 		ApplyDiscount.Request request = new ApplyDiscount.Request();
 		request.opportunityId = opportunityId;
 		request.discountPercentage = 10;
 
 		// When the invocable action is executed
-		List<ApplyDiscount.Result> results = ApplyDiscount.execute(
+		List<ApplyDiscount.Result> results = new ApplyDiscount(mockService).run(
 			new List<ApplyDiscount.Request>{ request }
 		);
 

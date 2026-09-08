@@ -55,8 +55,6 @@ private class OpportunitiesServiceTest
 		mocks.startStubbing();
 		mocks.when(selectorMock.selectByIdWithProducts(testOppsSet)).thenReturn(testOppsList);
 		mocks.stopStubbing();
-		UnitOfWork.mock = uowMock;
-		OpportunitiesSelector.mock = selectorMock;
 		Opportunities.mock = domainMock;
 
 		// When discounts are applied through the service
@@ -65,7 +63,7 @@ private class OpportunitiesServiceTest
 		{
 			discountByOpportunityId.put(opportunityId, 10);
 		}
-		OpportunitiesService.newInstance().applyDiscounts(discountByOpportunityId);
+		new OpportunitiesService(selectorMock, uowMock).applyDiscounts(discountByOpportunityId);
 
 		// Then the selector, domain, and unit of work are used
 		((OpportunitiesSelector) mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);

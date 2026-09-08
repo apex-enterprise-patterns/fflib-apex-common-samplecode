@@ -27,8 +27,28 @@
 /**
  * Invocable action that applies a percentage discount to an Opportunity.
  * Delegates to {@link OpportunitiesService}.
+ *
+ * Prefer the no-arg constructor / {@link #execute} for the default service.
+ * Use the service constructor when composing deliberately (including tests).
  */
 public inherited sharing class ApplyDiscount {
+	private final OpportunitiesService service;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance}.
+	 */
+	public ApplyDiscount() {
+		this(OpportunitiesService.newInstance());
+	}
+
+	/**
+	 * Creates an action with the given service.
+	 * @param service Opportunities service used to apply discounts. Cannot be null.
+	 */
+	public ApplyDiscount(OpportunitiesService service) {
+		this.service = service;
+	}
+
 	/**
 	 * Applies discounts for all requests via {@link OpportunitiesService#applyDiscounts}.
 	 * @param requests Opportunity Id and discount percent per request. Cannot be null.
@@ -40,6 +60,15 @@ public inherited sharing class ApplyDiscount {
 		category='Opportunities'
 	)
 	public static List<Result> execute(List<Request> requests) {
+		return new ApplyDiscount().run(requests);
+	}
+
+	/**
+	 * Instance entry used by {@link #execute} and by callers that inject a service.
+	 * @param requests Opportunity Id and discount percent per request. Cannot be null.
+	 * @return Opportunity Ids in the same order as {@code requests}.
+	 */
+	public List<Result> run(List<Request> requests) {
 
 		// Build the map of Opportunity Ids and discount percentages.
 		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
@@ -48,7 +77,7 @@ public inherited sharing class ApplyDiscount {
 		}
 
 		// Apply discounts to the Opportunities.
-		OpportunitiesService.newInstance().applyDiscounts(discountByOpportunityId);
+		service.applyDiscounts(discountByOpportunityId);
 
 		// Build the results.
 		List<Result> results = new List<Result>();

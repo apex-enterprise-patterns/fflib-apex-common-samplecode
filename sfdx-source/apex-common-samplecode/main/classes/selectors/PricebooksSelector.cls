@@ -29,16 +29,13 @@
  */
 public virtual inherited sharing class PricebooksSelector extends fflib_SObjectSelector
 {
-	@TestVisible
-	private static PricebooksSelector mock;
-
 	/**
-	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * Factory that returns this selector.
 	 * @return {@link PricebooksSelector} instance.
 	 */
 	public static PricebooksSelector newInstance()
 	{
-		return mock!=null ? mock : new PricebooksSelector();
+		return new PricebooksSelector();
 	}
 
 	/**

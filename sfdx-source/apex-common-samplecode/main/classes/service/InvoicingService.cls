@@ -27,19 +27,30 @@
 /**
  * Polymorphic invoicing service that generates invoices from registered source SObject types
  * via {@link InvoicingTargetsRegistry} and domains implementing {@link ISupportInvoicing}.
+ *
+ * Prefer {@link #newInstance} for the default Unit of Work.
+ * Use the constructor when tests inject mocks or a caller composes deliberately.
  */
 public inherited sharing class InvoicingService
 {
-	@TestVisible
-	private static InvoicingService mock;
+	private final fflib_SObjectUnitOfWork uow;
 
 	/**
-	 * Factory that returns this service, or {@link #mock} when tests have set one.
+	 * Default composition: {@link UnitOfWork#newInstance}.
 	 * @return {@link InvoicingService} instance.
 	 */
 	public static InvoicingService newInstance()
 	{
-		return mock!=null ? mock : new InvoicingService();
+		return new InvoicingService(UnitOfWork.newInstance());
+	}
+
+	/**
+	 * Creates a service with the given Unit of Work.
+	 * @param uow Unit of Work used to register and commit invoices. Cannot be null.
+	 */
+	public InvoicingService(fflib_SObjectUnitOfWork uow)
+	{
+		this.uow = uow;
 	}
 
 	/**
@@ -137,7 +148,6 @@ public inherited sharing class InvoicingService
 	{
 		try
 		{
-			fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
 			InvoiceFactory invoiceFactory = new InvoiceFactory(uow);
 			List<SObject> records = InvoicingTargetsRegistry.selectById(new Set<Id>(sourceRecordIds));
 			Object domain = InvoicingTargetsRegistry.newDomain(records);

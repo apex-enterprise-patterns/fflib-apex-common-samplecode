@@ -29,16 +29,13 @@
  */
 public virtual inherited sharing class OpportunityLineItemsSelector extends fflib_SObjectSelector
 {
-	@TestVisible
-	private static OpportunityLineItemsSelector mock;
-
 	/**
-	 * Factory that returns this selector, or {@link #mock} when tests have set one.
+	 * Factory that returns this selector.
 	 * @return {@link OpportunityLineItemsSelector} instance.
 	 */
 	public static OpportunityLineItemsSelector newInstance()
 	{
-		return mock!=null ? mock : new OpportunityLineItemsSelector();
+		return new OpportunityLineItemsSelector();
 	}
 
 	/**
