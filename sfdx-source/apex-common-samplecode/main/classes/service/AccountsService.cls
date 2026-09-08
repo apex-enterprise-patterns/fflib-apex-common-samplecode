@@ -27,35 +27,30 @@
 /**
  * Service for Account-related operations invoked from the service layer.
  *
- * Prefer {@link #newInstance} for the default selector and Unit of Work.
- * Use the constructor when tests inject mocks or a caller composes deliberately.
+ * Prefer {@link #newInstance} for the default selector.
+ * Use the constructor when tests inject a selector mock.
+ * Each method that persists creates a fresh {@link UnitOfWork#newInstance}.
  */
 public inherited sharing class AccountsService
 {
 	private final AccountsSelector selector;
-	private final fflib_SObjectUnitOfWork uow;
 
 	/**
-	 * Default composition: {@link AccountsSelector#newInstance} and {@link UnitOfWork#newInstance}.
+	 * Default composition: {@link AccountsSelector#newInstance}.
 	 * @return {@link AccountsService} instance.
 	 */
 	public static AccountsService newInstance()
 	{
-		return new AccountsService(
-			AccountsSelector.newInstance(),
-			UnitOfWork.newInstance()
-		);
+		return new AccountsService(AccountsSelector.newInstance());
 	}
 
 	/**
-	 * Creates a service with the given selector and Unit of Work.
+	 * Creates a service with the given selector.
 	 * @param selector Account selector used to load records. Cannot be null.
-	 * @param uow Unit of Work used to register and commit changes. Cannot be null.
 	 */
-	public AccountsService(AccountsSelector selector, fflib_SObjectUnitOfWork uow)
+	public AccountsService(AccountsSelector selector)
 	{
 		this.selector = selector;
-		this.uow = uow;
 	}
 
 	/**
@@ -69,6 +64,7 @@ public inherited sharing class AccountsService
 			return;
 		}
 
+		fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
 		List<Account> accountRecords = selector.selectById(accountIds);
 		Accounts accountsDomain = Accounts.newInstance(accountRecords);
 		accountsDomain.updateOpportunityActivity();

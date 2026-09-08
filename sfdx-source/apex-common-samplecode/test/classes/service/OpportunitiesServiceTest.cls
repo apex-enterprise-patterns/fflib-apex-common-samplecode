@@ -56,6 +56,7 @@ private class OpportunitiesServiceTest
 		mocks.when(selectorMock.selectByIdWithProducts(testOppsSet)).thenReturn(testOppsList);
 		mocks.stopStubbing();
 		Opportunities.mock = domainMock;
+		UnitOfWork.mock = uowMock;
 
 		// When discounts are applied through the service
 		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();
@@ -63,7 +64,7 @@ private class OpportunitiesServiceTest
 		{
 			discountByOpportunityId.put(opportunityId, 10);
 		}
-		new OpportunitiesService(selectorMock, uowMock).applyDiscounts(discountByOpportunityId);
+		new OpportunitiesService(selectorMock).applyDiscounts(discountByOpportunityId);
 
 		// Then the selector, domain, and unit of work are used
 		((OpportunitiesSelector) mocks.verify(selectorMock)).selectByIdWithProducts(testOppsSet);

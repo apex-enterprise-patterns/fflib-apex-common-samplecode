@@ -30,7 +30,7 @@ This repository contains a sample application illustrating the Apex Enterprise P
 Architecture Notes
 ------------------
 
-This sample uses **concrete** Domain, Selector, and Service classes. Constructors take collaborators; `newInstance()` is the default composition. Prefer `X.newInstance()` at entry points over `new X()`. Use the constructor to inject mocks (during Apex Tests) or to compose deliberately (for example one Unit of Work passed to two services). `X.newInstance()` is also the single place a later metadata-driven factory would resolve which service, selector, or domain implementation to construct.
+This sample uses **concrete** Domain, Selector, and Service classes. Constructors take collaborators; `newInstance()` is the default composition. Prefer `X.newInstance()` at entry points over `new X()`. Use the constructor to inject mocks (during Apex Tests) or to compose deliberately. Service methods that persist call `UnitOfWork.newInstance()` so each method gets a fresh Unit of Work; tests set `UnitOfWork.mock`. `X.newInstance()` is also the single place a later metadata-driven factory would resolve which service, selector, or domain implementation to construct.
 
 Domains wrap records, so they are constructed when those records are in hand — including mid-method, as when `Opportunities.applyDiscounts` builds `OpportunityLineItems`. Domain `newInstance(records)` keeps a `@TestVisible` mock for that case. This sample no longer includes an `Application` factory; that is reserved for more advanced DI, such as via [AT4DX](https://github.com/apex-enterprise-patterns/at4dx).
 
@@ -39,7 +39,7 @@ Domains wrap records, so they are constructed when those records are in hand —
 | **Services** | `OpportunitiesService`, `InvoicingService`, `AccountsService` — orchestrate selectors, domains, and Unit of Work |
 | **Domains** | `Opportunities`, `OpportunityLineItems`, `Accounts` — record behaviour (discounting, invoice DTOs) on `fflib_SObjects`. Constructed via `newInstance(records)` when the records are in hand; not trigger lifecycle |
 | **Trigger handlers** | `OpportunitiesTriggerHandler` — `fflib_SObjectDomain` trigger lifecycle (defaults, validation, related updates) |
-| **UnitOfWork** | `UnitOfWork.cls` — thin factory returning `fflib_SObjectUnitOfWork` with `UserModeDML()` |
+| **UnitOfWork** | `UnitOfWork.cls` — thin factory; each service method calls `newInstance()` for a fresh UoW; tests set `UnitOfWork.mock` |
 | **InvoicingTargetsRegistry** | Resolves invoice targets from `InvoiceTargets__mdt` at runtime |
 
 User Mode and CRUD/FLS

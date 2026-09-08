@@ -27,21 +27,24 @@
 /**
  * Thin Unit of Work factory for the sample app. No Application class.
  *
- * This sample uses one app-level registry of {@code SObjectType} values so a caller can
- * construct one Unit of Work and pass it into multiple service constructors in the same
- * transaction. Service methods still commit when they own the complete use case.
+ * Service methods call {@link #newInstance} so each persist operation gets a fresh
+ * Unit of Work. The type list is the app-level registry of SObject types.
  *
- * An alternative is per-service factories with {@code newInstance(List<SObjectType> types)}
- * for a narrower scope per call site. That can reduce the central type list but makes it
- * harder to pass one Unit of Work between services.
+ * Tests set {@link #mock} to substitute the instance that {@link #newInstance} returns.
  */
 public inherited sharing class UnitOfWork {
+	@TestVisible
+	private static fflib_SObjectUnitOfWork mock;
+
 	/**
-	 * Returns a Unit of Work registered for this app's types.
+	 * Returns a Unit of Work registered for this app's types, or {@link #mock} when tests have set one.
 	 * DML runs in user mode.
 	 * @return Unit of Work instance.
 	 */
 	public static fflib_SObjectUnitOfWork newInstance() {
+		if (mock != null) {
+			return mock;
+		}
 		return new fflib_SObjectUnitOfWork(
 			new List<SObjectType>{
 				Account.SObjectType,
