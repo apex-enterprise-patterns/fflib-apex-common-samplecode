@@ -24,23 +24,27 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+/**
+ * REST resource that applies a discount to a single Opportunity identified in the URL path.
+ * Path pattern: {@code /opportunities/{id}/applydiscount} with optional {@code discount} query parameter.
+ */
 @RestResource(UrlMapping='/opportunities/*/applydiscount')
-global with sharing class OpportunitiesResource 
+global inherited sharing class OpportunitiesResource
 {
+	/**
+	 * Applies a discount to the Opportunity Id in the request URI via {@link OpportunitiesService}.
+	 * Reads the {@code discount} query parameter; defaults to zero when absent.
+	 */
 	@HttpPost
-	// e.g. https://ue2.salesforce.com/services/apexrest/opportunities/006b0000003u4Ln/applydiscount?discount=10
 	global static void applyDiscount()
 	{
-    	// Take apart the URI to discover the Opportunity Id
-        RestRequest req = RestContext.request;
+		RestRequest req = RestContext.request;
 		String[] uriParts = req.requestURI.split('/');
-		
-		// Determine service parameter values from REST context
-		Id opportunityId = uriParts[2]; // get from URL path
+		Id opportunityId = uriParts[2];
 		String discountParam = req.params.get('discount');
 		Decimal discountPercent = discountParam!=null ? Decimal.valueOf(discountParam) : 0;
-		
-		// Call Service Method
-		OpportunitiesService.applyDiscounts(new Set<Id> { opportunityId }, discountPercent );
+		OpportunitiesService.newInstance().applyDiscounts(
+			new Map<Id, Decimal>{ opportunityId => discountPercent }
+		);
 	}
 }

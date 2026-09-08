@@ -25,43 +25,57 @@
 **/
 
 /**
- * Selector encapsulates queries around the User object, currently limited to needs around email, hence reduced scope
- **/
-public class UsersSelector extends fflib_SObjectSelector
-	implements IUsersSelector
+ * Selector for User email addresses used by job notification flows.
+ */
+public virtual inherited sharing class UsersSelector extends fflib_SObjectSelector
 {
-	public static IUsersSelector newInstance()
+	/**
+	 * Factory that returns this selector.
+	 * @return {@link UsersSelector} instance.
+	 */
+	public static UsersSelector newInstance()
 	{
-		return (IUsersSelector) Application.Selector.newInstance(User.SObjectType);
+		return new UsersSelector();
 	}
 
+	/**
+	 * Creates a selector that queries in user mode.
+	 */
 	public UsersSelector()
 	{
 		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
+	/**
+	 * Fields included in default queries from this selector.
+	 * @return User Id and Email.
+	 */
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
-		// Current app requirements driven solely by getUsersEmail at this stage
-		return new List<Schema.SObjectField> { User.Email };
+		return new List<Schema.SObjectField>{ User.Id, User.Email };
 	}
 
+	/**
+	 * SObject type this selector queries.
+	 * @return {@code User.SObjectType}.
+	 */
 	public Schema.SObjectType getSObjectType()
 	{
 		return User.SObjectType;
 	}
-	
+
 	/**
-	 * Queries given user records and maps the user Ids to assigned email addresses
-	 **/		
+	 * Maps User Ids to their Email addresses.
+	 * @param userIds User Ids to query. Empty set returns an empty map.
+	 * @return Map of User Id to Email; users without a matching row are omitted.
+	 */
 	public Map<Id, String> getUsersEmail(Set<Id> userIds)
 	{
-		List<User> users = selectSObjectsById(userIds);	
 		Map<Id, String> emailsById = new Map<Id, String>();
-		for (User user : users)
+		for(User u : (List<User>) selectSObjectsById(userIds))
 		{
-			emailsById.put(user.Id, user.Email);
+			emailsById.put(u.Id, u.Email);
 		}
-		return emailsById;	
+		return emailsById;
 	}
 }

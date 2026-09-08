@@ -25,51 +25,74 @@
 **/
 
 /**
- * This is a basic selector for Account for this app, note how it implements selectByOpportunity
- **/
-public class AccountsSelector extends fflib_SObjectSelector
-	implements IAccountsSelector
+ * Selector for Account queries used by account and opportunity activity flows.
+ */
+public virtual inherited sharing class AccountsSelector extends fflib_SObjectSelector
 {
-	public static IAccountsSelector newInstance()
+	/**
+	 * Factory that returns this selector.
+	 * @return {@link AccountsSelector} instance.
+	 */
+	public static AccountsSelector newInstance()
 	{
-		return (IAccountsSelector) Application.Selector.newInstance(Account.SObjectType);
+		return new AccountsSelector();
 	}
 
+	/**
+	 * Creates a selector that queries in user mode.
+	 */
 	public AccountsSelector()
 	{
 		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
+	/**
+	 * Fields included in default queries from this selector.
+	 * @return Account Id, Name, and Description.
+	 */
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
-		return new List<Schema.SObjectField> {
+		return new List<Schema.SObjectField>{
 			Account.Id,
 			Account.Name,
 			Account.Description
 		};
 	}
 
+	/**
+	 * SObject type this selector queries.
+	 * @return {@code Account.SObjectType}.
+	 */
 	public Schema.SObjectType getSObjectType()
 	{
 		return Account.SObjectType;
 	}
 
+	/**
+	 * Selects Accounts by Id with Id, Name, and Description.
+	 * @param idSet Account Ids to query. Empty set returns an empty list.
+	 * @return Matching Accounts; empty list when none match.
+	 */
 	public List<Account> selectById(Set<Id> idSet)
 	{
 		return (List<Account>) selectSObjectsById(idSet);
 	}
-		
+
+	/**
+	 * Selects Accounts related to the given Opportunities via AccountId.
+	 * @param opportunities Opportunities whose AccountId values are collected. Cannot be null.
+	 * @return Matching Accounts; empty list when no AccountIds are present.
+	 */
 	public List<Account> selectByOpportunity(List<Opportunity> opportunities)
 	{
-		// Related Accounts
 		Set<Id> accountIds = new Set<Id>();
-		for (Opportunity opp : (List<Opportunity>) opportunities)
+		for(Opportunity opp : opportunities)
 		{
-			if (opp.AccountId != null)
+			if(opp.AccountId!=null)
 			{
 				accountIds.add(opp.AccountId);
 			}
 		}
 		return selectById(accountIds);
-	}	
+	}
 }

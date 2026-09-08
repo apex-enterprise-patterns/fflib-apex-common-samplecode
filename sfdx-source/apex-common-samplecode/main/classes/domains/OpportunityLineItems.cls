@@ -24,58 +24,65 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class OpportunityLineItems extends fflib_SObjectDomain
-	implements IOpportunityLineItems
+/**
+ * Domain for OpportunityLineItem discounting based on parent Opportunity discount rules.
+ */
+public virtual inherited sharing class OpportunityLineItems extends fflib_SObjects
 {
-	public static IOpportunityLineItems newInstance(List<OpportunityLineItem> recordList)
+	@TestVisible
+	private static OpportunityLineItems mock;
+
+	/**
+	 * Factory that wraps the given line items, or {@link #mock} when tests have set one.
+	 * Used when another domain constructs line items mid-method (records are not known earlier).
+	 * @param recordList Opportunity line items to manage. Null is treated as an empty list.
+	 * @return {@link OpportunityLineItems} instance.
+	 */
+	public static OpportunityLineItems newInstance(List<OpportunityLineItem> recordList)
 	{
-		return (IOpportunityLineItems) Application.Domain.newInstance(recordList);
+		return mock!=null ? mock : new OpportunityLineItems(recordList);
 	}
 
-	public static IOpportunityLineItems newInstance(Set<Id> recordIdSet)
-	{
-		return (IOpportunityLineItems) Application.Domain.newInstance(recordIdSet);
-	}
-	
+	/**
+	 * Creates a domain wrapping the given OpportunityLineItem records.
+	 * @param sObjectList Opportunity line items to manage. Null is treated as an empty list.
+	 */
 	public OpportunityLineItems(List<OpportunityLineItem> sObjectList)
 	{
-		super(sObjectList);
+		super(sObjectList==null ? new List<OpportunityLineItem>() : sObjectList);
 	}
 
-	public void applyDiscount(IOpportunities opps, Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
+	/**
+	 * Applies discounts for each Opportunity Line Item Id and percentage pair.
+	 * When the parent Opportunity DiscountType__c is Approved Products, only lines whose
+	 * product has DiscountingApproved__c true are changed. Registers a minimal dirty
+	 * record (Id + UnitPrice) on the Unit of Work so user-mode DML does not touch unread fields.
+	 * @param opps Parent opportunities providing DiscountType__c context. Cannot be null.
+	 * @param discountByOpportunityLineItemId Map of Opportunity Line Item Id to discount percent.
+	 * @param uow Unit of Work that receives dirty line items. Cannot be null.
+	 */
+	public virtual void applyDiscounts(
+		Opportunities opps,
+		Map<Id, Decimal> discountByOpportunityLineItemId,
+		fflib_SObjectUnitOfWork uow
+	)
 	{
-		// Opportunties by Id
-		Map<Id, Opportunity> opportunitiesById = 
-			new Map<Id, Opportunity>((List<Opportunity>) opps.getRecords());
-		
-		// Calculate discount factor
-		Decimal factor = Opportunities.calculateDiscountFactor(discountPercentage);
-		
-		// Adjust UnitPrice of each line according to Discount Type of Opportunity
-		for(OpportunityLineItem line : (List<OpportunityLineItem>) this.records)
+		Map<Id, Opportunity> opportunitiesById = new Map<Id, Opportunity>((List<Opportunity>) opps.getRecords());
+		for(OpportunityLineItem line : (List<OpportunityLineItem>) getRecords())
 		{
-			// Skip products that have not been approved for discounting
+			// Apply discount to the line item only if the parent product has Approved Products discounting.
+			Decimal discountPercentage = discountByOpportunityLineItemId.get(line.Id);
 			Opportunity opportunity = opportunitiesById.get(line.OpportunityId);
-			if (opportunity.DiscountType__c == 'Approved Products')
+			if(opportunity.DiscountType__c=='Approved Products')
 			{
-				if (line.PricebookEntry.Product2.DiscountingApproved__c == false)
+				if(line.PricebookEntry.Product2.DiscountingApproved__c==false)
 				{
 					continue;
 				}
 			}
-
-			// Minimal record (Id + UnitPrice only): USER_MODE DML enforces FLS on every field in the record; queried records carry OpportunityId, PricebookEntryId, etc. that trigger "fields being inaccessible".
-			OpportunityLineItem updateOli = new OpportunityLineItem(Id = line.Id);
-			updateOli.UnitPrice = line.UnitPrice * factor;
-			uow.registerDirty(updateOli);
-		}
-	}
-		
-	public class Constructor implements fflib_SObjectDomain.IConstructable
-	{
-		public fflib_SObjectDomain construct(List<SObject> sObjectList)
-		{
-			return new OpportunityLineItems(sObjectList);
+			Decimal factor = Opportunities.calculateDiscountFactor(discountPercentage);
+			line.UnitPrice = line.UnitPrice * factor;
+			uow.registerDirty(new OpportunityLineItem(Id = line.Id, UnitPrice = line.UnitPrice));
 		}
 	}
 }

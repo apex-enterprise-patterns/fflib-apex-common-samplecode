@@ -24,49 +24,65 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class Accounts extends fflib_SObjects
-	implements IAccounts
+/**
+ * Domain logic for Account records, including opportunity activity description updates.
+ */
+public virtual inherited sharing class Accounts extends fflib_SObjects
 {
+	@TestVisible
+	private static Accounts mock;
+
+	/**
+	 * Factory that wraps the given Account records, or {@link #mock} when tests have set one.
+	 * @param recordList Accounts to manage. Null is treated as an empty list.
+	 * @return {@link Accounts} instance.
+	 */
+	public static Accounts newInstance(List<Account> recordList)
+	{
+		return mock!=null ? mock : new Accounts(recordList);
+	}
+
+	/**
+	 * Prefix written to Account.Description when opportunity activity is recorded.
+	 */
 	public static final String OPPORTUNITY_RAISED_DESCRIPTION = 'Last Opportunity Raised';
 
-	public static IAccounts newInstance(List<Account> recordList)
-	{
-		return (IAccounts) Application.Domain.newInstance(recordList);
-	}
-	
-	public static IAccounts newInstance(Set<Id> recordIdSet)
-	{
-		return (IAccounts) Application.Domain.newInstance(recordIdSet);
-	}
-	
+	/**
+	 * Creates a domain wrapping the given Account records.
+	 * @param sObjectList Accounts to manage. Null is treated as an empty list.
+	 */
 	public Accounts(List<Account> sObjectList)
 	{
-		super(sObjectList, Schema.Account.SObjectType);
+		super(sObjectList==null ? new List<Account>() : sObjectList);
 	}
 
+	/**
+	 * Returns the Account records held by this domain.
+	 * @return The in-memory Account list; never null. Same as {@link #getRecords()}.
+	 */
 	public List<Account> getAccounts()
 	{
 		return (List<Account>) getRecords();
 	}
 
+	/**
+	 * Sets Description on every Account in the domain.
+	 * @param description Value to assign to Account.Description.
+	 */
 	public void setDescription(String description)
 	{
-		for (Account account : getAccounts())
+		for(Account account : (List<Account>) getRecords())
 		{
 			account.Description = description;
 		}
 	}
 
+	/**
+	 * Updates Description to record that an opportunity was raised today.
+	 * Uses {@link #OPPORTUNITY_RAISED_DESCRIPTION} plus {@code System.today()}.
+	 */
 	public void updateOpportunityActivity()
 	{
 		setDescription(OPPORTUNITY_RAISED_DESCRIPTION + ' ' + System.today());
-	}
-
-	public class Constructor implements fflib_IDomainConstructor
-	{
-		public fflib_SObjects construct(List<Object> objectList)
-		{
-			return new Accounts((List<SObject>) objectList);
-		}
 	}
 }

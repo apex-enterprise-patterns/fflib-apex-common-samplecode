@@ -1,0 +1,39 @@
+<template>
+	<lightning-quick-action-panel header="Create Invoice from Opportunity">
+		<lightning-record-view-form record-id={recordId} object-api-name="Opportunity">
+			<div class="slds-grid slds-wrap slds-gutters">
+				<div class="slds-col slds-size_1-of-2">
+					<lightning-output-field field-name="Name"></lightning-output-field>
+				</div>
+				<div class="slds-col slds-size_1-of-2">
+					<lightning-output-field field-name="AccountId"></lightning-output-field>
+				</div>
+				<div class="slds-col slds-size_1-of-2">
+					<lightning-output-field field-name="Amount"></lightning-output-field>
+				</div>
+			</div>
+		</lightning-record-view-form>
+		<div class="slds-m-top_medium">
+			<p class="slds-m-bottom_small">
+				This process will optionally discount this opportunity and then create an Invoice from it.
+			</p>
+			<lightning-input
+				type="number"
+				label="Discount Percentage"
+				value={discountPercentage}
+				onchange={handleDiscountChange}
+				step="0.01"
+			></lightning-input>
+		</div>
+		<div slot="footer">
+			<lightning-button variant="neutral" label="Cancel" onclick={handleCancel}></lightning-button>
+			<lightning-button
+				variant="brand"
+				class="slds-m-left_x-small"
+				label="Create Invoice"
+				onclick={handleCreate}
+				disabled={isSaving}
+			></lightning-button>
+		</div>
+	</lightning-quick-action-panel>
+</template>

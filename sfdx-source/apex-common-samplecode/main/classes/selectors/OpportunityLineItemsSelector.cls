@@ -24,54 +24,83 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class OpportunityLineItemsSelector extends fflib_SObjectSelector
-	implements IOpportunityLineItemsSelector
+/**
+ * Selector for OpportunityLineItem queries used by discount and wizard flows.
+ */
+public virtual inherited sharing class OpportunityLineItemsSelector extends fflib_SObjectSelector
 {
-	public static IOpportunityLineItemsSelector newInstance()
+	/**
+	 * Factory that returns this selector.
+	 * @return {@link OpportunityLineItemsSelector} instance.
+	 */
+	public static OpportunityLineItemsSelector newInstance()
 	{
-		return (IOpportunityLineItemsSelector) Application.Selector.newInstance(OpportunityLineItem.SObjectType);
+		return new OpportunityLineItemsSelector();
 	}
 
+	/**
+	 * Creates a selector that queries in user mode.
+	 */
 	public OpportunityLineItemsSelector()
 	{
 		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
+	/**
+	 * Fields included in default queries from this selector.
+	 * @return OpportunityLineItem Id, OpportunityId, Description, Quantity, UnitPrice, ListPrice, PricebookEntryId, and SortOrder.
+	 */
 	public List<Schema.SObjectField> getSObjectFieldList()
 	{
-		return new List<Schema.SObjectField> {
-			OpportunityLineItem.Description,
+		return new List<Schema.SObjectField>{
 			OpportunityLineItem.Id,
-			OpportunityLineItem.ListPrice,
 			OpportunityLineItem.OpportunityId,
-			OpportunityLineItem.PricebookEntryId,
+			OpportunityLineItem.Description,
 			OpportunityLineItem.Quantity,
-			OpportunityLineItem.SortOrder,
-			OpportunityLineItem.TotalPrice,
-			OpportunityLineItem.UnitPrice
+			OpportunityLineItem.UnitPrice,
+			OpportunityLineItem.ListPrice,
+			OpportunityLineItem.PricebookEntryId,
+			OpportunityLineItem.SortOrder
 		};
 	}
 
+	/**
+	 * SObject type this selector queries.
+	 * @return {@code OpportunityLineItem.SObjectType}.
+	 */
 	public Schema.SObjectType getSObjectType()
 	{
 		return OpportunityLineItem.SObjectType;
 	}
 
-	public override String getOrderBy()
-	{
-		return 'SortOrder,PricebookEntry.Name';
-	}
-
+	/**
+	 * Selects OpportunityLineItems by Id with fields used by discounting, invoicing, and the wizard.
+	 * @param idSet OpportunityLineItem Ids to query. Empty set returns an empty list.
+	 * @return Matching line items; empty list when none match.
+	 */
 	public List<OpportunityLineItem> selectById(Set<Id> idSet)
 	{
 		return (List<OpportunityLineItem>) selectSObjectsById(idSet);
 	}
 
+	/**
+	 * Selects recently modified line items for Opportunities belonging to the given Accounts.
+	 * @param accountIds Account Ids whose related opportunity line items are included. Empty set returns an empty list.
+	 * @param recordLimit Maximum number of rows to return.
+	 * @return Matching line items ordered by SystemModstamp descending; empty list when none match.
+	 */
 	public List<OpportunityLineItem> selectRecentlyUsed(Set<Id> accountIds, Integer recordLimit)
 	{
-		assertIsAccessible();
-		String query = String.format('select {0} from {1} where Opportunity.Account.id in :accountIds order by SystemModstamp DESC LIMIT :recordLimit', 
-			new List<String>{ getFieldListString(), getSObjectName() });
-		return (List<OpportunityLineItem>) Database.query(query);
+		return (List<OpportunityLineItem>) Database.query(
+			newQueryFactory()
+				.selectField('PricebookEntry.Name')
+				.selectField('PricebookEntry.Product2Id')
+				.selectField('PricebookEntry.Product2.DiscountingApproved__c')
+				.selectField('PricebookEntry.Pricebook2.Name')
+				.setCondition('Opportunity.AccountId IN :accountIds')
+				.setOrdering('SystemModstamp', fflib_QueryFactory.SortOrder.DESCENDING)
+				.setLimit(recordLimit)
+				.toSOQL()
+		);
 	}
 }

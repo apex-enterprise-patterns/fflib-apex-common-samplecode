@@ -25,67 +25,70 @@
 **/
 
 /**
- * Controller shared by Create Invoice and Create Invoices Custom Buttons (and related pages) on the Opportunity
- * 
- * NOTE: The same service method is called regardless, logic in this controller is thus very light,
- *        focusing on passing parameters in and handling errors and notifications
- **/
-public with sharing class OpportunityCreateInvoiceController 
+ * Controller for the Create Invoice Lightning action.
+ * Delegates invoice creation to {@link OpportunitiesService}.
+ *
+ * Prefer the no-arg constructor / {@link #createInvoice} for the default service.
+ * Use the service constructor when composing deliberately (including tests).
+ */
+public inherited sharing class OpportunityCreateInvoiceController
 {
-	public Decimal DiscountPercentage { get; set; } 
-		
-	private ApexPages.StandardController standardController = null; 
-	
-	private ApexPages.StandardSetController standardSetController = null; 
-	
-	public OpportunityCreateInvoiceController(ApexPages.StandardController controller)
+	private final OpportunitiesService opportunitiesSvc;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance}.
+	 */
+	public OpportunityCreateInvoiceController()
 	{
-		standardController = controller;
-	}
-	
-	public OpportunityCreateInvoiceController(ApexPages.StandardSetController controller)
-	{
-		standardSetController = controller;
+		this(OpportunitiesService.newInstance());
 	}
 
-	public PageReference createInvoice()
+	/**
+	 * Creates a controller with the given service.
+	 * @param opportunitiesSvc Opportunities service used to create invoices. Cannot be null.
+	 */
+	public OpportunityCreateInvoiceController(OpportunitiesService opportunitiesSvc)
 	{
-		try
-		{
-			// Create Invoice the Opportunity
-			Set<Id> invoiceIds = OpportunitiesService.createInvoices(
-				new Set<Id> { standardController.getId() }, DiscountPercentage);
-			
-			// Redirect to Invoice 
-			return new PageReference('/'+new List<Id>(invoiceIds)[0]);
-		}
-		catch (Exception e)		
-		{
-			ApexPages.addMessages(e);
-		}	
-				
-		return ApexPages.hasMessages() ? null : standardController.view();
+		this.opportunitiesSvc = opportunitiesSvc;
 	}
-	
-	public PageReference createInvoices()
+
+	/**
+	 * Creates an invoice for a single Opportunity from the Lightning action.
+	 * @param opportunityId Opportunity Id to invoice. Cannot be null.
+	 * @param discountPercentage Optional discount applied before invoicing when greater than zero.
+	 * @return Id of the first created Invoice__c.
+	 */
+	@AuraEnabled(cacheable=false)
+	public static Id createInvoice(Id opportunityId, Decimal discountPercentage)
+	{
+		return new OpportunityCreateInvoiceController().handleCreateInvoice(opportunityId, discountPercentage);
+	}
+
+	/**
+	 * Instance entry for {@link #createInvoice}, used by callers that inject a service.
+	 * @param opportunityId Opportunity Id to invoice. Cannot be null.
+	 * @param discountPercentage Optional discount applied before invoicing when greater than zero.
+	 * @return Id of the first created Invoice__c.
+	 */
+	public Id handleCreateInvoice(Id opportunityId, Decimal discountPercentage)
 	{
 		try
 		{
-			// Selected Opportunity Id's
-			Set<Id> selectedOpportunityIds =
-				new Map<Id, SObject>(standardSetController.getSelected()).keySet();
-			
-			// Create invoices for selected Invoices, optionally applying discount before hand
-			OpportunitiesService.createInvoices(selectedOpportunityIds, DiscountPercentage);
-			
-			// Confirm
-			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Invoices created.'));
+			Map<Id, Id> invoiceIdByOpportunityId = opportunitiesSvc.applyDiscountsAndCreateInvoices(
+				new Map<Id, Decimal>{ opportunityId => discountPercentage }
+			);
+			return invoiceIdByOpportunityId.get(opportunityId);
 		}
-		catch (Exception e)		
+		catch (Exception e)
 		{
-			ApexPages.addMessages(e);
-		}	
-				
-		return null;
-	}	
+			throw toAura(e);
+		}
+	}
+
+	private static AuraHandledException toAura(Exception e)
+	{
+		AuraHandledException auraException = new AuraHandledException(e.getMessage());
+		auraException.setMessage(e.getMessage());
+		return auraException;
+	}
 }

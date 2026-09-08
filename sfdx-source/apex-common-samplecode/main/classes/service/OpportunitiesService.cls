@@ -24,25 +24,150 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing class OpportunitiesService 
-{		
-	public static void applyDiscounts(Set<Id> opportunityIds, Decimal discountPercentage)
-	{
-		service().applyDiscounts(opportunityIds, discountPercentage);
-	}
-	
-	public static Set<Id> createInvoices(Set<Id> opportunityIds, Decimal discountPercentage)
-	{		
-		return service().createInvoices(opportunityIds, discountPercentage);
-	}
-	
-	public static Id submitInvoicingJob()
-	{
-		return service().submitInvoicingJob();
-	}	
+/**
+ * Service for Opportunity discounting, invoice creation, and invoicing job submission.
+ *
+ * Prefer {@link #newInstance} for the default selector.
+ * Use the constructor when tests inject a selector mock.
+ * Each method that persists creates a fresh {@link UnitOfWork#newInstance}.
+ */
+public inherited sharing class OpportunitiesService
+{
+	private final OpportunitiesSelector selector;
 
-	private static IOpportunitiesService service()
+	/**
+	 * Default composition: {@link OpportunitiesSelector#newInstance}.
+	 * @return {@link OpportunitiesService} instance.
+	 */
+	public static OpportunitiesService newInstance()
 	{
-		return (IOpportunitiesService) Application.Service.newInstance(IOpportunitiesService.class);
-	}	
+		return new OpportunitiesService(OpportunitiesSelector.newInstance());
+	}
+
+	/**
+	 * Creates a service with the given selector.
+	 * @param selector Opportunity selector used to load records. Cannot be null.
+	 */
+	public OpportunitiesService(OpportunitiesSelector selector)
+	{
+		this.selector = selector;
+	}
+
+	/**
+	 * Applies discounts in one query and one commit.
+	 * @param discountByOpportunityId Map of Opportunity Id to discount percent. Empty map performs no DML.
+	 * @throws OpportunitiesServiceException When commit fails or another unexpected error occurs.
+	 */
+	public void applyDiscounts(Map<Id, Decimal> discountByOpportunityId)
+	{
+		if(discountByOpportunityId==null || discountByOpportunityId.isEmpty())
+		{
+			return;
+		}
+		try
+		{
+			fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
+			List<Opportunity> opportunitiesWithProducts = selector.selectByIdWithProducts(discountByOpportunityId.keySet());
+			Opportunities opportunities = Opportunities.newInstance(opportunitiesWithProducts);
+			opportunities.applyDiscounts(discountByOpportunityId, uow);
+			uow.commitWork();
+		}
+		catch (Exception e)
+		{
+			throw wrap(e);
+		}
+	}
+
+	/**
+	 * Applies discounts, then creates Invoice__c and InvoiceLine__c records in one query and one commit.
+	 * Invoice date is CloseDate (the simple Opportunity path; {@link InvoicingService} uses CloseDate plus 14 days).
+	 * @param discountByOpportunityId Map of Opportunity Id to discount percent. Empty map performs no DML.
+	 * @return Map of Opportunity Id to created Invoice__c Id.
+	 * @throws OpportunitiesServiceException When commit fails or another unexpected error occurs.
+	 */
+	public Map<Id, Id> applyDiscountsAndCreateInvoices(Map<Id, Decimal> discountByOpportunityId)
+	{
+		if(discountByOpportunityId==null || discountByOpportunityId.isEmpty())
+		{
+			return new Map<Id, Id>();
+		}
+		try
+		{
+			fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
+
+			// Select the Opportunities and apply discounts.
+			Opportunities opps = Opportunities.newInstance(selector.selectByIdWithProducts(discountByOpportunityId.keySet()));
+			opps.applyDiscounts(discountByOpportunityId, uow);
+
+			// Create the invoices.
+			List<Invoice__c> invoices = new List<Invoice__c>();
+			for(Opportunity opportunityRecord : (List<Opportunity>) opps.getRecords())
+			{
+				Invoice__c invoice = new Invoice__c();
+				invoice.Account__c = opportunityRecord.AccountId;
+				invoice.Description__c = opportunityRecord.Description;
+				invoice.InvoiceDate__c = opportunityRecord.CloseDate;
+				invoice.Opportunity__c = opportunityRecord.Id;
+				uow.registerNew(invoice);
+				invoices.add(invoice);
+				if(opportunityRecord.OpportunityLineItems==null)
+				{
+					continue;
+				}
+				for(OpportunityLineItem lineItem : opportunityRecord.OpportunityLineItems)
+				{
+					InvoiceLine__c invoiceLineItem = new InvoiceLine__c();
+					invoiceLineItem.Description__c = lineItem.Description;
+					invoiceLineItem.Product__c = lineItem.PricebookEntry.Product2Id;
+					invoiceLineItem.UnitPrice__c = lineItem.UnitPrice;
+					invoiceLineItem.Quantity__c = lineItem.Quantity;
+					uow.registerNew(invoiceLineItem, InvoiceLine__c.Invoice__c, invoice);
+				}
+			}
+			
+			// Commit the Unit of Work.
+			uow.commitWork();
+
+			// Build the result map.
+			Map<Id, Id> invoiceIdByOpportunityId = new Map<Id, Id>();
+			for(Invoice__c invoice : invoices)
+			{
+				invoiceIdByOpportunityId.put(invoice.Opportunity__c, invoice.Id);
+			}
+			return invoiceIdByOpportunityId;
+		}
+		catch (Exception e)
+		{
+			throw wrap(e);
+		}
+	}
+
+	/**
+	 * Submits {@link CreateInvoicesJob} as a Batch Apex job.
+	 * @return Async Apex job Id returned by {@code Database.executeBatch}.
+	 */
+	public Id submitInvoicingJob()
+	{
+		return Database.executeBatch(new CreateInvoicesJob());
+	}
+
+	private static OpportunitiesServiceException wrap(Exception e)
+	{
+		if(e instanceof OpportunitiesServiceException)
+		{
+			return (OpportunitiesServiceException) e;
+		}
+		if(e instanceof DmlException)
+		{
+			return new OpportunitiesServiceException('Error applying discounts or creating invoices: ' + ((DmlException) e).getDmlMessage(0), e);
+		}
+		return new OpportunitiesServiceException(e.getMessage(), e);
+	}
+
+	/**
+	 * Represents an exception thrown by {@link OpportunitiesService} operations.
+	 */
+	public class OpportunitiesServiceException extends Exception
+	{
+	}
 }

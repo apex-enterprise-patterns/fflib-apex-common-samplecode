@@ -24,28 +24,44 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class Opportunities extends fflib_SObjects
-	implements IOpportunities, InvoicingService.ISupportInvoicing
+/**
+ * Domain for Opportunity records that supports discounting and invoice generation.
+ * Implements {@link InvoicingService.ISupportInvoicing} for polymorphic invoicing.
+ */
+public virtual inherited sharing class Opportunities extends fflib_SObjects
+	implements InvoicingService.ISupportInvoicing
 {
-	public static IOpportunities newInstance(List<Opportunity> recordList)
+	@TestVisible
+	private static Opportunities mock;
+
+	/**
+	 * Factory that wraps the given Opportunity records, or {@link #mock} when tests have set one.
+	 * Domain records are not known until the caller has them, so this factory (not a constructor
+	 * collaborator) is the seam for substituting a domain created mid-method.
+	 * @param recordList Opportunities to manage. Null is treated as an empty list.
+	 * @return {@link Opportunities} instance.
+	 */
+	public static Opportunities newInstance(List<Opportunity> recordList)
 	{
-		return (IOpportunities) Application.Domain.newInstance(recordList);
+		return mock!=null ? mock : new Opportunities(recordList);
 	}
 
-	public static IOpportunities newInstance(Set<Id> recordIdSet)
-	{
-		return (IOpportunities) Application.Domain.newInstance(recordIdSet);
-	}
-	
+	/**
+	 * Creates a domain wrapping the given Opportunity records.
+	 * @param sObjectList Opportunities to manage. Null is treated as an empty list.
+	 */
 	public Opportunities(List<Opportunity> sObjectList)
 	{
-		// Domain classes are initialised with lists to enforce bulkification throughout
-		super(sObjectList);
+		super(sObjectList==null ? new List<Opportunity>() : sObjectList);
 	}
-	
-	public void generate(InvoicingService.InvoiceFactory invoiceFactory)
+
+	/**
+	 * Builds invoice DTOs from each Opportunity and its line items into the factory.
+	 * Invoice date is CloseDate plus 14 days; product comes from the pricebook entry.
+	 * @param invoiceFactory Factory that collects invoice headers and lines. Cannot be null.
+	 */
+	public virtual void generate(InvoicingService.InvoiceFactory invoiceFactory)
 	{
-		// Utilise InvoiceFactory to create invoices from Opportunity details
 		for(Opportunity opportunity : (List<Opportunity>) getRecords())
 		{
 			InvoicingService.Invoice invoice = new InvoicingService.Invoice();
@@ -53,65 +69,87 @@ public class Opportunities extends fflib_SObjects
 			invoice.Description = opportunity.Description;
 			invoice.InvoiceDate = opportunity.CloseDate.addDays(14);
 			invoice.Lines = new List<InvoicingService.InvoiceLine>();
-			for(OpportunityLineItem lineItem : opportunity.OpportunityLineItems)
+			if(opportunity.OpportunityLineItems!=null)
 			{
-				InvoicingService.InvoiceLine invoiceLineItem = new InvoicingService.InvoiceLine();
-				invoiceLineItem.Description = lineItem.Description;
-				invoiceLineItem.Product = lineItem.PricebookEntry.Product2Id;
-				invoiceLineItem.UnitPrice = lineItem.UnitPrice;
-				invoiceLineItem.Quantity = lineItem.Quantity;
-				invoice.Lines.add(invoiceLineItem);
-			}			
+				for(OpportunityLineItem lineItem : opportunity.OpportunityLineItems)
+				{
+					InvoicingService.InvoiceLine invoiceLineItem = new InvoicingService.InvoiceLine();
+					invoiceLineItem.Description = lineItem.Description;
+					invoiceLineItem.Product = lineItem.PricebookEntry.Product2Id;
+					invoiceLineItem.UnitPrice = lineItem.UnitPrice;
+					invoiceLineItem.Quantity = lineItem.Quantity;
+					invoice.Lines.add(invoiceLineItem);
+				}
+			}
 			invoiceFactory.add(invoice);
 		}
 	}
 
-	public void applyDiscount(Decimal discountPercentage, fflib_ISObjectUnitOfWork uow)
+	/**
+	 * Applies discounts for each Opportunity Id and percentage pair on this domain instance.
+	 * Registers dirty records on the Unit of Work. Does not commit.
+	 * @param discountByOpportunityId Map of Opportunity Id to discount percent.
+	 * @param uow Unit of Work that receives dirty Opportunity / line item records. Cannot be null.
+	 */
+	public virtual void applyDiscounts(Map<Id, Decimal> discountByOpportunityId, fflib_SObjectUnitOfWork uow)
 	{
-		// Calculate discount factor
-		Decimal factor = calculateDiscountFactor(discountPercentage);
-
-		// Opportunity lines to apply discount to
+		if(discountByOpportunityId==null || discountByOpportunityId.isEmpty())
+		{
+			return;
+		}
 		List<OpportunityLineItem> linesToApplyDiscount = new List<OpportunityLineItem>();
-		
-		// Apply discount 
+		Map<Id, Decimal> discountByOpportunityLineItemId = new Map<Id, Decimal>();
+
+		// Apply discounts to Opportunities without lines, or to their line items.
 		for(Opportunity opportunity : (List<Opportunity>) getRecords())
 		{
-			// Apply to the Opportunity Amount?
-			if(opportunity.OpportunityLineItems == null 
-        		|| opportunity.OpportunityLineItems.isEmpty())
+			Decimal discountPercentage = discountByOpportunityId.get(opportunity.Id);
+			if(opportunity.OpportunityLineItems==null || opportunity.OpportunityLineItems.isEmpty())
 			{
-				// Adjust the Amount on the Opportunity if no lines
+				// Apply discount to the Opportunity (no line items).
+				Decimal factor = calculateDiscountFactor(discountPercentage);
 				opportunity.Amount = opportunity.Amount * factor;
 				uow.registerDirty(opportunity);
 			}
 			else
 			{
-				// Collect lines to apply discount to
-				linesToApplyDiscount.addAll(opportunity.OpportunityLineItems);
+				for(OpportunityLineItem lineItem : opportunity.OpportunityLineItems)
+				{
+					linesToApplyDiscount.add(lineItem);
+					discountByOpportunityLineItemId.put(lineItem.Id, discountPercentage);
+				}
 			}
-		}		
-		
-		// Apply discount to lines
-		IOpportunityLineItems lineItems = (IOpportunityLineItems) Application.Domain.newInstance(linesToApplyDiscount);
+		}
 
-		lineItems.applyDiscount(this, discountPercentage, uow);
+		// Apply discounts to line items.
+		if(!linesToApplyDiscount.isEmpty())
+		{
+			OpportunityLineItems.newInstance(linesToApplyDiscount)
+				.applyDiscounts(this, discountByOpportunityLineItemId, uow);
+		}
 	}
 
+	/**
+	 * Converts a discount percentage into a multiplicative factor.
+	 * @param discountPercentage Discount percent (for example 10 for 10%). Null is treated as zero.
+	 * @return Factor to multiply prices by (for example 0.9 for a 10% discount).
+	 */
 	public static Decimal calculateDiscountFactor(Decimal discountPercentage)
 	{
-		// Calculate discount factor
 		Decimal discountProportion = discountPercentage==null ? 0 : discountPercentage / 100;
-		Decimal factor = 1 - discountProportion;
-		return factor;
+		return 1 - discountProportion;
 	}
 
+	/**
+	 * Collects distinct Account Ids from the Opportunities in this domain.
+	 * @return Account Ids present on the records; empty when none have an AccountId.
+	 */
 	public Set<Id> getAccountIds()
 	{
 		Set<Id> result = new Set<Id>();
-		for (Opportunity record : (List<Opportunity>) getRecords())
+		for(Opportunity record : (List<Opportunity>) getRecords())
 		{
-			if (record.AccountId != null)
+			if(record.AccountId!=null)
 			{
 				result.add(record.AccountId);
 			}
@@ -119,11 +157,14 @@ public class Opportunities extends fflib_SObjects
 		return result;
 	}
 
+	/**
+	 * Constructs this domain from a record list for {@link fflib_Application.DomainFactory}.
+	 */
 	public class Constructor implements fflib_IDomainConstructor
 	{
-		public fflib_SObjects construct(List<Object> objectList)
+		public fflib_IDomain construct(List<Object> objects)
 		{
-			return new Opportunities((List<SObject>) objectList);
+			return new Opportunities((List<Opportunity>) objects);
 		}
 	}
 }
