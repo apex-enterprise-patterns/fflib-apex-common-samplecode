@@ -60,15 +60,15 @@ public inherited sharing class ApplyDiscount {
 		category='Opportunities'
 	)
 	public static List<Result> execute(List<Request> requests) {
-		return new ApplyDiscount().run(requests);
+		return new ApplyDiscount().handleExecute(requests);
 	}
 
 	/**
-	 * Instance entry used by {@link #execute} and by callers that inject a service.
+	 * Instance entry for {@link #execute}, used by callers that inject a service.
 	 * @param requests Opportunity Id and discount percent per request. Cannot be null.
 	 * @return Opportunity Ids in the same order as {@code requests}.
 	 */
-	public List<Result> run(List<Request> requests) {
+	public List<Result> handleExecute(List<Request> requests) {
 
 		// Build the map of Opportunity Ids and discount percentages.
 		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();

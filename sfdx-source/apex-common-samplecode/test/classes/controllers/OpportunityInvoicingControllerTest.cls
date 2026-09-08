@@ -39,7 +39,7 @@ private class OpportunityInvoicingControllerTest {
 		mocks.when(mockService.submitInvoicingJob()).thenReturn(jobId);
 		mocks.stopStubbing();
 		// When start job is invoked from the Lightning action
-		Id resultId = new OpportunityInvoicingController(mockService).start();
+		Id resultId = new OpportunityInvoicingController(mockService).handleStartJob();
 
 		// Then the service is called and the job id is returned
 		((OpportunitiesService) mocks.verify(mockService)).submitInvoicingJob();

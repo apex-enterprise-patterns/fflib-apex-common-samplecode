@@ -40,7 +40,7 @@ private class ApplyDiscountTest {
 		request.discountPercentage = 10;
 
 		// When the invocable action is executed
-		List<ApplyDiscount.Result> results = new ApplyDiscount(mockService).run(
+		List<ApplyDiscount.Result> results = new ApplyDiscount(mockService).handleExecute(
 			new List<ApplyDiscount.Request>{ request }
 		);
 

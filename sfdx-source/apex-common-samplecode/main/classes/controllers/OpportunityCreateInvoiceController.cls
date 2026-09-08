@@ -61,16 +61,16 @@ public inherited sharing class OpportunityCreateInvoiceController
 	@AuraEnabled(cacheable=false)
 	public static Id createInvoice(Id opportunityId, Decimal discountPercentage)
 	{
-		return new OpportunityCreateInvoiceController().create(opportunityId, discountPercentage);
+		return new OpportunityCreateInvoiceController().handleCreateInvoice(opportunityId, discountPercentage);
 	}
 
 	/**
-	 * Instance entry used by {@link #createInvoice} and by callers that inject a service.
+	 * Instance entry for {@link #createInvoice}, used by callers that inject a service.
 	 * @param opportunityId Opportunity Id to invoice. Cannot be null.
 	 * @param discountPercentage Optional discount applied before invoicing when greater than zero.
 	 * @return Id of the first created Invoice__c.
 	 */
-	public Id create(Id opportunityId, Decimal discountPercentage)
+	public Id handleCreateInvoice(Id opportunityId, Decimal discountPercentage)
 	{
 		try
 		{

@@ -49,7 +49,7 @@ private class CreateInvoiceTest {
 		request.discountPercentage = 10;
 
 		// When the invocable action is executed
-		List<CreateInvoice.Result> results = new CreateInvoice(mockService, mockSelector).run(
+		List<CreateInvoice.Result> results = new CreateInvoice(mockService, mockSelector).handleExecute(
 			new List<CreateInvoice.Request>{ request }
 		);
 

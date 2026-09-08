@@ -63,15 +63,15 @@ public inherited sharing class CreateInvoice {
 		category='Opportunities'
 	)
 	public static List<Result> execute(List<Request> requests) {
-		return new CreateInvoice().run(requests);
+		return new CreateInvoice().handleExecute(requests);
 	}
 
 	/**
-	 * Instance entry used by {@link #execute} and by callers that inject collaborators.
+	 * Instance entry for {@link #execute}, used by callers that inject collaborators.
 	 * @param requests Opportunity Id and optional discount percent per request. Cannot be null.
 	 * @return Invoice Id and Name in the same order as {@code requests}.
 	 */
-	public List<Result> run(List<Request> requests) {
+	public List<Result> handleExecute(List<Request> requests) {
 
 		// Build the map of Opportunity Ids and discount percentages.
 		Map<Id, Decimal> discountByOpportunityId = new Map<Id, Decimal>();

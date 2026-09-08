@@ -58,14 +58,14 @@ public inherited sharing class OpportunityInvoicingController
 	@AuraEnabled(cacheable=false)
 	public static Id startJob()
 	{
-		return new OpportunityInvoicingController().start();
+		return new OpportunityInvoicingController().handleStartJob();
 	}
 
 	/**
-	 * Instance entry used by {@link #startJob} and by callers that inject a service.
+	 * Instance entry for {@link #startJob}, used by callers that inject a service.
 	 * @return Async Apex job Id returned after a successful submit.
 	 */
-	public Id start()
+	public Id handleStartJob()
 	{
 		try
 		{

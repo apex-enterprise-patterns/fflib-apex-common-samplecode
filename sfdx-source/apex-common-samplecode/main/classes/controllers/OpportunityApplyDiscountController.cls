@@ -60,15 +60,15 @@ public inherited sharing class OpportunityApplyDiscountController
 	@AuraEnabled(cacheable=false)
 	public static void applyDiscount(Id opportunityId, Decimal discountPercentage)
 	{
-		new OpportunityApplyDiscountController().apply(opportunityId, discountPercentage);
+		new OpportunityApplyDiscountController().handleApplyDiscount(opportunityId, discountPercentage);
 	}
 
 	/**
-	 * Instance entry used by {@link #applyDiscount} and by callers that inject a service.
+	 * Instance entry for {@link #applyDiscount}, used by callers that inject a service.
 	 * @param opportunityId Opportunity Id to discount. Cannot be null.
 	 * @param discountPercentage Discount percent to apply (for example 10 for 10%).
 	 */
-	public void apply(Id opportunityId, Decimal discountPercentage)
+	public void handleApplyDiscount(Id opportunityId, Decimal discountPercentage)
 	{
 		try
 		{
