@@ -33,7 +33,7 @@
  */
 public inherited sharing class OpportunityApplyDiscountController
 {
-	private final OpportunitiesService service;
+	private final OpportunitiesService opportunitiesSvc;
 
 	/**
 	 * Default composition: {@link OpportunitiesService#newInstance}.
@@ -45,11 +45,11 @@ public inherited sharing class OpportunityApplyDiscountController
 
 	/**
 	 * Creates a controller with the given service.
-	 * @param service Opportunities service used to apply discounts. Cannot be null.
+	 * @param opportunitiesSvc Opportunities service used to apply discounts. Cannot be null.
 	 */
-	public OpportunityApplyDiscountController(OpportunitiesService service)
+	public OpportunityApplyDiscountController(OpportunitiesService opportunitiesSvc)
 	{
-		this.service = service;
+		this.opportunitiesSvc = opportunitiesSvc;
 	}
 
 	/**
@@ -72,7 +72,7 @@ public inherited sharing class OpportunityApplyDiscountController
 	{
 		try
 		{
-			service.applyDiscounts(
+			opportunitiesSvc.applyDiscounts(
 				new Map<Id, Decimal>{ opportunityId => discountPercentage }
 			);
 		}

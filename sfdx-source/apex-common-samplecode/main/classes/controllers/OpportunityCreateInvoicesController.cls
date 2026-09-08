@@ -39,7 +39,7 @@ public inherited sharing class OpportunityCreateInvoicesController {
 	public Decimal discountPercentage { get; set; }
 
 	private ApexPages.StandardSetController standardSetController;
-	private final OpportunitiesService service;
+	private final OpportunitiesService opportunitiesSvc;
 
 	/**
 	 * Default composition: {@link OpportunitiesService#newInstance}.
@@ -52,14 +52,14 @@ public inherited sharing class OpportunityCreateInvoicesController {
 	/**
 	 * Creates a controller with the given StandardSetController and service.
 	 * @param controller StandardSetController with selected Opportunities. Cannot be null.
-	 * @param service Opportunities service used to create invoices. Cannot be null.
+	 * @param opportunitiesSvc Opportunities service used to create invoices. Cannot be null.
 	 */
 	public OpportunityCreateInvoicesController(
 		ApexPages.StandardSetController controller,
-		OpportunitiesService service
+		OpportunitiesService opportunitiesSvc
 	) {
 		this.standardSetController = controller;
-		this.service = service;
+		this.opportunitiesSvc = opportunitiesSvc;
 	}
 
 	/**
@@ -74,7 +74,7 @@ public inherited sharing class OpportunityCreateInvoicesController {
 			for (Id opportunityId : selectedOpportunityIds) {
 				discountByOpportunityId.put(opportunityId, discountPercentage);
 			}
-			service.applyDiscountsAndCreateInvoices(discountByOpportunityId);
+			opportunitiesSvc.applyDiscountsAndCreateInvoices(discountByOpportunityId);
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Invoices created.'));
 		} catch (Exception e) {
 			ApexPages.addMessages(e);

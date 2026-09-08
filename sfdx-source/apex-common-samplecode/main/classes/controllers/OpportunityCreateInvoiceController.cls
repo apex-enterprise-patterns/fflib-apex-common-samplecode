@@ -33,7 +33,7 @@
  */
 public inherited sharing class OpportunityCreateInvoiceController
 {
-	private final OpportunitiesService service;
+	private final OpportunitiesService opportunitiesSvc;
 
 	/**
 	 * Default composition: {@link OpportunitiesService#newInstance}.
@@ -45,11 +45,11 @@ public inherited sharing class OpportunityCreateInvoiceController
 
 	/**
 	 * Creates a controller with the given service.
-	 * @param service Opportunities service used to create invoices. Cannot be null.
+	 * @param opportunitiesSvc Opportunities service used to create invoices. Cannot be null.
 	 */
-	public OpportunityCreateInvoiceController(OpportunitiesService service)
+	public OpportunityCreateInvoiceController(OpportunitiesService opportunitiesSvc)
 	{
-		this.service = service;
+		this.opportunitiesSvc = opportunitiesSvc;
 	}
 
 	/**
@@ -74,7 +74,7 @@ public inherited sharing class OpportunityCreateInvoiceController
 	{
 		try
 		{
-			Map<Id, Id> invoiceIdByOpportunityId = service.applyDiscountsAndCreateInvoices(
+			Map<Id, Id> invoiceIdByOpportunityId = opportunitiesSvc.applyDiscountsAndCreateInvoices(
 				new Map<Id, Decimal>{ opportunityId => discountPercentage }
 			);
 			return invoiceIdByOpportunityId.get(opportunityId);

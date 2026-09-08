@@ -38,7 +38,7 @@ public inherited sharing class OpportunityApplyDiscountsController {
 	public Decimal discountPercentage { get; set; }
 
 	private ApexPages.StandardSetController standardSetController;
-	private final OpportunitiesService service;
+	private final OpportunitiesService opportunitiesSvc;
 
 	/**
 	 * Default composition: {@link OpportunitiesService#newInstance}.
@@ -51,14 +51,14 @@ public inherited sharing class OpportunityApplyDiscountsController {
 	/**
 	 * Creates a controller with the given StandardSetController and service.
 	 * @param controller StandardSetController with selected Opportunities. Cannot be null.
-	 * @param service Opportunities service used to apply discounts. Cannot be null.
+	 * @param opportunitiesSvc Opportunities service used to apply discounts. Cannot be null.
 	 */
 	public OpportunityApplyDiscountsController(
 		ApexPages.StandardSetController controller,
-		OpportunitiesService service
+		OpportunitiesService opportunitiesSvc
 	) {
 		this.standardSetController = controller;
-		this.service = service;
+		this.opportunitiesSvc = opportunitiesSvc;
 	}
 
 	/**
@@ -73,7 +73,7 @@ public inherited sharing class OpportunityApplyDiscountsController {
 			for (Id opportunityId : selectedOpportunityIds) {
 				discountByOpportunityId.put(opportunityId, discountPercentage);
 			}
-			service.applyDiscounts(discountByOpportunityId);
+			opportunitiesSvc.applyDiscounts(discountByOpportunityId);
 			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Opportunities updated.'));
 		} catch (Exception e) {
 			ApexPages.addMessages(e);

@@ -32,7 +32,7 @@
  * Use the service constructor when composing deliberately (including tests).
  */
 public inherited sharing class ApplyDiscount {
-	private final OpportunitiesService service;
+	private final OpportunitiesService opportunitiesSvc;
 
 	/**
 	 * Default composition: {@link OpportunitiesService#newInstance}.
@@ -43,10 +43,10 @@ public inherited sharing class ApplyDiscount {
 
 	/**
 	 * Creates an action with the given service.
-	 * @param service Opportunities service used to apply discounts. Cannot be null.
+	 * @param opportunitiesSvc Opportunities service used to apply discounts. Cannot be null.
 	 */
-	public ApplyDiscount(OpportunitiesService service) {
-		this.service = service;
+	public ApplyDiscount(OpportunitiesService opportunitiesSvc) {
+		this.opportunitiesSvc = opportunitiesSvc;
 	}
 
 	/**
@@ -77,7 +77,7 @@ public inherited sharing class ApplyDiscount {
 		}
 
 		// Apply discounts to the Opportunities.
-		service.applyDiscounts(discountByOpportunityId);
+		opportunitiesSvc.applyDiscounts(discountByOpportunityId);
 
 		// Build the results.
 		List<Result> results = new List<Result>();

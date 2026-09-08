@@ -32,7 +32,7 @@
  */
 public inherited sharing class OpportunityInvoicingController
 {
-	private final OpportunitiesService service;
+	private final OpportunitiesService opportunitiesSvc;
 
 	/**
 	 * Default composition: {@link OpportunitiesService#newInstance}.
@@ -44,11 +44,11 @@ public inherited sharing class OpportunityInvoicingController
 
 	/**
 	 * Creates a controller with the given service.
-	 * @param service Opportunities service used to submit the job. Cannot be null.
+	 * @param opportunitiesSvc Opportunities service used to submit the job. Cannot be null.
 	 */
-	public OpportunityInvoicingController(OpportunitiesService service)
+	public OpportunityInvoicingController(OpportunitiesService opportunitiesSvc)
 	{
-		this.service = service;
+		this.opportunitiesSvc = opportunitiesSvc;
 	}
 
 	/**
@@ -69,7 +69,7 @@ public inherited sharing class OpportunityInvoicingController
 	{
 		try
 		{
-			return service.submitInvoicingJob();
+			return opportunitiesSvc.submitInvoicingJob();
 		}
 		catch (Exception e)
 		{

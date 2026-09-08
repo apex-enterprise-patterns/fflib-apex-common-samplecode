@@ -32,7 +32,7 @@
  * Use the constructor when composing deliberately (including tests).
  */
 public inherited sharing class CreateInvoice {
-	private final OpportunitiesService service;
+	private final OpportunitiesService opportunitiesSvc;
 	private final InvoicesSelector selector;
 
 	/**
@@ -44,11 +44,11 @@ public inherited sharing class CreateInvoice {
 
 	/**
 	 * Creates an action with the given service and selector.
-	 * @param service Opportunities service used to create invoices. Cannot be null.
+	 * @param opportunitiesSvc Opportunities service used to create invoices. Cannot be null.
 	 * @param selector Selector used to load created invoice names. Cannot be null.
 	 */
-	public CreateInvoice(OpportunitiesService service, InvoicesSelector selector) {
-		this.service = service;
+	public CreateInvoice(OpportunitiesService opportunitiesSvc, InvoicesSelector selector) {
+		this.opportunitiesSvc = opportunitiesSvc;
 		this.selector = selector;
 	}
 
@@ -81,7 +81,7 @@ public inherited sharing class CreateInvoice {
 
 		// Apply discounts and create invoices.
 		Map<Id, Id> invoiceIdByOpportunityId =
-			service.applyDiscountsAndCreateInvoices(discountByOpportunityId);
+			opportunitiesSvc.applyDiscountsAndCreateInvoices(discountByOpportunityId);
 		Map<Id, String> invoiceNameById = invoiceNamesById(invoiceIdByOpportunityId.values());
 
 		// Build the results.
