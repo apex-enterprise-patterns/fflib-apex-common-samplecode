@@ -40,13 +40,13 @@ public class UsersSelector extends fflib_SObjectSelector
 		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
-	public List<Schema.SObjectField> getSObjectFieldList()
+	public override List<Schema.SObjectField> getSObjectFieldList()
 	{
 		// Current app requirements driven solely by getUsersEmail at this stage
 		return new List<Schema.SObjectField> { User.Email };
 	}
 
-	public Schema.SObjectType getSObjectType()
+	public override Schema.SObjectType getSObjectType()
 	{
 		return User.SObjectType;
 	}

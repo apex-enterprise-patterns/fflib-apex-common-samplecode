@@ -37,7 +37,7 @@ public class PricebookEntriesSelector extends fflib_SObjectSelector
 		super(false, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 
-	public List<Schema.SObjectField> getSObjectFieldList()
+	public override List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {
 			PricebookEntry.Id,
@@ -51,7 +51,7 @@ public class PricebookEntriesSelector extends fflib_SObjectSelector
 		};
 	}
 
-	public Schema.SObjectType getSObjectType()
+	public override Schema.SObjectType getSObjectType()
 	{
 		return PricebookEntry.SObjectType;
 	}
