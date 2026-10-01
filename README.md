@@ -30,17 +30,26 @@ This repository contains a sample application illustrating the Apex Enterprise P
 Architecture Notes
 ------------------
 
-This sample uses **concrete** Domain, Selector, and Service classes. Constructors take collaborators; `newInstance()` is the default composition. Prefer `X.newInstance()` at entry points over `new X()`. Use the constructor to inject mocks (during Apex Tests) or to compose deliberately. Service methods that persist call `UnitOfWork.newInstance()` so each method gets a fresh Unit of Work; tests set `UnitOfWork.mock`. `X.newInstance()` is also the single place a later metadata-driven factory would resolve which service, selector, or domain implementation to construct.
-
-Domains wrap records, so they are constructed when those records are in hand — including mid-method, as when `Opportunities.applyDiscounts` builds `OpportunityLineItems`. Domain `newInstance(records)` keeps a `@TestVisible` mock for that case. This sample no longer includes an `Application` factory; that is reserved for more advanced DI, such as via [AT4DX](https://github.com/apex-enterprise-patterns/at4dx).
+This sample uses **concrete** Domain, Selector, and Service classes. `newInstance()` is the default composition: it calls the public constructor with the usual collaborators. Prefer `X.newInstance()` over `new X()` when constructing a service, selector, or domain. Use the constructor to inject mocks in tests or to compose deliberately. Constructors stay public so the [Apex Stub API](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_testing_stub_api.htm) can mock the class (`Test.createStub` cannot stub a type that has only private constructors) and so tests can pass collaborators in.
 
 | Component | Role |
 |-----------|------|
 | **Services** | `OpportunitiesService`, `InvoicingService`, `AccountsService` — orchestrate selectors, domains, and Unit of Work |
 | **Domains** | `Opportunities`, `OpportunityLineItems`, `Accounts` — record behaviour (discounting, invoice DTOs) on `fflib_SObjects`. Constructed via `newInstance(records)` when the records are in hand; not trigger lifecycle |
 | **Trigger handlers** | `OpportunitiesTriggerHandler` — `fflib_SObjectDomain` trigger lifecycle (defaults, validation, related updates) |
-| **UnitOfWork** | `UnitOfWork.cls` — thin factory; each service method calls `newInstance()` for a fresh UoW; tests set `UnitOfWork.mock` |
-| **InvoicingTargetsRegistry** | Resolves invoice targets from `InvoiceTargets__mdt` at runtime |
+| **UnitOfWork** | `UnitOfWork.cls` — thin factory; no-arg `newInstance()` uses the sample type list; `newInstance(types)` for a narrower list; tests set `UnitOfWork.mock` |
+| **InvoicingTargetsRegistry** | Example of reusing fflib selector/domain factories locally for `InvoicingService.generate` (`InvoiceTargets__mdt`); not an application factory |
+
+Exceptions and local factories
+------------------------------
+
+The constructor / `newInstance()` baseline above does not cover every type in that table. These notes are where composition differs, or where a local factory is used instead of an application-wide `Application` class:
+
+- This sample has no application-wide `Application` factory; that is reserved for more advanced DI, such as via [AT4DX](https://github.com/apex-enterprise-patterns/at4dx).
+- Controllers and invocable actions have no `newInstance()` of their own: the platform calls a static `@AuraEnabled` / `@InvocableMethod`, or a Visualforce `StandardSetController` constructor. Those entry points compose `OpportunitiesService.newInstance()` internally; tests inject the service through the constructor.
+- A service does not keep one Unit of Work for its lifetime. Each method that commits DML calls `UnitOfWork.newInstance()`, registers its work, and commits; a second call on the same service instance must not reuse a Unit of Work that has already committed. Tests set `UnitOfWork.mock`. `UnitOfWork.newInstance(List<SObjectType>)` is there when a method should not take the whole sample type list.
+- A domain wraps records you often do not have until you are already inside a method — for example `Opportunities.applyDiscounts` collects line items and then constructs `OpportunityLineItems`. That domain cannot be passed into the `Opportunities` constructor, so `newInstance(records)` is the factory and tests set the `@TestVisible` `mock` it returns.
+- `InvoicingTargetsRegistry` is an example of reusing the fflib selector and domain factories in a more concrete way when one service (`InvoicingService.generate`) needs runtime type resolution. It reads `InvoiceTargets__mdt` and, for a set of source Ids, selects the records and constructs the domain that implements `ISupportInvoicing` (Opportunity, DeveloperWorkItem, TrainingWorkItem, or a further metadata row) so the service does not hard-code those types.
 
 User Mode and CRUD/FLS
 ----------------------
@@ -56,7 +65,7 @@ Tests that exercise USER_MODE code use `TestDataFactory` to create a Standard Us
 | Area | Approach |
 |------|----------|
 | **Selectors** | `super(false, fflib_SObjectSelector.DataAccess.USER_MODE)` in selector constructors (and `includeFieldSetFields` overload where present) |
-| **UnitOfWork** | `UnitOfWork.cls` factory; uses `UserModeDML()` |
+| **UnitOfWork** | `UnitOfWork.cls` factory (`newInstance()` / `newInstance(types)`); uses `UserModeDML()` |
 | **Tests** | `TestDataFactory`; `@TestSetup` + `System.runAs(getRunAsUser())` for USER_MODE tests |
 | **Permission set** | `ApexEnterprisePatternsSampleApp` grants field-level access for USER_MODE tests |
 

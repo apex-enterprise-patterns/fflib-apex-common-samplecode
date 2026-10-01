@@ -28,24 +28,30 @@
  * Thin Unit of Work factory for the sample app. No Application class.
  *
  * Service methods call {@link #newInstance} so each persist operation gets a fresh
- * Unit of Work. The type list is the app-level registry of SObject types.
+ * Unit of Work. The no-arg overload uses this sample's SObject type list.
  *
- * Tests set {@link #mock} to substitute the instance that {@link #newInstance} returns.
+ * That list is only {@code SObjectType} tokens, not Apex classes, so a compile error
+ * in a service, selector, or domain does not cascade through this factory the way
+ * a central {@code Application} class that referenced those types would.
+ *
+ * A single app-level list is fine at this sample's size. In a larger org (many
+ * custom objects, circular lookups) the insert order becomes hard to maintain
+ * and one list is a poor fit across functional domains. Prefer
+ * {@link #newInstance(List)} with the types that method actually registers.
+ *
+ * Tests set {@link #mock} to substitute the instance that either overload returns.
  */
 public inherited sharing class UnitOfWork {
 	@TestVisible
 	private static fflib_SObjectUnitOfWork mock;
 
 	/**
-	 * Returns a Unit of Work registered for this app's types, or {@link #mock} when tests have set one.
-	 * DML runs in user mode.
+	 * Returns a Unit of Work registered for this sample's types, or {@link #mock} when tests have set one.
+	 * DML runs in user mode. Type order is parent before child for related inserts.
 	 * @return Unit of Work instance.
 	 */
 	public static fflib_SObjectUnitOfWork newInstance() {
-		if (mock != null) {
-			return mock;
-		}
-		return new fflib_SObjectUnitOfWork(
+		return newInstance(
 			new List<SObjectType>{
 				Account.SObjectType,
 				Opportunity.SObjectType,
@@ -58,7 +64,23 @@ public inherited sharing class UnitOfWork {
 				DeveloperWorkItem__c.SObjectType,
 				TrainingWorkItem__c.SObjectType,
 				DesignWorkItem__c.SObjectType
-			},
+			}
+		);
+	}
+
+	/**
+	 * Returns a Unit of Work registered for the given types, or {@link #mock} when tests have set one.
+	 * Use this when a method should not take the whole sample type list.
+	 * DML runs in user mode. List parent types before children.
+	 * @param types SObject types this Unit of Work may register. Cannot be null.
+	 * @return Unit of Work instance.
+	 */
+	public static fflib_SObjectUnitOfWork newInstance(List<SObjectType> types) {
+		if (mock != null) {
+			return mock;
+		}
+		return new fflib_SObjectUnitOfWork(
+			types,
 			new fflib_SObjectUnitOfWork.UserModeDML()
 		);
 	}

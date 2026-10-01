@@ -28,6 +28,9 @@
  * Polymorphic invoicing service that generates invoices from registered source SObject types
  * via {@link InvoicingTargetsRegistry} and domains implementing {@link ISupportInvoicing}.
  *
+ * {@link InvoicingTargetsRegistry} shows how to reuse the fflib selector and domain
+ * factories in a concrete, local way when generate must resolve a source type at runtime.
+ *
  * Prefer {@link #newInstance} for the default composition.
  * Each method that persists creates a fresh {@link UnitOfWork#newInstance}.
  */
@@ -58,7 +61,7 @@ public inherited sharing class InvoicingService
 	 * Registers invoice headers and lines with a Unit of Work.
 	 */
 	public class InvoiceFactory
-{
+	{
 		private fflib_SObjectUnitOfWork unitOfWork;
 		/**
 		 * Invoice__c headers accumulated so far; Ids are set after commit.
@@ -108,7 +111,7 @@ public inherited sharing class InvoicingService
 	 * In-memory invoice header used by domains before persistence.
 	 */
 	public class Invoice
-{
+	{
 		public List<InvoiceLine> Lines { get; set; }
 		public Id Account { get; set; }
 		public String Description { get; set; }
@@ -119,7 +122,7 @@ public inherited sharing class InvoicingService
 	 * In-memory invoice line used by domains before persistence.
 	 */
 	public class InvoiceLine
-{
+	{
 		public String Description { get; set; }
 		public Id Product { get; set; }
 		public Decimal UnitPrice { get; set; }

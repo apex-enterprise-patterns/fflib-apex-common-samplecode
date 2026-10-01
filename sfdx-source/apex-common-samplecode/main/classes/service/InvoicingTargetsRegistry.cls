@@ -25,12 +25,19 @@
 **/
 
 /**
- * Registry for InvoicingService.generate: polymorphic resolution of domains/selectors
- * for SObject types whose domain implements InvoicingService.ISupportInvoicing.
+ * Example of reusing {@link fflib_Application.SelectorFactory} and
+ * {@link fflib_Application.DomainFactory} in a concrete, local way when a
+ * service needs runtime type resolution — here for {@link InvoicingService#generate}.
  *
- * Configure via InvoiceTargets__mdt only for SObject types whose domain implements ISupportInvoicing.
- * Not a general-purpose factory. Use direct construction (e.g. AccountsSelector.newInstance(),
- * Opportunities.newInstance(records)) when the SObject type is known at compile time.
+ * This is not an application-wide {@code Application} class and not a coarse-grained
+ * service. It wires only the invoice source types from {@link InvoiceTargets__mdt}
+ * (Opportunity, DeveloperWorkItem, TrainingWorkItem, and further rows) so
+ * {@link InvoicingService} does not hard-code them.
+ *
+ * Configure via InvoiceTargets__mdt only for SObject types whose domain implements
+ * {@link InvoicingService.ISupportInvoicing}. Use direct construction
+ * (e.g. AccountsSelector.newInstance(), Opportunities.newInstance(records)) when
+ * the SObject type is known at compile time.
  */
 public inherited sharing class InvoicingTargetsRegistry {
 	private static fflib_Application.SelectorFactory selectorFactory;
