@@ -25,37 +25,62 @@
 **/
 
 /**
- * Small example showing a controller using the service layer to submit a Batch Apex job
- **/
-public with sharing class OpportunityInvoicingController 
+ * Controller that submits the Opportunity invoicing Batch Apex job from a headless Lightning action.
+ *
+ * Prefer the no-arg constructor / {@link #startJob} for the default service.
+ * Use the service constructor when composing deliberately (including tests).
+ */
+public inherited sharing class OpportunityInvoicingController
 {
-	public Id JobId {get;set;}
-	
-	public OpportunityInvoicingController(ApexPages.StandardSetController standardSetControlelr)
+	private final OpportunitiesService opportunitiesSvc;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance}.
+	 */
+	public OpportunityInvoicingController()
 	{
-		ApexPages.addMessage(
-			new ApexPages.Message(
-				ApexPages.Severity.INFO, 'Click Start to scan Opportunities that are ready for invoicing and process them.'));
+		this(OpportunitiesService.newInstance());
 	}
-	
-	public PageReference startJob()
+
+	/**
+	 * Creates a controller with the given service.
+	 * @param opportunitiesSvc Opportunities service used to submit the job. Cannot be null.
+	 */
+	public OpportunityInvoicingController(OpportunitiesService opportunitiesSvc)
+	{
+		this.opportunitiesSvc = opportunitiesSvc;
+	}
+
+	/**
+	 * Submits {@link CreateInvoicesJob} through {@link OpportunitiesService#submitInvoicingJob}.
+	 * @return Async Apex job Id returned after a successful submit.
+	 */
+	@AuraEnabled(cacheable=false)
+	public static Id startJob()
+	{
+		return new OpportunityInvoicingController().handleStartJob();
+	}
+
+	/**
+	 * Instance entry for {@link #startJob}, used by callers that inject a service.
+	 * @return Async Apex job Id returned after a successful submit.
+	 */
+	public Id handleStartJob()
 	{
 		try
-		{	
-			// Ask the service to submit the job
-			JobId = OpportunitiesService.submitInvoicingJob();
-			
-			// Confirm
-			ApexPages.addMessage(
-				new ApexPages.Message(
-					ApexPages.Severity.INFO, 'The job has been submitted, you will receive an email notificaiton of any issues.'));
+		{
+			return opportunitiesSvc.submitInvoicingJob();
 		}
 		catch (Exception e)
 		{
-			// Client displays any issues submitting the job 		
-			ApexPages.addMessages(e);
+			throw toAura(e);
 		}
-		
-		return null;
+	}
+
+	private static AuraHandledException toAura(Exception e)
+	{
+		AuraHandledException auraException = new AuraHandledException(e.getMessage());
+		auraException.setMessage(e.getMessage());
+		return auraException;
 	}
 }

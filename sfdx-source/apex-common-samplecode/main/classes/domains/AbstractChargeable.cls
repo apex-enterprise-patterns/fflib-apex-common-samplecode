@@ -24,39 +24,62 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public with sharing abstract class AbstractChargeable extends fflib_SObjectDomain
-	implements IChargeable 
+/**
+ * Abstract chargeable work-item domain that derives cost as hours worked times 100.
+ * Concrete subclasses supply the cost field and hour calculation for their SObject type.
+ */
+public abstract inherited sharing class AbstractChargeable extends fflib_SObjectDomain
 {
+	/**
+	 * Creates a domain wrapping the given records.
+	 * @param records Work-item records to manage. Null is treated as an empty list.
+	 */
 	public AbstractChargeable(List<SObject> records)
 	{
 		super(records);
 	}
-	
+
+	/**
+	 * Returns the SObject field that stores the calculated cost of hours worked.
+	 * @return Schema field token for the cost field on the concrete work-item type.
+	 */
 	public abstract Schema.SObjectField getCostOfHoursWorkedField();
-	 
+
+	/**
+	 * Calculates hours worked for each record in domain order.
+	 * @return Hours worked per record; size matches {@link #getRecords()}.
+	 */
 	public abstract List<Integer> calculateHoursWorked();
-	
+
+	/**
+	 * Before-insert hook that recalculates cost of hours worked on all records.
+	 */
 	public override void onBeforeInsert()
 	{
-		updateCostOfHoursWorked();		
+		updateCostOfHoursWorked();
 	}
-	
-	public override void onBeforeUpdate(Map<Id,SObject> existingRecords)
+
+	/**
+	 * Before-update hook that recalculates cost of hours worked on all records.
+	 * @param existingRecords Prior versions of the records keyed by Id. May be unused by the base implementation.
+	 */
+	public override void onBeforeUpdate(Map<Id, SObject> existingRecords)
 	{
 		updateCostOfHoursWorked();
-	}			
-	
-	public void updateCostOfHoursWorked()
+	}
+
+	/**
+	 * Sets each record's cost field to hours worked times 100 using
+	 * {@link #calculateHoursWorked()} and {@link #getCostOfHoursWorkedField()}.
+	 */
+	public virtual void updateCostOfHoursWorked()
 	{
 		List<Integer> hoursWorked = calculateHoursWorked();
-		
 		Schema.SObjectField costOfHoursWorkedField = getCostOfHoursWorkedField();
-		
-		Integer hoursWorkedRecordIdx = 0; 
-		
-		for(SObject record : this.records)
+		Integer hoursWorkedRecordIdx = 0;
+		for(SObject record : Records)
 		{
-			record.put(costOfHoursWorkedField, hoursWorked[hoursWorkedRecordIdx++] * 100);	
+			record.put(costOfHoursWorkedField, hoursWorked[hoursWorkedRecordIdx++] * 100);
 		}
 	}
 }

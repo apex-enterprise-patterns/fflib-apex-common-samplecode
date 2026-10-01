@@ -24,9 +24,6 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-trigger DeveloperWorkItems on DeveloperWorkItem__c (
-	after delete, after insert, after update, before delete, before insert, before update) 
-{
-	// Creates Domain class instance and calls apprpoprite overideable methods according to Trigger state
+trigger DeveloperWorkItems on DeveloperWorkItem__c (before insert, before update) {
 	fflib_SObjectDomain.triggerHandler(DeveloperWorkItems.class);
 }

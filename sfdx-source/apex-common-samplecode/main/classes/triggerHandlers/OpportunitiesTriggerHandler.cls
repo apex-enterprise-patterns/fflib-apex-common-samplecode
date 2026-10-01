@@ -24,48 +24,68 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
-public class OpportunitiesTriggerHandler extends fflib_SObjectDomain
+/**
+ * Opportunity trigger handler that applies defaults, validates records, and updates related Account activity.
+ */
+public inherited sharing class OpportunitiesTriggerHandler extends fflib_SObjectDomain
 {
+	/**
+	 * Creates a handler for the given Opportunity records.
+	 * @param sObjectList Trigger.new records. Cannot be null.
+	 */
 	public OpportunitiesTriggerHandler(List<Opportunity> sObjectList)
 	{
-		// Domain classes are initialised with lists to enforce bulkification throughout
 		super(sObjectList);
 	}
 
+	/**
+	 * Sets DiscountType__c from {@link OpportunitySettings__c} on each Opportunity.
+	 */
 	public override void onApplyDefaults()
 	{
-		// Apply defaults to OpportunityTriggerHandler
-		for(Opportunity opportunity : (List<Opportunity>) this.records)
+		for(Opportunity opportunity : (List<Opportunity>) Records)
 		{
 			opportunity.DiscountType__c = OpportunitySettings__c.getInstance().DiscountType__c;
 		}
 	}
 
+	/**
+	 * Validates new Opportunities: Existing* types require an AccountId.
+	 */
 	public override void onValidate()
 	{
-		// Validate OpportunityTriggerHandler
-		for(Opportunity opp : (List<Opportunity>) this.records)
+		for(Opportunity opp : (List<Opportunity>) Records)
 		{
-			if(opp.Type != null && opp.Type.startsWith('Existing') && opp.AccountId == null)
+			if(opp.Type!=null && opp.Type.startsWith('Existing') && opp.AccountId==null)
 			{
-				opp.AccountId.addError( error('You must provide an Account for OpportunityTriggerHandler for existing Customers.', opp, Opportunity.AccountId) );
+				opp.AccountId.addError(
+					error('You must provide an Account for OpportunityTriggerHandler for existing Customers.', opp, Opportunity.AccountId)
+				);
 			}
 		}
 	}
 
-	public override void onValidate(Map<Id,SObject> existingRecords)
+	/**
+	 * Validates updates: Opportunity Type cannot change after create.
+	 * @param existingRecords Prior Opportunity versions keyed by Id. Cannot be null.
+	 */
+	public override void onValidate(Map<Id, SObject> existingRecords)
 	{
-		// Validate changes to OpportunityTriggerHandler
-		for (Opportunity opp : (List<Opportunity>) this.records)
+		for(Opportunity opp : (List<Opportunity>) Records)
 		{
 			Opportunity existingOpp = (Opportunity) existingRecords.get(opp.Id);
-			if (opp.Type != existingOpp.Type)
+			if(opp.Type!=existingOpp.Type)
 			{
-				opp.Type.addError( error('You cannot change the Opportunity type once it has been created.', opp, Opportunity.Type) );
+				opp.Type.addError(
+					error('You cannot change the Opportunity type once it has been created.', opp, Opportunity.Type)
+				);
 			}
 		}
 	}
 
+	/**
+	 * Updates Description on related Accounts to record opportunity activity.
+	 */
 	public override void onAfterInsert()
 	{
 		updateOpportunityActivityOnAccount();
@@ -74,19 +94,24 @@ public class OpportunitiesTriggerHandler extends fflib_SObjectDomain
 	private void updateOpportunityActivityOnAccount()
 	{
 		Set<Id> accountIds =
-				Opportunities.newInstance(this.records)
-						.getAccountIds();
+			Opportunities.newInstance((List<Opportunity>) Records).getAccountIds();
 
-		if (accountIds.isEmpty()) return;
+		if(accountIds.isEmpty())
+		{
+			return;
+		}
 
-		AccountsService.updateOpportunityActivity(accountIds);
+		AccountsService.newInstance().updateOpportunityActivity(accountIds);
 	}
 
+	/**
+	 * Constructs this handler from a trigger record list.
+	 */
 	public class Constructor implements fflib_SObjectDomain.IConstructable
 	{
 		public fflib_SObjectDomain construct(List<SObject> sObjectList)
 		{
-			return new OpportunitiesTriggerHandler(sObjectList);
+			return new OpportunitiesTriggerHandler((List<Opportunity>) sObjectList);
 		}
 	}
 }

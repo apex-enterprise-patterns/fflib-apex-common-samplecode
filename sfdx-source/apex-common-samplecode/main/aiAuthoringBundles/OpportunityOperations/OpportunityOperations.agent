@@ -1,0 +1,131 @@
+# OpportunityOperations - Employee agent for opportunity discounts and invoices
+# Calls the ApplyDiscount and CreateInvoice invocable Apex actions
+
+config:
+   developer_name: "OpportunityOperations"
+   agent_label: "Opportunity Operations"
+   agent_type: "AgentforceEmployeeAgent"
+   description: "Helps employees apply opportunity discounts and create invoices from opportunities."
+
+variables:
+   currentRecordId: mutable string = ""
+      description: "Id of the record the employee opened the agent from"
+      visibility: "External"
+   opportunity_id: mutable string = ""
+      description: "Salesforce Opportunity Id for the current request"
+   discount_percentage: mutable number = 0
+      description: "Discount percent to apply, for example 10 for 10 percent"
+   invoice_id: mutable string = ""
+      description: "Id of the Invoice__c created from an Opportunity"
+   invoice_name: mutable string = ""
+      description: "Auto-number Name of the Invoice__c created from an Opportunity"
+
+system:
+   messages:
+      welcome: "I can apply discounts to opportunities and create invoices from them. What would you like to do?"
+      error: "I could not complete that opportunity request. Please try again."
+   instructions: "You help sales employees discount opportunities and create invoices. Use only the provided Apex actions. Never invent an Opportunity Id. If the user names an Opportunity Id, use that. Otherwise use {!@variables.currentRecordId} when it is set. Ask for any missing Id or discount percent before calling an action."
+
+language:
+   default_locale: "en_US"
+
+start_agent agent_router:
+   description: "Welcome the user and route discount or invoice requests"
+
+   reasoning:
+      instructions:|
+         Select the tool that best matches the user's message and conversation history. If it's unclear, make your best guess.
+      actions:
+         go_to_apply_discount: @utils.transition to @subagent.apply_discount
+            description: "User wants to apply a discount to an Opportunity"
+         go_to_create_invoice: @utils.transition to @subagent.create_invoice
+            description: "User wants to create an Invoice from an Opportunity"
+
+subagent apply_discount:
+   description: "Applies a percentage discount to an Opportunity through ApplyDiscount Apex"
+
+   actions:
+      apply_opportunity_discount:
+         description: "Applies a percentage discount to an Opportunity and its discountable products"
+         require_user_confirmation: False
+         inputs:
+            opportunityId: object
+               description: "Id of the Opportunity to discount"
+               is_required: True
+               complex_data_type_name: "lightning__recordIdType"
+            discountPercentage: number
+               description: "Discount percent to apply, for example 10 for 10 percent"
+               is_required: True
+         outputs:
+            opportunityId: object
+               description: "Id of the Opportunity that was discounted"
+               complex_data_type_name: "lightning__recordIdType"
+            discountPercentage: number
+               description: "Discount percent that was applied"
+         target: "apex://ApplyDiscount"
+
+   reasoning:
+      instructions:->
+         | Apply a discount to an Opportunity using {!@actions.apply_opportunity_discount}.
+           You need an Opportunity Id and a discount percent.
+           Prefer an Opportunity Id the user named.
+           Otherwise use {!@variables.currentRecordId} when it is set.
+           If either the Opportunity Id or discount percent is missing, ask for it.
+           After the action succeeds, confirm the Opportunity Id and the percent that was applied.
+         if @variables.currentRecordId:
+            | Record page Opportunity Id: {!@variables.currentRecordId}
+         if @variables.opportunity_id:
+            | Current Opportunity Id: {!@variables.opportunity_id}
+         if @variables.discount_percentage > 0:
+            | Current discount percent: {!@variables.discount_percentage}
+      actions:
+         apply_opportunity_discount: @actions.apply_opportunity_discount
+            with opportunityId=...
+            with discountPercentage=...
+            set @variables.opportunity_id = @outputs.opportunityId
+            set @variables.discount_percentage = @outputs.discountPercentage
+
+subagent create_invoice:
+   description: "Creates an Invoice__c from an Opportunity through CreateInvoice Apex"
+
+   actions:
+      create_opportunity_invoice:
+         description: "Creates an Invoice from an Opportunity, optionally applying a discount first"
+         require_user_confirmation: False
+         inputs:
+            opportunityId: object
+               description: "Id of the Opportunity to invoice"
+               is_required: True
+               complex_data_type_name: "lightning__recordIdType"
+            discountPercentage: number
+               description: "Optional discount percent applied before invoicing, for example 10 for 10 percent"
+               is_required: False
+         outputs:
+            invoiceId: object
+               description: "Id of the Invoice__c that was created"
+               complex_data_type_name: "lightning__recordIdType"
+            invoiceName: string
+               description: "Invoice Number (Name) of the Invoice__c that was created, for example INV-00000001"
+         target: "apex://CreateInvoice"
+
+   reasoning:
+      instructions:->
+         | Create an invoice from an Opportunity using {!@actions.create_opportunity_invoice}.
+           You need an Opportunity Id.
+           Prefer an Opportunity Id the user named.
+           Otherwise use {!@variables.currentRecordId} when it is set.
+           If no Opportunity Id is available, ask for it.
+           Only include a discount percent when the user asked for one.
+           After the action succeeds, tell the user the new Invoice Number (invoiceName), not the Salesforce Id.
+         if @variables.currentRecordId:
+            | Record page Opportunity Id: {!@variables.currentRecordId}
+         if @variables.opportunity_id:
+            | Current Opportunity Id: {!@variables.opportunity_id}
+         if @variables.invoice_name:
+            | Last Invoice Number: {!@variables.invoice_name}
+      actions:
+         create_opportunity_invoice: @actions.create_opportunity_invoice
+            with opportunityId=...
+            with discountPercentage=...
+            set @variables.invoice_id = @outputs.invoiceId
+            set @variables.invoice_name = @outputs.invoiceName

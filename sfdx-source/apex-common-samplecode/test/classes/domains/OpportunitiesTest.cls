@@ -25,52 +25,42 @@
 **/
 
 /**
- * This test class demonstrates two approaches to unit testing, with and without DML, each has its own pros and cons
- **/
+ * Domain tests for Opportunities.
+ */
 @IsTest
-private class OpportunitiesTest 
+private class OpportunitiesTest
 {
-	@TestSetup
-	static void setup()
-	{
-		TestDataFactory.createUserWithSampleAppPermissions();
-	}
-
 	@IsTest
-	private static void callingApplyDiscountShouldCalcDiscountAndRegisterDirty()
+	private static void applyDiscountWithoutLinesMutatesAmount()
 	{
-		// Create mocks
-		fflib_ApexMocks mocks = new fflib_ApexMocks();
-		fflib_ISObjectUnitOfWork uowMock = (fflib_ISObjectUnitOfWork) mocks.mock(fflib_ISObjectUnitOfWork.class);
-		// Given
+		// Given an opportunity with an amount and no line items
 		Opportunity opp = new Opportunity(
-			Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+			Id = TestIdGenerator.generate(Opportunity.SObjectType),
 			Name = 'Test Opportunity',
 			StageName = 'Open',
 			Amount = 1000,
-			CloseDate = System.today());
-		List<Opportunity> testOppsList = new List<Opportunity> { opp };
-		Decimal discountPercent = 10;
-		Application.UnitOfWork.setMock(uowMock);
+			CloseDate = System.today()
+		);
+		Opportunities opps = Opportunities.newInstance(new List<Opportunity>{ opp });
+		fflib_ApexMocks mocks = new fflib_ApexMocks();
+		fflib_SObjectUnitOfWork uowMock = (fflib_SObjectUnitOfWork) mocks.mock(
+			fflib_SObjectUnitOfWork.class
+		);
 
-		// When
-		IOpportunities opps = 
-			Opportunities.newInstance(testOppsList);
-		opps.applyDiscount(discountPercent, uowMock);
+		// When a discount is applied in the domain
+		opps.applyDiscounts(new Map<Id, Decimal>{ opp.Id => 10 }, uowMock);
 
-		// Then
-		((fflib_ISObjectUnitOfWork) 
-			mocks.verify(uowMock, 1)).registerDirty(
-				fflib_Match.sObjectWith(
-					new Map<SObjectField, Object>{ 
-						Opportunity.Id => opp.Id, 
-						Opportunity.Amount => 900} ));
-	}	
-
+		// Then the amount is reduced on the wrapped records and registered dirty
+		System.assertEquals(1, opps.getRecords().size(), 'Domain should still wrap one opportunity');
+		System.assertEquals(900, opp.Amount, 'Amount should be discounted to 900');
+		System.assertEquals(900, ((Opportunity) opps.getRecords()[0]).Amount, 'getRecords amount should be 900');
+		((fflib_SObjectUnitOfWork) mocks.verify(uowMock)).registerDirty(opp);
+	}
 
 	@IsTest
-	private static void testApplyDiscountWithoutOpportunityLines()
+	private static void applyDiscountNoLinesReducesAmount()
 	{
+		// Given a persisted opportunity with an amount and no lines
 		Opportunity opp = new Opportunity(
 			Name = 'Test',
 			Type = 'New Account',
@@ -80,37 +70,40 @@ private class OpportunitiesTest
 		);
 		insert opp;
 
-		System.runAs(TestDataFactory.getRunAsUser())
-		{
-			fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
-			IOpportunities opps = Opportunities.newInstance(new List<Opportunity> { opp });
-			opps.applyDiscount(10, uow);
-			uow.commitWork();
-		}
+		// When discounts are applied and updates are committed by the caller
+		Opportunities opps = Opportunities.newInstance(new List<Opportunity>{ opp });
+		fflib_SObjectUnitOfWork uow = UnitOfWork.newInstance();
+		opps.applyDiscounts(new Map<Id, Decimal>{ opp.Id => 10 }, uow);
+		uow.commitWork();
 
+		// Then the stored amount reflects the discount
 		Opportunity assertOpp = [SELECT Amount FROM Opportunity WHERE Id = :opp.Id];
-		System.assertEquals(90, assertOpp.Amount);
+		System.assertEquals(90, assertOpp.Amount, 'Discount should reduce amount to 90');
 	}
-		
+
 	@IsTest
-	private static void testUpdateAccountOnInsertOfOpportunity()
+	private static void insertOppUpdatesAccountDesc()
 	{
+		// Given an account and a related opportunity insert
 		Account account = new Account(Name = 'Test', Description = null);
 		insert account;
+		Opportunity opp = new Opportunity(
+			Name = 'Test',
+			Type = 'Existing Account',
+			StageName = 'Open',
+			CloseDate = System.today().addMonths(1),
+			AccountId = account.Id
+		);
 
-		System.runAs(TestDataFactory.getRunAsUser())
-		{
-			Opportunity opp = new Opportunity(
-				Name = 'Test',
-				Type = 'Existing Account',
-				StageName = 'Open',
-				CloseDate = System.today().addMonths(1),
-				AccountId = account.Id
-			);
-			insert opp;
-		}
+		// When the opportunity is inserted
+		insert opp;
 
+		// Then the account description records opportunity activity
 		Account assertAccount = [SELECT Description FROM Account WHERE Id = :account.Id];
-		System.assertEquals('Last Opportunity Raised ' + System.today(), assertAccount.Description);
-	}			
+		System.assertEquals(
+			'Last Opportunity Raised ' + System.today(),
+			assertAccount.Description,
+			'Account description should be updated'
+		);
+	}
 }
