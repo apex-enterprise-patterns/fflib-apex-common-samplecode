@@ -27,11 +27,35 @@
 /**
  * Batch and schedulable job that invoices Opportunities marked Ready via {@link OpportunitiesService}.
  * Accumulates per-chunk failures and emails the running user on finish.
+ *
+ * Prefer the no-arg constructor for the default service and selector.
+ * Use the constructor when composing deliberately (including tests).
  */
 public inherited sharing class CreateInvoicesJob
 	implements System.Schedulable, Database.Batchable<SObject>, Database.Stateful  
 {	
+	private final OpportunitiesService opportunitiesSvc;
+	private final OpportunitiesSelector selector;
 	private List<JobError> jobErrors = new List<JobError>();
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance} and {@link OpportunitiesSelector#newInstance}.
+	 */
+	public CreateInvoicesJob()
+	{
+		this(OpportunitiesService.newInstance(), OpportunitiesSelector.newInstance());
+	}
+
+	/**
+	 * Creates a job with the given service and selector.
+	 * @param opportunitiesSvc Opportunities service used to create invoices. Cannot be null.
+	 * @param selector Selector used to query Opportunities ready to invoice. Cannot be null.
+	 */
+	public CreateInvoicesJob(OpportunitiesService opportunitiesSvc, OpportunitiesSelector selector)
+	{
+		this.opportunitiesSvc = opportunitiesSvc;
+		this.selector = selector;
+	}
 	
 	/**
 	 * Schedulable entry point that starts a new batch instance of this job.
@@ -49,7 +73,7 @@ public inherited sharing class CreateInvoicesJob
 	 */
 	public Database.QueryLocator start(Database.BatchableContext context)
 	{
-		return OpportunitiesSelector.newInstance().readyToInvoiceAsQueryLocator();	
+		return selector.readyToInvoiceAsQueryLocator();
 	}
 	
 	/**
@@ -67,7 +91,7 @@ public inherited sharing class CreateInvoicesJob
 			for (Id opportunityId : opportunitiesToInvoice) {
 				discountByOpportunityId.put(opportunityId, 0);
 			}
-			OpportunitiesService.newInstance().applyDiscountsAndCreateInvoices(discountByOpportunityId);
+			opportunitiesSvc.applyDiscountsAndCreateInvoices(discountByOpportunityId);
 		}
 		catch (Exception e)
 		{

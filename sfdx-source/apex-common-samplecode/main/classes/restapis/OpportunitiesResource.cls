@@ -27,10 +27,32 @@
 /**
  * REST resource that applies a discount to a single Opportunity identified in the URL path.
  * Path pattern: {@code /opportunities/{id}/applydiscount} with optional {@code discount} query parameter.
+ *
+ * Prefer the no-arg constructor / {@link #applyDiscount} for the default service.
+ * Use the service constructor when composing deliberately (including tests).
  */
 @RestResource(UrlMapping='/opportunities/*/applydiscount')
 global inherited sharing class OpportunitiesResource
 {
+	private final OpportunitiesService opportunitiesSvc;
+
+	/**
+	 * Default composition: {@link OpportunitiesService#newInstance}.
+	 */
+	public OpportunitiesResource()
+	{
+		this(OpportunitiesService.newInstance());
+	}
+
+	/**
+	 * Creates a resource with the given service.
+	 * @param opportunitiesSvc Opportunities service used to apply discounts. Cannot be null.
+	 */
+	public OpportunitiesResource(OpportunitiesService opportunitiesSvc)
+	{
+		this.opportunitiesSvc = opportunitiesSvc;
+	}
+
 	/**
 	 * Applies a discount to the Opportunity Id in the request URI via {@link OpportunitiesService}.
 	 * Reads the {@code discount} query parameter; defaults to zero when absent.
@@ -38,12 +60,21 @@ global inherited sharing class OpportunitiesResource
 	@HttpPost
 	global static void applyDiscount()
 	{
+		new OpportunitiesResource().handleApplyDiscount();
+	}
+
+	/**
+	 * Instance entry for {@link #applyDiscount}, used by callers that inject a service.
+	 * Reads the Opportunity Id from {@link RestContext} and the {@code discount} query parameter.
+	 */
+	public void handleApplyDiscount()
+	{
 		RestRequest req = RestContext.request;
 		String[] uriParts = req.requestURI.split('/');
 		Id opportunityId = uriParts[2];
 		String discountParam = req.params.get('discount');
 		Decimal discountPercent = discountParam!=null ? Decimal.valueOf(discountParam) : 0;
-		OpportunitiesService.newInstance().applyDiscounts(
+		opportunitiesSvc.applyDiscounts(
 			new Map<Id, Decimal>{ opportunityId => discountPercent }
 		);
 	}
