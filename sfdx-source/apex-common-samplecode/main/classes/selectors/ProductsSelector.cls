@@ -42,7 +42,7 @@ public class ProductsSelector extends fflib_SObjectSelector
 		super(includeFieldSetFields, fflib_SObjectSelector.DataAccess.USER_MODE);
 	}
 	
-	public List<Schema.SObjectField> getSObjectFieldList()
+	public override List<Schema.SObjectField> getSObjectFieldList()
 	{
 		return new List<Schema.SObjectField> {
 			Product2.Description,
@@ -54,7 +54,7 @@ public class ProductsSelector extends fflib_SObjectSelector
 		};
 	}
 
-	public Schema.SObjectType getSObjectType()
+	public override Schema.SObjectType getSObjectType()
 	{
 		return Product2.SObjectType;
 	}
