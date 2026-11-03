@@ -42,7 +42,7 @@ private class ProductsSelectorTest
 			IsActive = true,
 			SubscriberField__c = 'My Text Field'
 		);
-		insert product;
+		Database.insert(product,AccessLevel.SYSTEM_MODE);
 
 		System.runAs(TestDataFactory.getRunAsUser())
 		{
@@ -65,7 +65,7 @@ private class ProductsSelectorTest
 			IsActive = true,
 			SubscriberField__c = 'My Text Field'
 		);
-		insert product;
+		Database.insert(product,AccessLevel.SYSTEM_MODE);
 
 		System.runAs(TestDataFactory.getRunAsUser())
 		{
