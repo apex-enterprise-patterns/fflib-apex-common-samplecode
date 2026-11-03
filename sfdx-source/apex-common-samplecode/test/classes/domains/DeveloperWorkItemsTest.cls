@@ -52,6 +52,6 @@ private class DeveloperWorkItemsTest
 		}
 
 		// Then
-		System.assertEquals(3100, [SELECT DeveloperCost__c FROM DeveloperWorkItem__c WHERE Id = :wi.Id].DeveloperCost__c);
+		System.assertEquals(3100, [SELECT DeveloperCost__c FROM DeveloperWorkItem__c WHERE Id = :wi.Id WITH SYSTEM_MODE].DeveloperCost__c);
 	}
 }
